@@ -618,7 +618,7 @@ main {
     min-height: 104px;
 
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 25px;
+    font-size: 29px;
     font-weight: 700;
     text-align: center;
 }
