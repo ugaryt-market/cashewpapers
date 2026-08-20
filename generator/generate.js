@@ -820,13 +820,20 @@ main {
 
 /* ---------------- PAPER STATUS ---------------- */
 
+.paper-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
 .paper-status {
     height: 42px;
-    padding: 0 13px;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    background: #fff0f0;
-    color: #d94a4a;
+    padding: 0 16px;
+    border: 1px dashed #cfd2dc;
+    border-radius: 999px;
+    background: #fafbfc;
+    color: #73798c;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
@@ -836,17 +843,23 @@ main {
     gap: 7px;
     transition: 0.15s ease;
     flex-shrink: 0;
+    margin-right: 14px;
 }
 
 .paper-status:hover {
     transform: translateY(-1px);
-    border-color: #f0bcbc;
+    border-color: #b9becb;
+    background: #f5f6f9;
 }
 
 .paper-status.completed {
     background: #e8f8ee;
-    border-color: #b9e8c8;
+    border: 1px solid #b9e8c8;
     color: #2e9b52;
+}
+
+.paper-status.completed:hover {
+    background: #def4e6;
 }
 
 
@@ -908,6 +921,11 @@ footer {
 
     .paper-button {
         flex: 1;
+    }
+
+    .paper-status {
+        margin-right: 0;
+        margin-bottom: 4px;
     }
 
 }
