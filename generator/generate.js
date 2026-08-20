@@ -783,7 +783,7 @@ main {
 }
 
 .paper-card.group-break {
-    margin-top: 15px;
+    margin-top: 18px;
 }
 
 .paper-code {
