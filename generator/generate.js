@@ -3,7 +3,7 @@ const path = require("path");
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.06
+    Version Alpha 0.0.07
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -540,11 +540,13 @@ main {
 
 .page-header h1 {
     font-size: 36px;
+    letter-spacing: -1px;
 }
 
 .page-header p {
     color: var(--muted);
     margin-top: 8px;
+    line-height: 1.5;
 }
 
 .subject-grid,
@@ -567,7 +569,8 @@ main {
 .subject-card:hover,
 .category-card:hover,
 .session-card:hover,
-.paper-card:hover {
+.paper-card:hover,
+.year-session-card:hover {
     transform: translateY(-3px);
     border-color: #ffd0df;
 }
@@ -612,6 +615,7 @@ main {
     color: white;
 }
 
+
 /* ---------------- YEAR SESSION CARDS ---------------- */
 
 .year-session-grid {
@@ -630,18 +634,14 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.year-session-card:hover {
-    transform: translateY(-3px);
-    border-color: #ffd0df;
-    box-shadow: 0 14px 35px rgba(30, 35, 60, 0.12);
+    min-height: 104px;
 }
 
 .year-session-left {
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0;
 }
 
 .year-session-icon {
@@ -659,6 +659,7 @@ main {
 .year-session-name {
     font-size: 17px;
     font-weight: 700;
+    line-height: 1.4;
 }
 
 .year-session-count {
@@ -671,7 +672,11 @@ main {
     color: var(--muted);
     font-size: 22px;
     margin-left: 16px;
+    flex-shrink: 0;
 }
+
+
+/* ---------------- SESSION / PAPER LISTS ---------------- */
 
 .session-list,
 .paper-list {
@@ -679,6 +684,7 @@ main {
     gap: 14px;
 }
 
+.session-card,
 .paper-card {
     background: white;
     border: 1px solid var(--border);
@@ -688,11 +694,36 @@ main {
     transition: 0.2s ease;
 }
 
+.session-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.session-left {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.folder {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #eefbfc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .muted {
     color: var(--muted);
     margin-top: 5px;
     font-size: 13px;
 }
+
+
+/* ---------------- PAPER CARDS ---------------- */
 
 .paper-card {
     display: flex;
@@ -727,6 +758,9 @@ main {
     color: white;
 }
 
+
+/* ---------------- EMPTY ---------------- */
+
 .empty {
     background: white;
     border: 1px dashed var(--border);
@@ -736,6 +770,9 @@ main {
     color: var(--muted);
 }
 
+
+/* ---------------- FOOTER ---------------- */
+
 footer {
     text-align: center;
     padding: 35px;
@@ -743,6 +780,9 @@ footer {
     color: var(--muted);
     font-size: 13px;
 }
+
+
+/* ---------------- MOBILE ---------------- */
 
 @media (max-width: 700px) {
 
@@ -756,13 +796,18 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .paper-card {
+    .paper-card,
+    .session-card {
         flex-direction: column;
         align-items: flex-start;
     }
 
     .year-session-card {
         padding: 20px;
+    }
+
+    .year-session-name {
+        font-size: 16px;
     }
 
     .paper-actions {
@@ -924,7 +969,7 @@ function generateHome(subjects) {
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.06
+                    Version Alpha 0.0.07
                 </div>
 
             </section>
@@ -1268,7 +1313,7 @@ function generateYearPage(
     ) {
 
         backPath =
-            `../`;
+            "../";
 
         backText =
             "Back to category";
