@@ -1,0 +1,26 @@
+{
+    "mathematics": {
+        "name": "Mathematics",
+        "code": "9709",
+        "icon": "📐",
+        "description": "AS & A Level Mathematics past papers."
+    },
+    "physics": {
+        "name": "Physics",
+        "code": "9702",
+        "icon": "⚛️",
+        "description": "AS & A Level Physics past papers."
+    },
+    "chemistry": {
+        "name": "Chemistry",
+        "code": "9701",
+        "icon": "🧪",
+        "description": "AS & A Level Chemistry past papers."
+    },
+    "biology": {
+        "name": "Biology",
+        "code": "9700",
+        "icon": "🧬",
+        "description": "AS & A Level Biology past papers."
+    }
+}
