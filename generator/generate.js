@@ -782,6 +782,10 @@ main {
     gap: 20px;
 }
 
+.paper-card.group-break {
+    margin-top: 10px;
+}
+
 .paper-code {
     font-family: "JetBrains Mono", monospace;
     color: var(--muted);
@@ -1447,11 +1451,29 @@ function generateSessionPage(
 
 
     const cards =
-        papers
-            .map(
-                paper => `
+    papers
+        .map(
+            (paper, index) => {
 
-                    <div class="paper-card">
+                const currentGroup =
+                    String(paper.paper).charAt(0);
+
+                const previousGroup =
+                    index > 0
+                        ? String(
+                            papers[index - 1].paper
+                        ).charAt(0)
+                        : null;
+
+                const groupBreak =
+                    index > 0 &&
+                    currentGroup !== previousGroup;
+
+                return `
+
+                    <div
+                        class="paper-card${groupBreak ? " group-break" : ""}"
+                    >
 
                         <div>
 
@@ -1559,9 +1581,11 @@ function generateSessionPage(
 
                     </div>
 
-                `
-            )
-            .join("");
+                `;
+            }
+        )
+        .join("");
+            
 
 
     return documentHTML(
