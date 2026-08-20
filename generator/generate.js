@@ -612,13 +612,73 @@ main {
     color: white;
 }
 
+/* ---------------- YEAR SESSION CARDS ---------------- */
+
+.year-session-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.year-session-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.year-session-card:hover {
+    transform: translateY(-3px);
+    border-color: #ffd0df;
+    box-shadow: 0 14px 35px rgba(30, 35, 60, 0.12);
+}
+
+.year-session-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.year-session-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #eefbfc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    flex-shrink: 0;
+}
+
+.year-session-name {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.year-session-count {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.year-session-arrow {
+    color: var(--muted);
+    font-size: 22px;
+    margin-left: 16px;
+}
+
 .session-list,
 .paper-list {
     display: grid;
     gap: 14px;
 }
 
-.session-card,
 .paper-card {
     background: white;
     border: 1px solid var(--border);
@@ -626,28 +686,6 @@ main {
     padding: 20px;
     box-shadow: var(--shadow);
     transition: 0.2s ease;
-}
-
-.session-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.session-left {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-}
-
-.folder {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: #eefbfc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .muted {
@@ -713,14 +751,18 @@ footer {
     }
 
     .subject-grid,
-    .category-grid {
+    .category-grid,
+    .year-session-grid {
         grid-template-columns: 1fr;
     }
 
-    .paper-card,
-    .session-card {
+    .paper-card {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .year-session-card {
+        padding: 20px;
     }
 
     .paper-actions {
@@ -1161,38 +1203,36 @@ function generateYearPage(
                         session.sessionCode
                     );
 
-
                 const count =
                     Object.keys(
                         session.papers
                     ).length;
 
-
                 return `
 
                     <a
-                        class="session-card"
+                        class="year-session-card"
                         href="${slug}/"
                     >
 
                         <div
-                            class="session-left"
+                            class="year-session-left"
                         >
 
-                            <div class="folder">
-                                📁
+                            <div class="year-session-icon">
+                                📅
                             </div>
 
                             <div>
 
-                                <strong>
+                                <div class="year-session-name">
                                     ${sessionName(
                                         session.sessionCode,
                                         year
                                     )}
-                                </strong>
+                                </div>
 
-                                <div class="muted">
+                                <div class="year-session-count">
                                     ${count}
                                     paper${count !== 1 ? "s" : ""}
                                 </div>
@@ -1201,8 +1241,7 @@ function generateYearPage(
 
                         </div>
 
-
-                        <div>
+                        <div class="year-session-arrow">
                             →
                         </div>
 
@@ -1258,12 +1297,13 @@ function generateYearPage(
 
                 <p>
                     ${subject.code}
+                    · Choose a session to browse past papers.
                 </p>
 
             </div>
 
 
-            <div class="session-list">
+            <div class="year-session-grid">
 
                 ${sessionCards}
 
