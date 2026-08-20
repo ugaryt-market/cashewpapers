@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Past Papers</title>
+    <title>Cashew Past Papers</title>
 
     <style>
         * {
@@ -19,16 +19,25 @@
             --text: #202536;
             --muted: #73798c;
             --primary: #ff3976;
-            --primary-dark: #e92965;
-            --border: #e9ebf2;
+            --primary-dark: #e92d68;
+            --border: #e7e9f0;
             --shadow: 0 8px 25px rgba(30, 35, 60, 0.08);
         }
 
         body {
-            font-family: Inter, Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
         }
 
         a {
@@ -36,14 +45,9 @@
             color: inherit;
         }
 
-        button {
-            font: inherit;
-        }
-
-        /* NAVBAR */
+        /* ---------------- NAVBAR ---------------- */
 
         nav {
-            width: 100%;
             background: white;
             border-bottom: 1px solid var(--border);
             position: sticky;
@@ -56,8 +60,8 @@
             margin: auto;
             padding: 18px 24px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
 
         .logo {
@@ -81,23 +85,24 @@
             color: var(--primary);
         }
 
-        /* MAIN */
+        /* ---------------- MAIN ---------------- */
 
         main {
             max-width: 1200px;
             margin: auto;
-            padding: 55px 24px 80px;
+            padding: 50px 24px 80px;
         }
+
+        /* ---------------- HERO ---------------- */
 
         .hero {
             text-align: center;
-            margin-bottom: 45px;
+            margin-bottom: 40px;
         }
 
         .hero h1 {
-            font-size: clamp(40px, 6vw, 64px);
-            line-height: 1;
-            letter-spacing: -2px;
+            font-size: clamp(42px, 7vw, 68px);
+            letter-spacing: -3px;
             margin-bottom: 18px;
         }
 
@@ -106,28 +111,28 @@
         }
 
         .hero p {
-            color: var(--muted);
-            max-width: 620px;
+            max-width: 650px;
             margin: auto;
+            color: var(--muted);
             font-size: 17px;
             line-height: 1.6;
         }
 
-        /* SEARCH */
+        /* ---------------- SEARCH ---------------- */
 
         .search-wrapper {
-            max-width: 700px;
-            margin: 30px auto 50px;
+            max-width: 750px;
+            margin: 0 auto 50px;
         }
 
         .search-box {
             background: white;
             border: 1px solid var(--border);
-            border-radius: 18px;
+            border-radius: 16px;
             box-shadow: var(--shadow);
+            padding: 6px 18px;
             display: flex;
             align-items: center;
-            padding: 6px 18px;
         }
 
         .search-icon {
@@ -139,26 +144,28 @@
             width: 100%;
             border: none;
             outline: none;
-            padding: 15px 5px;
+            background: transparent;
+            padding: 14px 5px;
             font-size: 16px;
             color: var(--text);
-            background: transparent;
         }
 
-        /* SUBJECTS */
+        /* ---------------- SECTION ---------------- */
 
         .section-title {
             margin-bottom: 20px;
         }
 
         .section-title h2 {
-            font-size: 24px;
+            font-size: 25px;
         }
 
         .section-title p {
             color: var(--muted);
             margin-top: 5px;
         }
+
+        /* ---------------- SUBJECTS ---------------- */
 
         .subject-grid {
             display: grid;
@@ -189,23 +196,23 @@
         }
 
         .subject-icon {
-            width: 50px;
-            height: 50px;
-            background: #fff0f5;
+            width: 52px;
+            height: 52px;
             border-radius: 14px;
+            background: #fff0f5;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 25px;
         }
 
         .arrow {
-            font-size: 22px;
             color: var(--muted);
+            font-size: 22px;
         }
 
         .subject-card h3 {
-            margin-top: 22px;
+            margin-top: 20px;
             font-size: 23px;
         }
 
@@ -217,24 +224,24 @@
 
         .subject-description {
             color: var(--muted);
-            margin-top: 14px;
             font-size: 14px;
             line-height: 1.5;
+            margin-top: 14px;
         }
 
-        /* PAGE HEADER */
+        /* ---------------- PAGE HEADER ---------------- */
 
         .page-header {
             margin-bottom: 25px;
         }
 
         .back-btn {
-            border: none;
             background: transparent;
+            border: none;
             color: var(--primary);
-            cursor: pointer;
-            margin-bottom: 18px;
             font-weight: 700;
+            margin-bottom: 18px;
+            padding: 0;
         }
 
         .page-header h1 {
@@ -247,24 +254,21 @@
             margin-top: 8px;
         }
 
-        /* YEAR FILTERS */
+        /* ---------------- FILTERS ---------------- */
 
         .filters {
             display: flex;
-            gap: 8px;
             flex-wrap: wrap;
-            margin: 25px 0;
+            gap: 8px;
+            margin: 24px 0 30px;
         }
 
         .filter-btn {
-            border: none;
-            background: #fff;
+            background: white;
             border: 1px solid var(--border);
-            padding: 9px 15px;
-            border-radius: 10px;
-            cursor: pointer;
             color: var(--muted);
-            transition: 0.2s;
+            padding: 9px 15px;
+            border-radius: 9px;
         }
 
         .filter-btn:hover,
@@ -274,10 +278,10 @@
             border-color: var(--primary);
         }
 
-        /* YEAR SECTIONS */
+        /* ---------------- YEAR ---------------- */
 
         .year-section {
-            margin-top: 35px;
+            margin-bottom: 35px;
         }
 
         .year-title {
@@ -299,12 +303,12 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.2s ease;
         }
 
         .session-card:hover {
-            border-color: #ffd0df;
             transform: translateX(3px);
+            border-color: #ffd0df;
         }
 
         .session-left {
@@ -314,14 +318,14 @@
         }
 
         .folder-icon {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
+            background: #eefbfc;
             border-radius: 10px;
-            background: #f0fbfc;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px;
+            font-size: 21px;
         }
 
         .session-name {
@@ -329,16 +333,16 @@
         }
 
         .session-count {
+            margin-top: 4px;
             color: var(--muted);
             font-size: 13px;
-            margin-top: 4px;
         }
 
         .session-arrow {
             color: var(--muted);
         }
 
-        /* PAPERS */
+        /* ---------------- PAPERS ---------------- */
 
         .paper-list {
             display: grid;
@@ -354,11 +358,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .paper-info h3 {
-            font-size: 17px;
+            font-size: 18px;
         }
 
         .paper-info p {
@@ -375,11 +379,10 @@
 
         .paper-btn {
             border: none;
-            background: #f1f2f7;
+            background: #f0f1f6;
             padding: 9px 13px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
+            color: var(--text);
         }
 
         .paper-btn.primary {
@@ -391,15 +394,42 @@
             opacity: 0.85;
         }
 
-        /* EMPTY */
+        /* ---------------- LOADING ---------------- */
 
-        .empty {
+        .loading {
             text-align: center;
             padding: 60px 20px;
             color: var(--muted);
         }
 
-        /* FOOTER */
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 4px solid #ececf2;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ---------------- EMPTY ---------------- */
+
+        .empty {
+            background: white;
+            border: 1px dashed var(--border);
+            border-radius: 15px;
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        /* ---------------- FOOTER ---------------- */
 
         footer {
             text-align: center;
@@ -409,7 +439,7 @@
             font-size: 13px;
         }
 
-        /* MOBILE */
+        /* ---------------- MOBILE ---------------- */
 
         @media (max-width: 700px) {
 
@@ -430,8 +460,8 @@
             }
 
             .paper-card {
-                align-items: flex-start;
                 flex-direction: column;
+                align-items: flex-start;
             }
 
             .paper-actions {
@@ -449,320 +479,432 @@
 
 <nav>
     <div class="nav-inner">
+
         <div class="logo">
-            Past<span>Papers</span>
+            Cashew<span>Papers</span>
         </div>
 
         <div class="nav-links">
             <a href="#" onclick="showHome()">Home</a>
-            <a href="#">About</a>
         </div>
+
     </div>
 </nav>
 
 <main id="app"></main>
 
 <footer>
-    Past Papers · Built for students
+    Cashew Papers · Built for students
 </footer>
 
 
 <script>
 
-    /*
-        =========================
-        DATA
-        =========================
+/* ============================================================
+   CONFIGURATION
+   ============================================================ */
 
-        Replace/add papers here.
-
-        Later, we can move this into
-        separate JSON files or a database.
-    */
-
-    const subjects = {
-
-        mathematics: {
-            name: "Mathematics",
-            code: "9709",
-            icon: "📐",
-            description: "AS & A Level Mathematics past papers.",
-            years: {
-
-                2025: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/mathematics/2025/mj/9709_qp_12.pdf",
-                            markscheme: "papers/mathematics/2025/mj/9709_ms_12.pdf"
-                        },
-                        {
-                            paper: "22",
-                            question: "papers/mathematics/2025/mj/9709_qp_22.pdf",
-                            markscheme: "papers/mathematics/2025/mj/9709_ms_22.pdf"
-                        }
-                    ],
-
-                    "October / November": [
-                        {
-                            paper: "12",
-                            question: "papers/mathematics/2025/on/9709_qp_12.pdf",
-                            markscheme: "papers/mathematics/2025/on/9709_ms_12.pdf"
-                        }
-                    ]
-                },
-
-                2024: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/mathematics/2024/mj/9709_qp_12.pdf",
-                            markscheme: "papers/mathematics/2024/mj/9709_ms_12.pdf"
-                        },
-                        {
-                            paper: "22",
-                            question: "papers/mathematics/2024/mj/9709_qp_22.pdf",
-                            markscheme: "papers/mathematics/2024/mj/9709_ms_22.pdf"
-                        }
-                    ]
-                }
-            }
-        },
-
-        physics: {
-            name: "Physics",
-            code: "9702",
-            icon: "⚛️",
-            description: "AS & A Level Physics past papers.",
-            years: {
-                2025: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/physics/2025/mj/9702_qp_12.pdf",
-                            markscheme: "papers/physics/2025/mj/9702_ms_12.pdf"
-                        }
-                    ]
-                },
-                2024: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/physics/2024/mj/9702_qp_12.pdf",
-                            markscheme: "papers/physics/2024/mj/9702_ms_12.pdf"
-                        }
-                    ]
-                }
-            }
-        },
-
-        chemistry: {
-            name: "Chemistry",
-            code: "9701",
-            icon: "🧪",
-            description: "AS & A Level Chemistry past papers.",
-            years: {
-                2025: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/chemistry/2025/mj/9701_qp_12.pdf",
-                            markscheme: "papers/chemistry/2025/mj/9701_ms_12.pdf"
-                        }
-                    ]
-                },
-                2024: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/chemistry/2024/mj/9701_qp_12.pdf",
-                            markscheme: "papers/chemistry/2024/mj/9701_ms_12.pdf"
-                        }
-                    ]
-                }
-            }
-        },
-
-        biology: {
-            name: "Biology",
-            code: "9700",
-            icon: "🧬",
-            description: "AS & A Level Biology past papers.",
-            years: {
-                2025: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/biology/2025/mj/9700_qp_12.pdf",
-                            markscheme: "papers/biology/2025/mj/9700_ms_12.pdf"
-                        }
-                    ]
-                },
-                2024: {
-                    "May / June": [
-                        {
-                            paper: "12",
-                            question: "papers/biology/2024/mj/9700_qp_12.pdf",
-                            markscheme: "papers/biology/2024/mj/9700_ms_12.pdf"
-                        }
-                    ]
-                }
-            }
-        }
-
-    };
+const GITHUB_OWNER = "ugaryt-market";
+const GITHUB_REPO = "cashewpapers";
+const GITHUB_BRANCH = "main";
 
 
-    /*
-        =========================
-        HOME PAGE
-        =========================
-    */
+/* ============================================================
+   SUBJECTS
+   ============================================================ */
 
-    function showHome() {
+const subjects = {
 
-        const app = document.getElementById("app");
+    mathematics: {
+        name: "Mathematics",
+        code: "9709",
+        icon: "📐",
+        description: "AS & A Level Mathematics past papers."
+    },
 
-        app.innerHTML = `
-            <section class="hero">
+    physics: {
+        name: "Physics",
+        code: "9702",
+        icon: "⚛️",
+        description: "AS & A Level Physics past papers."
+    },
 
-                <h1>
-                    Find your <span>past papers.</span>
-                </h1>
+    chemistry: {
+        name: "Chemistry",
+        code: "9701",
+        icon: "🧪",
+        description: "AS & A Level Chemistry past papers."
+    },
 
-                <p>
-                    A simple, modern place to find past papers,
-                    mark schemes and revision materials.
-                </p>
-
-            </section>
-
-
-            <div class="search-wrapper">
-
-                <div class="search-box">
-
-                    <div class="search-icon">
-                        🔍
-                    </div>
-
-                    <input
-                        id="homeSearch"
-                        type="text"
-                        placeholder="Search subjects..."
-                        oninput="searchSubjects(this.value)"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="section-title">
-
-                <h2>Subjects</h2>
-
-                <p>
-                    Choose a subject to browse past papers.
-                </p>
-
-            </div>
-
-
-            <div
-                class="subject-grid"
-                id="subjectGrid"
-            >
-
-                ${renderSubjectCards()}
-
-            </div>
-        `;
-
+    biology: {
+        name: "Biology",
+        code: "9700",
+        icon: "🧬",
+        description: "AS & A Level Biology past papers."
     }
 
+};
 
-    function renderSubjectCards(filter = "") {
 
-        return Object.entries(subjects)
+/* ============================================================
+   GITHUB API
+   ============================================================ */
 
-            .filter(([key, subject]) => {
+const API_BASE =
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`;
 
-                const query = filter.toLowerCase();
 
-                return (
-                    subject.name.toLowerCase().includes(query) ||
-                    subject.code.includes(query)
-                );
+const RAW_BASE =
+    `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}`;
 
-            })
 
-            .map(([key, subject]) => `
+/* Cache API results so we don't repeatedly request the
+   same folders during a session. */
 
-                <div
-                    class="subject-card"
-                    onclick="showSubject('${key}')"
+const cache = {};
+
+
+async function getGitHubFolder(path) {
+
+    if (cache[path]) {
+        return cache[path];
+    }
+
+    const response =
+        await fetch(`${API_BASE}/${path}`);
+
+    if (!response.ok) {
+        throw new Error(
+            `GitHub API error: ${response.status}`
+        );
+    }
+
+    const data = await response.json();
+
+    cache[path] = data;
+
+    return data;
+}
+
+
+/* ============================================================
+   FILE NAME PARSER
+   ============================================================ */
+
+/*
+    Example:
+
+    9709_s25_qp_11.pdf
+
+    becomes:
+
+    code       = 9709
+    session    = s25
+    type       = qp
+    paper      = 11
+*/
+
+function parseFilename(filename) {
+
+    const match =
+        filename.match(
+            /^(\d+)_([a-z]\d{2})_(qp|ms|er|in)_(\d+)\.pdf$/i
+        );
+
+    if (!match) {
+        return null;
+    }
+
+    return {
+        code: match[1],
+        sessionCode: match[2].toLowerCase(),
+        type: match[3].toLowerCase(),
+        paper: match[4]
+    };
+}
+
+
+/* ============================================================
+   SESSION NAME
+   ============================================================ */
+
+function sessionName(sessionCode) {
+
+    const type = sessionCode[0].toLowerCase();
+    const year = `20${sessionCode.substring(1)}`;
+
+    if (type === "s") {
+        return `May / June ${year}`;
+    }
+
+    if (type === "w") {
+        return `October / November ${year}`;
+    }
+
+    if (type === "m") {
+        return `March ${year}`;
+    }
+
+    return sessionCode.toUpperCase();
+}
+
+
+/* ============================================================
+   GET YEARS
+   ============================================================ */
+
+async function getSubjectYears(subjectKey) {
+
+    const path =
+        `papers/${subjectKey}`;
+
+    return await getGitHubFolder(path);
+}
+
+
+/* ============================================================
+   GET YEAR SESSIONS
+   ============================================================ */
+
+async function getYearSessions(subjectKey, year) {
+
+    const path =
+        `papers/${subjectKey}/${year}`;
+
+    return await getGitHubFolder(path);
+}
+
+
+/* ============================================================
+   GET PAPERS
+   ============================================================ */
+
+async function getSessionFiles(
+    subjectKey,
+    year,
+    folder
+) {
+
+    const path =
+        `papers/${subjectKey}/${year}/${folder}`;
+
+    const files =
+        await getGitHubFolder(path);
+
+    return files.filter(
+        file =>
+            file.type === "file" &&
+            file.name.toLowerCase().endsWith(".pdf")
+    );
+}
+
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+
+function showHome() {
+
+    const app =
+        document.getElementById("app");
+
+    app.innerHTML = `
+
+        <section class="hero">
+
+            <h1>
+                Find your <span>past papers.</span>
+            </h1>
+
+            <p>
+                A simple, modern place to find
+                past papers and mark schemes.
+            </p>
+
+        </section>
+
+
+        <div class="search-wrapper">
+
+            <div class="search-box">
+
+                <div class="search-icon">
+                    🔍
+                </div>
+
+                <input
+                    id="homeSearch"
+                    type="text"
+                    placeholder="Search subjects..."
+                    oninput="searchSubjects(this.value)"
                 >
 
-                    <div class="subject-top">
+            </div>
 
-                        <div class="subject-icon">
-                            ${subject.icon}
-                        </div>
+        </div>
 
-                        <div class="arrow">
-                            →
-                        </div>
 
+        <div class="section-title">
+
+            <h2>Subjects</h2>
+
+            <p>
+                Choose a subject to browse past papers.
+            </p>
+
+        </div>
+
+
+        <div
+            class="subject-grid"
+            id="subjectGrid"
+        >
+
+            ${renderSubjectCards()}
+
+        </div>
+
+    `;
+}
+
+
+/* ============================================================
+   SUBJECT CARDS
+   ============================================================ */
+
+function renderSubjectCards(filter = "") {
+
+    const query =
+        filter.toLowerCase().trim();
+
+    return Object.entries(subjects)
+        .filter(([key, subject]) => {
+
+            return (
+                subject.name.toLowerCase().includes(query) ||
+                subject.code.includes(query)
+            );
+
+        })
+        .map(([key, subject]) => `
+
+            <div
+                class="subject-card"
+                onclick="showSubject('${key}')"
+            >
+
+                <div class="subject-top">
+
+                    <div class="subject-icon">
+                        ${subject.icon}
                     </div>
 
-                    <h3>
-                        ${subject.name}
-                    </h3>
-
-                    <div class="subject-code">
-                        Cambridge ${subject.code}
-                    </div>
-
-                    <div class="subject-description">
-                        ${subject.description}
+                    <div class="arrow">
+                        →
                     </div>
 
                 </div>
 
-            `)
-            .join("");
 
-    }
-
-
-    function searchSubjects(query) {
-
-        document.getElementById("subjectGrid").innerHTML =
-            renderSubjectCards(query);
-
-    }
+                <h3>
+                    ${subject.name}
+                </h3>
 
 
-    /*
-        =========================
-        SUBJECT PAGE
-        =========================
-    */
+                <div class="subject-code">
+                    Cambridge ${subject.code}
+                </div>
 
-    function showSubject(subjectKey, selectedYear = "all") {
 
-        const subject = subjects[subjectKey];
+                <div class="subject-description">
+                    ${subject.description}
+                </div>
 
-        const years = Object.keys(subject.years)
-            .sort((a, b) => b - a);
+            </div>
 
-        const filteredYears =
-            selectedYear === "all"
-                ? years
-                : years.filter(year => year === selectedYear);
+        `)
+        .join("");
+}
 
-        const app = document.getElementById("app");
+
+function searchSubjects(query) {
+
+    document.getElementById(
+        "subjectGrid"
+    ).innerHTML =
+        renderSubjectCards(query);
+
+}
+
+
+/* ============================================================
+   SUBJECT PAGE
+   ============================================================ */
+
+async function showSubject(subjectKey) {
+
+    const subject =
+        subjects[subjectKey];
+
+    const app =
+        document.getElementById("app");
+
+    app.innerHTML = `
+
+        <div class="page-header">
+
+            <button
+                class="back-btn"
+                onclick="showHome()"
+            >
+                ← Back to subjects
+            </button>
+
+            <h1>
+                ${subject.name} ${subject.code}
+            </h1>
+
+            <p>
+                ${subject.description}
+            </p>
+
+        </div>
+
+
+        <div class="loading">
+
+            <div class="spinner"></div>
+
+            Loading papers...
+
+        </div>
+
+    `;
+
+
+    try {
+
+        const years =
+            await getSubjectYears(subjectKey);
+
+        const yearFolders =
+            years
+                .filter(item => item.type === "dir")
+                .map(item => item.name)
+                .sort((a, b) => Number(b) - Number(a));
+
+
+        if (yearFolders.length === 0) {
+
+            app.innerHTML += `
+                <div class="empty">
+                    No papers have been added yet.
+                </div>
+            `;
+
+            return;
+        }
+
 
         app.innerHTML = `
 
@@ -786,36 +928,20 @@
             </div>
 
 
-            <div class="search-box">
-
-                <div class="search-icon">
-                    🔍
-                </div>
-
-                <input
-                    id="paperSearch"
-                    type="text"
-                    placeholder="Search papers..."
-                    oninput="filterPapers('${subjectKey}', this.value)"
-                >
-
-            </div>
-
-
             <div class="filters">
 
                 <button
-                    class="filter-btn ${selectedYear === "all" ? "active" : ""}"
-                    onclick="showSubject('${subjectKey}', 'all')"
+                    class="filter-btn active"
+                    onclick="filterYears('${subjectKey}', 'all')"
                 >
-                    All
+                    All Years
                 </button>
 
-                ${years.map(year => `
+                ${yearFolders.map(year => `
 
                     <button
-                        class="filter-btn ${selectedYear === year ? "active" : ""}"
-                        onclick="showSubject('${subjectKey}', '${year}')"
+                        class="filter-btn"
+                        onclick="filterYears('${subjectKey}', '${year}')"
                     >
                         ${year}
                     </button>
@@ -827,106 +953,365 @@
 
             <div id="yearContainer">
 
-                ${
-                    filteredYears.length
-                        ? filteredYears
-                            .map(year => renderYear(subjectKey, year, subject.years[year]))
-                            .join("")
-                        : `
-                            <div class="empty">
-                                No papers found.
+                ${yearFolders.map(year => `
+
+                    <section
+                        class="year-section"
+                        data-year="${year}"
+                    >
+
+                        <h2 class="year-title">
+                            ${year}
+                        </h2>
+
+
+                        <div
+                            class="session-list"
+                            id="sessions-${year}"
+                        >
+
+                            <div class="loading">
+                                Loading...
                             </div>
-                        `
-                }
+
+                        </div>
+
+                    </section>
+
+                `).join("")}
 
             </div>
+
         `;
+
+
+        /* Load each year's sessions */
+
+        for (const year of yearFolders) {
+
+            loadYearSessions(
+                subjectKey,
+                year
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        app.innerHTML += `
+
+            <div class="empty">
+
+                Could not load the papers.
+
+                <br><br>
+
+                Make sure your GitHub repository
+                is public.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ============================================================
+   LOAD YEAR SESSIONS
+   ============================================================ */
+
+async function loadYearSessions(
+    subjectKey,
+    year
+) {
+
+    const container =
+        document.getElementById(
+            `sessions-${year}`
+        );
+
+    if (!container) {
+        return;
     }
 
 
-    /*
-        =========================
-        YEAR / SESSION
-        =========================
-    */
+    try {
 
-    function renderYear(subjectKey, year, sessions) {
-
-        return `
-
-            <section class="year-section">
-
-                <h2 class="year-title">
-                    ${year}
-                </h2>
+        const folders =
+            await getYearSessions(
+                subjectKey,
+                year
+            );
 
 
-                <div class="session-list">
+        const sessionFolders =
+            folders.filter(
+                item => item.type === "dir"
+            );
 
-                    ${Object.entries(sessions)
-                        .map(([session, papers]) => `
 
-                            <div
-                                class="session-card"
-                                onclick="showSession(
-                                    '${subjectKey}',
-                                    '${year}',
-                                    '${session}'
-                                )"
-                            >
+        if (sessionFolders.length === 0) {
 
-                                <div class="session-left">
+            container.innerHTML = `
+                <div class="empty">
+                    No sessions found.
+                </div>
+            `;
 
-                                    <div class="folder-icon">
-                                        📁
-                                    </div>
+            return;
+        }
 
-                                    <div>
 
-                                        <div class="session-name">
-                                            ${session}
-                                        </div>
+        const sessionHTML = [];
 
-                                        <div class="session-count">
-                                            ${papers.length} paper${papers.length !== 1 ? "s" : ""}
-                                        </div>
 
-                                    </div>
+        for (const folder of sessionFolders) {
 
-                                </div>
+            const files =
+                await getSessionFiles(
+                    subjectKey,
+                    year,
+                    folder.name
+                );
 
-                                <div class="session-arrow">
-                                    →
-                                </div>
 
+            const papers =
+                groupPapers(files);
+
+
+            if (papers.length === 0) {
+                continue;
+            }
+
+
+            const firstPaper =
+                papers[0];
+
+
+            sessionHTML.push(`
+
+                <div
+                    class="session-card"
+                    onclick='showSession(
+                        "${subjectKey}",
+                        "${year}",
+                        "${folder.name}"
+                    )'
+                >
+
+                    <div class="session-left">
+
+                        <div class="folder-icon">
+                            📁
+                        </div>
+
+                        <div>
+
+                            <div class="session-name">
+                                ${sessionName(
+                                    firstPaper.sessionCode
+                                )}
                             </div>
 
-                        `)
-                        .join("")}
+                            <div class="session-count">
+                                ${papers.length}
+                                paper${papers.length !== 1 ? "s" : ""}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="session-arrow">
+                        →
+                    </div>
 
                 </div>
 
-            </section>
+            `);
 
+        }
+
+
+        container.innerHTML =
+            sessionHTML.join("");
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML = `
+            <div class="empty">
+                Could not load this session.
+            </div>
         `;
 
     }
 
+}
 
-    /*
-        =========================
-        SESSION PAGE
-        =========================
-    */
 
-    function showSession(subjectKey, year, session) {
+/* ============================================================
+   GROUP PAPERS
+   ============================================================ */
 
-        const subject = subjects[subjectKey];
+function groupPapers(files) {
+
+    const grouped = {};
+
+
+    for (const file of files) {
+
+        const parsed =
+            parseFilename(file.name);
+
+        if (!parsed) {
+            continue;
+        }
+
+
+        if (!grouped[parsed.paper]) {
+
+            grouped[parsed.paper] = {
+                code: parsed.code,
+                sessionCode: parsed.sessionCode,
+                paper: parsed.paper,
+                question: null,
+                markScheme: null,
+                examinerReport: null,
+                insert: null
+            };
+
+        }
+
+
+        if (parsed.type === "qp") {
+
+            grouped[parsed.paper].question =
+                file.path;
+
+        }
+
+
+        if (parsed.type === "ms") {
+
+            grouped[parsed.paper].markScheme =
+                file.path;
+
+        }
+
+
+        if (parsed.type === "er") {
+
+            grouped[parsed.paper].examinerReport =
+                file.path;
+
+        }
+
+
+        if (parsed.type === "in") {
+
+            grouped[parsed.paper].insert =
+                file.path;
+
+        }
+
+    }
+
+
+    return Object.values(grouped)
+        .sort(
+            (a, b) =>
+                a.paper.localeCompare(
+                    b.paper,
+                    undefined,
+                    { numeric: true }
+                )
+        );
+
+}
+
+
+/* ============================================================
+   SESSION PAGE
+   ============================================================ */
+
+async function showSession(
+    subjectKey,
+    year,
+    folder
+) {
+
+    const subject =
+        subjects[subjectKey];
+
+    const app =
+        document.getElementById("app");
+
+
+    app.innerHTML = `
+
+        <div class="page-header">
+
+            <button
+                class="back-btn"
+                onclick="showSubject('${subjectKey}')"
+            >
+                ← Back to ${subject.name}
+            </button>
+
+            <h1>
+                ${year}
+            </h1>
+
+            <p>
+                Loading papers...
+            </p>
+
+        </div>
+
+
+        <div class="loading">
+
+            <div class="spinner"></div>
+
+            Loading papers...
+
+        </div>
+
+    `;
+
+
+    try {
+
+        const files =
+            await getSessionFiles(
+                subjectKey,
+                year,
+                folder
+            );
+
 
         const papers =
-            subject.years[year][session];
+            groupPapers(files);
 
-        const app = document.getElementById("app");
+
+        const firstPaper =
+            papers[0];
+
+
+        const sessionTitle =
+            firstPaper
+                ? sessionName(
+                    firstPaper.sessionCode
+                )
+                : folder;
+
 
         app.innerHTML = `
 
@@ -940,11 +1325,12 @@
                 </button>
 
                 <h1>
-                    ${year} · ${session}
+                    ${sessionTitle}
                 </h1>
 
                 <p>
-                    ${subject.name} ${subject.code}
+                    ${subject.name}
+                    ${subject.code}
                 </p>
 
             </div>
@@ -952,141 +1338,207 @@
 
             <div class="paper-list">
 
-                ${papers.map(paper => `
-
-                    <div class="paper-card">
-
-                        <div class="paper-info">
-
-                            <h3>
-                                Paper ${paper.paper}
-                            </h3>
-
-                            <p>
-                                ${subject.name}
-                                ${subject.code}
-                                · ${year}
-                                · ${session}
-                            </p>
-
+                ${
+                    papers.length
+                    ? papers.map(
+                        paper =>
+                            renderPaper(
+                                paper,
+                                subject,
+                                year,
+                                sessionTitle
+                            )
+                    ).join("")
+                    : `
+                        <div class="empty">
+                            No papers found.
                         </div>
-
-
-                        <div class="paper-actions">
-
-                            <button
-                                class="paper-btn primary"
-                                onclick="openPDF('${paper.question}')"
-                            >
-                                📄 Question Paper
-                            </button>
-
-                            <button
-                                class="paper-btn"
-                                onclick="openPDF('${paper.markscheme}')"
-                            >
-                                ✅ Mark Scheme
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                `).join("")}
-
-            </div>
-        `;
-    }
-
-
-    /*
-        =========================
-        OPEN PDF
-        =========================
-    */
-
-    function openPDF(path) {
-
-        /*
-            Eventually these paths will point
-            to your actual PDF files.
-
-            For now, this simply attempts to
-            open the path in a new tab.
-        */
-
-        window.open(path, "_blank");
-
-    }
-
-
-    /*
-        =========================
-        SEARCH PAPERS
-        =========================
-    */
-
-    function filterPapers(subjectKey, query) {
-
-        query = query.toLowerCase().trim();
-
-        const subject = subjects[subjectKey];
-
-        const container =
-            document.getElementById("yearContainer");
-
-        let html = "";
-
-        Object.entries(subject.years).forEach(([year, sessions]) => {
-
-            const filteredSessions = {};
-
-            Object.entries(sessions).forEach(([session, papers]) => {
-
-                const filteredPapers = papers.filter(paper => {
-
-                    return (
-                        year.includes(query) ||
-                        session.toLowerCase().includes(query) ||
-                        paper.paper.toLowerCase().includes(query)
-                    );
-
-                });
-
-                if (filteredPapers.length) {
-                    filteredSessions[session] = filteredPapers;
+                    `
                 }
 
-            });
+            </div>
 
-            if (Object.keys(filteredSessions).length) {
+        `;
 
-                html += renderYear(
-                    subjectKey,
-                    year,
-                    filteredSessions
-                );
+    } catch (error) {
+
+        console.error(error);
+
+        app.innerHTML += `
+
+            <div class="empty">
+                Could not load the papers.
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ============================================================
+   PAPER CARD
+   ============================================================ */
+
+function renderPaper(
+    paper,
+    subject,
+    year,
+    session
+) {
+
+    return `
+
+        <div class="paper-card">
+
+            <div class="paper-info">
+
+                <h3>
+                    Paper ${paper.paper}
+                </h3>
+
+                <p>
+                    ${subject.name}
+                    ${subject.code}
+                    · ${year}
+                    · ${session}
+                </p>
+
+            </div>
+
+
+            <div class="paper-actions">
+
+                ${
+                    paper.question
+                    ? `
+                        <button
+                            class="paper-btn primary"
+                            onclick='openPDF("${paper.question}")'
+                        >
+                            📄 Question Paper
+                        </button>
+                    `
+                    : ""
+                }
+
+
+                ${
+                    paper.markScheme
+                    ? `
+                        <button
+                            class="paper-btn"
+                            onclick='openPDF("${paper.markScheme}")'
+                        >
+                            ✅ Mark Scheme
+                        </button>
+                    `
+                    : ""
+                }
+
+
+                ${
+                    paper.examinerReport
+                    ? `
+                        <button
+                            class="paper-btn"
+                            onclick='openPDF("${paper.examinerReport}")'
+                        >
+                            📋 Examiner Report
+                        </button>
+                    `
+                    : ""
+                }
+
+
+                ${
+                    paper.insert
+                    ? `
+                        <button
+                            class="paper-btn"
+                            onclick='openPDF("${paper.insert}")'
+                        >
+                            📎 Insert
+                        </button>
+                    `
+                    : ""
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   OPEN PDF
+   ============================================================ */
+
+function openPDF(path) {
+
+    const url =
+        `${RAW_BASE}/${path}`;
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
+
+
+/* ============================================================
+   YEAR FILTER
+   ============================================================ */
+
+function filterYears(
+    subjectKey,
+    year
+) {
+
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach(button => {
+
+            button.classList.remove("active");
+
+        });
+
+
+    event.target.classList.add("active");
+
+
+    document
+        .querySelectorAll(".year-section")
+        .forEach(section => {
+
+            if (
+                year === "all" ||
+                section.dataset.year === year
+            ) {
+
+                section.style.display = "";
+
+            } else {
+
+                section.style.display = "none";
 
             }
 
         });
 
-        container.innerHTML = html || `
-            <div class="empty">
-                No papers found for "${query}".
-            </div>
-        `;
-
-    }
+}
 
 
-    /*
-        =========================
-        START WEBSITE
-        =========================
-    */
+/* ============================================================
+   START
+   ============================================================ */
 
-    showHome();
+showHome();
 
 </script>
 
