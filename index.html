@@ -436,6 +436,22 @@
             color: var(--muted);
         }
 
+        /* ---------------- ERROR ---------------- */
+
+        .error-message {
+            background: #fff3f5;
+            border: 1px solid #ffd4de;
+            border-radius: 15px;
+            padding: 25px;
+            color: #a52645;
+            line-height: 1.6;
+        }
+
+        .error-message strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
         /* ---------------- FOOTER ---------------- */
 
         footer {
@@ -492,7 +508,7 @@
         </div>
 
         <div class="nav-links">
-            <a href="#" onclick="showHome()">Home</a>
+            <a href="#" onclick="showHome(); return false;">Home</a>
         </div>
 
     </div>
@@ -514,6 +530,12 @@
 const GITHUB_OWNER = "ugaryt-market";
 const GITHUB_REPO = "cashewpapers";
 const GITHUB_BRANCH = "main";
+
+const GITHUB_TREE_URL =
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
+
+const RAW_BASE =
+    `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}`;
 
 
 /* ============================================================
@@ -554,69 +576,99 @@ const subjects = {
 
 
 /* ============================================================
-   GITHUB API
+   PAPER DATABASE
    ============================================================ */
 
-const API_BASE =
-    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`;
+/*
+   Instead of requesting every folder individually from GitHub,
+   we load the repository tree once and build our own local
+   paper database from the filenames.
+
+   Example:
+
+   papers/mathematics/2025/mj/9709_s25_qp_11.pdf
+
+   becomes:
+
+   Subject: mathematics
+   Year: 2025
+   Folder: mj
+   Session: s25
+   Type: qp
+   Paper: 11
+*/
+
+let repositoryFiles = null;
+let paperDatabase = {};
 
 
-const RAW_BASE =
-    `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}`;
+async function loadRepositoryFiles() {
 
-
-/* Cache API results so we don't repeatedly request the
-   same folders during a session. */
-
-const cache = {};
-
-
-async function getGitHubFolder(path) {
-
-    if (cache[path]) {
-        return cache[path];
+    if (repositoryFiles) {
+        return repositoryFiles;
     }
 
-    const response =
-        await fetch(`${API_BASE}/${path}`);
+    const response = await fetch(
+        GITHUB_TREE_URL,
+        {
+            cache: "no-store"
+        }
+    );
 
     if (!response.ok) {
+
         throw new Error(
-            `GitHub API error: ${response.status}`
+            `GitHub returned ${response.status}`
         );
+
     }
 
     const data = await response.json();
 
-    cache[path] = data;
+    if (data.truncated) {
 
-    return data;
+        throw new Error(
+            "The GitHub repository contains too many files for the automatic paper scanner."
+        );
+
+    }
+
+    repositoryFiles = data.tree
+        .filter(item =>
+            item.type === "blob" &&
+            item.path.toLowerCase().startsWith("papers/") &&
+            item.path.toLowerCase().endsWith(".pdf")
+        );
+
+    buildPaperDatabase();
+
+    return repositoryFiles;
 }
 
 
 /* ============================================================
-   FILE NAME PARSER
+   FILENAME PARSER
    ============================================================ */
 
 /*
-    Example:
+   Supported examples:
 
-    9709_s25_qp_11.pdf
+   9709_s25_qp_11.pdf
+   9709_s25_ms_11.pdf
+   9709_s25_er_11.pdf
+   9709_s25_in_11.pdf
 
-    becomes:
-
-    code       = 9709
-    session    = s25
-    type       = qp
-    paper      = 11
+   qp = Question Paper
+   ms = Mark Scheme
+   er = Examiner Report
+   in = Insert
 */
 
 function parseFilename(filename) {
 
-    const match =
-        filename.match(
-            /^(\d+)_([a-z]\d{2})_(qp|ms|er|in)_(\d+)\.pdf$/i
-        );
+    const match = filename.match(
+        /^(\d+)_([a-z]\d{2})_(qp|ms|er|in)_(\d+)\.pdf$/i
+    );
 
     if (!match) {
         return null;
@@ -637,8 +689,15 @@ function parseFilename(filename) {
 
 function sessionName(sessionCode) {
 
-    const type = sessionCode[0].toLowerCase();
-    const year = `20${sessionCode.substring(1)}`;
+    if (!sessionCode) {
+        return "Unknown Session";
+    }
+
+    const type =
+        sessionCode[0].toLowerCase();
+
+    const year =
+        `20${sessionCode.substring(1)}`;
 
     if (type === "s") {
         return `May / June ${year}`;
@@ -657,52 +716,216 @@ function sessionName(sessionCode) {
 
 
 /* ============================================================
-   GET YEARS
+   BUILD PAPER DATABASE
    ============================================================ */
 
-async function getSubjectYears(subjectKey) {
+function buildPaperDatabase() {
 
-    const path =
-        `papers/${subjectKey}`;
+    paperDatabase = {};
 
-    return await getGitHubFolder(path);
+    for (const file of repositoryFiles) {
+
+        /*
+           Expected path:
+
+           papers/
+           subject/
+           year/
+           session folder/
+           filename.pdf
+        */
+
+        const parts =
+            file.path.split("/");
+
+        if (parts.length < 5) {
+            continue;
+        }
+
+        const subjectKey = parts[1];
+        const year = parts[2];
+        const folder = parts[3];
+        const filename = parts[4];
+
+        if (!subjects[subjectKey]) {
+            continue;
+        }
+
+        const parsed =
+            parseFilename(filename);
+
+        if (!parsed) {
+            continue;
+        }
+
+        /*
+           Only include files belonging to the
+           subject code configured above.
+        */
+
+        if (
+            parsed.code !==
+            subjects[subjectKey].code
+        ) {
+            continue;
+        }
+
+        if (!paperDatabase[subjectKey]) {
+            paperDatabase[subjectKey] = {};
+        }
+
+        if (!paperDatabase[subjectKey][year]) {
+            paperDatabase[subjectKey][year] = {};
+        }
+
+        if (!paperDatabase[subjectKey][year][folder]) {
+            paperDatabase[subjectKey][year][folder] = {
+                sessionCode: parsed.sessionCode,
+                papers: {}
+            };
+        }
+
+        const session =
+            paperDatabase[subjectKey][year][folder];
+
+        if (!session.papers[parsed.paper]) {
+
+            session.papers[parsed.paper] = {
+
+                paper: parsed.paper,
+
+                question: null,
+
+                markScheme: null,
+
+                examinerReport: null,
+
+                insert: null
+
+            };
+
+        }
+
+        const currentPaper =
+            session.papers[parsed.paper];
+
+
+        if (parsed.type === "qp") {
+
+            currentPaper.question =
+                file.path;
+
+        }
+
+
+        if (parsed.type === "ms") {
+
+            currentPaper.markScheme =
+                file.path;
+
+        }
+
+
+        if (parsed.type === "er") {
+
+            currentPaper.examinerReport =
+                file.path;
+
+        }
+
+
+        if (parsed.type === "in") {
+
+            currentPaper.insert =
+                file.path;
+
+        }
+
+    }
+
 }
 
 
 /* ============================================================
-   GET YEAR SESSIONS
+   GET SUBJECT YEARS
    ============================================================ */
 
-async function getYearSessions(subjectKey, year) {
+function getSubjectYears(subjectKey) {
 
-    const path =
-        `papers/${subjectKey}/${year}`;
+    const data =
+        paperDatabase[subjectKey] || {};
 
-    return await getGitHubFolder(path);
+    return Object.keys(data)
+        .sort(
+            (a, b) =>
+                Number(b) - Number(a)
+        );
+
 }
 
 
 /* ============================================================
-   GET PAPERS
+   GET SUBJECT SESSIONS
    ============================================================ */
 
-async function getSessionFiles(
+function getSubjectSessions(
+    subjectKey,
+    year
+) {
+
+    const data =
+        paperDatabase[subjectKey]?.[year] || {};
+
+    return Object.entries(data)
+        .sort((a, b) => {
+
+            const sessionA =
+                a[1].sessionCode || "";
+
+            const sessionB =
+                b[1].sessionCode || "";
+
+            return sessionA.localeCompare(sessionB);
+
+        });
+
+}
+
+
+/* ============================================================
+   GET SESSION PAPERS
+   ============================================================ */
+
+function getSessionPapers(
     subjectKey,
     year,
     folder
 ) {
 
-    const path =
-        `papers/${subjectKey}/${year}/${folder}`;
+    const session =
+        paperDatabase[
+            subjectKey
+        ]?.[
+            year
+        ]?.[
+            folder
+        ];
 
-    const files =
-        await getGitHubFolder(path);
+    if (!session) {
+        return [];
+    }
 
-    return files.filter(
-        file =>
-            file.type === "file" &&
-            file.name.toLowerCase().endsWith(".pdf")
+    return Object.values(
+        session.papers
+    ).sort(
+        (a, b) =>
+            a.paper.localeCompare(
+                b.paper,
+                undefined,
+                { numeric: true }
+            )
     );
+
 }
 
 
@@ -728,7 +951,7 @@ function showHome() {
                 past papers and mark schemes.
             </p>
 
-            <div class="version" id="version">
+            <div class="version">
                 Version Alpha 0.0.01
             </div>
 
@@ -776,6 +999,7 @@ function showHome() {
         </div>
 
     `;
+
 }
 
 
@@ -792,8 +1016,12 @@ function renderSubjectCards(filter = "") {
         .filter(([key, subject]) => {
 
             return (
-                subject.name.toLowerCase().includes(query) ||
-                subject.code.includes(query)
+                subject.name
+                    .toLowerCase()
+                    .includes(query) ||
+
+                subject.code
+                    .includes(query)
             );
 
         })
@@ -835,6 +1063,7 @@ function renderSubjectCards(filter = "") {
 
         `)
         .join("");
+
 }
 
 
@@ -859,6 +1088,7 @@ async function showSubject(subjectKey) {
 
     const app =
         document.getElementById("app");
+
 
     app.innerHTML = `
 
@@ -895,25 +1125,46 @@ async function showSubject(subjectKey) {
 
     try {
 
+        await loadRepositoryFiles();
+
+
         const years =
-            await getSubjectYears(subjectKey);
-
-        const yearFolders =
-            years
-                .filter(item => item.type === "dir")
-                .map(item => item.name)
-                .sort((a, b) => Number(b) - Number(a));
+            getSubjectYears(subjectKey);
 
 
-        if (yearFolders.length === 0) {
+        if (years.length === 0) {
 
-            app.innerHTML += `
-                <div class="empty">
-                    No papers have been added yet.
+            app.innerHTML = `
+
+                <div class="page-header">
+
+                    <button
+                        class="back-btn"
+                        onclick="showHome()"
+                    >
+                        ← Back to subjects
+                    </button>
+
+                    <h1>
+                        ${subject.name} ${subject.code}
+                    </h1>
+
+                    <p>
+                        ${subject.description}
+                    </p>
+
                 </div>
+
+                <div class="empty">
+
+                    No papers have been added yet.
+
+                </div>
+
             `;
 
             return;
+
         }
 
 
@@ -943,16 +1194,19 @@ async function showSubject(subjectKey) {
 
                 <button
                     class="filter-btn active"
-                    onclick="filterYears('${subjectKey}', 'all')"
+                    onclick="filterYears(this, 'all')"
                 >
                     All Years
                 </button>
 
-                ${yearFolders.map(year => `
+                ${years.map(year => `
 
                     <button
                         class="filter-btn"
-                        onclick="filterYears('${subjectKey}', '${year}')"
+                        onclick="filterYears(
+                            this,
+                            '${year}'
+                        )"
                     >
                         ${year}
                     </button>
@@ -964,63 +1218,163 @@ async function showSubject(subjectKey) {
 
             <div id="yearContainer">
 
-                ${yearFolders.map(year => `
+                ${years.map(year => {
 
-                    <section
-                        class="year-section"
-                        data-year="${year}"
-                    >
+                    const sessions =
+                        getSubjectSessions(
+                            subjectKey,
+                            year
+                        );
 
-                        <h2 class="year-title">
-                            ${year}
-                        </h2>
+                    return `
 
-
-                        <div
-                            class="session-list"
-                            id="sessions-${year}"
+                        <section
+                            class="year-section"
+                            data-year="${year}"
                         >
 
-                            <div class="loading">
-                                Loading...
+                            <h2 class="year-title">
+                                ${year}
+                            </h2>
+
+
+                            <div class="session-list">
+
+                                ${
+                                    sessions.length
+                                    ? sessions.map(
+                                        ([folder, session]) => {
+
+                                            const papers =
+                                                Object.values(
+                                                    session.papers
+                                                );
+
+                                            return `
+
+                                                <div
+                                                    class="session-card"
+                                                    onclick='showSession(
+                                                        "${subjectKey}",
+                                                        "${year}",
+                                                        "${folder}"
+                                                    )'
+                                                >
+
+                                                    <div class="session-left">
+
+                                                        <div class="folder-icon">
+                                                            📁
+                                                        </div>
+
+                                                        <div>
+
+                                                            <div class="session-name">
+                                                                ${sessionName(
+                                                                    session.sessionCode
+                                                                )}
+                                                            </div>
+
+                                                            <div class="session-count">
+                                                                ${papers.length}
+                                                                paper${papers.length !== 1 ? "s" : ""}
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="session-arrow">
+                                                        →
+                                                    </div>
+
+                                                </div>
+
+                                            `;
+
+                                        }
+                                    ).join("")
+                                    : `
+                                        <div class="empty">
+                                            No papers found for ${year}.
+                                        </div>
+                                    `
+                                }
+
                             </div>
 
-                        </div>
+                        </section>
 
-                    </section>
+                    `;
 
-                `).join("")}
+                }).join("")}
 
             </div>
 
         `;
 
-
-        /* Load each year's sessions */
-
-        for (const year of yearFolders) {
-
-            loadYearSessions(
-                subjectKey,
-                year
-            );
-
-        }
-
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Paper loading error:",
+            error
+        );
 
-        app.innerHTML += `
 
-            <div class="empty">
+        app.innerHTML = `
 
-                Could not load the papers.
+            <div class="page-header">
+
+                <button
+                    class="back-btn"
+                    onclick="showHome()"
+                >
+                    ← Back to subjects
+                </button>
+
+                <h1>
+                    ${subject.name} ${subject.code}
+                </h1>
+
+            </div>
+
+
+            <div class="error-message">
+
+                <strong>
+                    Could not load the papers.
+                </strong>
+
+                The website could not read the
+                public GitHub repository.
 
                 <br><br>
 
-                Make sure your GitHub repository
-                is public.
+                Check that:
+
+                <br>
+
+                • The repository is public
+
+                <br>
+
+                • The repository name is
+                <strong style="display:inline;">
+                    ${GITHUB_REPO}
+                </strong>
+
+                <br>
+
+                • The files are inside the
+                <strong style="display:inline;">
+                    papers/
+                </strong>
+                folder
+
+                <br><br>
+
+                Technical error:
+                ${error.message}
 
             </div>
 
@@ -1032,218 +1386,44 @@ async function showSubject(subjectKey) {
 
 
 /* ============================================================
-   LOAD YEAR SESSIONS
+   YEAR FILTER
    ============================================================ */
 
-async function loadYearSessions(
-    subjectKey,
+function filterYears(
+    button,
     year
 ) {
 
-    const container =
-        document.getElementById(
-            `sessions-${year}`
-        );
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach(btn => {
 
-    if (!container) {
-        return;
-    }
+            btn.classList.remove("active");
 
-
-    try {
-
-        const folders =
-            await getYearSessions(
-                subjectKey,
-                year
-            );
+        });
 
 
-        const sessionFolders =
-            folders.filter(
-                item => item.type === "dir"
-            );
+    button.classList.add("active");
 
 
-        if (sessionFolders.length === 0) {
+    document
+        .querySelectorAll(".year-section")
+        .forEach(section => {
 
-            container.innerHTML = `
-                <div class="empty">
-                    No sessions found.
-                </div>
-            `;
+            if (
+                year === "all" ||
+                section.dataset.year === year
+            ) {
 
-            return;
-        }
+                section.style.display = "";
 
+            } else {
 
-        const sessionHTML = [];
+                section.style.display = "none";
 
-
-        for (const folder of sessionFolders) {
-
-            const files =
-                await getSessionFiles(
-                    subjectKey,
-                    year,
-                    folder.name
-                );
-
-
-            const papers =
-                groupPapers(files);
-
-
-            if (papers.length === 0) {
-                continue;
             }
 
-
-            const firstPaper =
-                papers[0];
-
-
-            sessionHTML.push(`
-
-                <div
-                    class="session-card"
-                    onclick='showSession(
-                        "${subjectKey}",
-                        "${year}",
-                        "${folder.name}"
-                    )'
-                >
-
-                    <div class="session-left">
-
-                        <div class="folder-icon">
-                            📁
-                        </div>
-
-                        <div>
-
-                            <div class="session-name">
-                                ${sessionName(
-                                    firstPaper.sessionCode
-                                )}
-                            </div>
-
-                            <div class="session-count">
-                                ${papers.length}
-                                paper${papers.length !== 1 ? "s" : ""}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="session-arrow">
-                        →
-                    </div>
-
-                </div>
-
-            `);
-
-        }
-
-
-        container.innerHTML =
-            sessionHTML.join("");
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        container.innerHTML = `
-            <div class="empty">
-                Could not load this session.
-            </div>
-        `;
-
-    }
-
-}
-
-
-/* ============================================================
-   GROUP PAPERS
-   ============================================================ */
-
-function groupPapers(files) {
-
-    const grouped = {};
-
-
-    for (const file of files) {
-
-        const parsed =
-            parseFilename(file.name);
-
-        if (!parsed) {
-            continue;
-        }
-
-
-        if (!grouped[parsed.paper]) {
-
-            grouped[parsed.paper] = {
-                code: parsed.code,
-                sessionCode: parsed.sessionCode,
-                paper: parsed.paper,
-                question: null,
-                markScheme: null,
-                examinerReport: null,
-                insert: null
-            };
-
-        }
-
-
-        if (parsed.type === "qp") {
-
-            grouped[parsed.paper].question =
-                file.path;
-
-        }
-
-
-        if (parsed.type === "ms") {
-
-            grouped[parsed.paper].markScheme =
-                file.path;
-
-        }
-
-
-        if (parsed.type === "er") {
-
-            grouped[parsed.paper].examinerReport =
-                file.path;
-
-        }
-
-
-        if (parsed.type === "in") {
-
-            grouped[parsed.paper].insert =
-                file.path;
-
-        }
-
-    }
-
-
-    return Object.values(grouped)
-        .sort(
-            (a, b) =>
-                a.paper.localeCompare(
-                    b.paper,
-                    undefined,
-                    { numeric: true }
-                )
-        );
+        });
 
 }
 
@@ -1252,7 +1432,7 @@ function groupPapers(files) {
    SESSION PAGE
    ============================================================ */
 
-async function showSession(
+function showSession(
     subjectKey,
     year,
     folder
@@ -1261,8 +1441,47 @@ async function showSession(
     const subject =
         subjects[subjectKey];
 
+    const session =
+        paperDatabase[
+            subjectKey
+        ]?.[
+            year
+        ]?.[
+            folder
+        ];
+
+
     const app =
         document.getElementById("app");
+
+
+    if (!session) {
+
+        app.innerHTML = `
+
+            <div class="empty">
+                This session could not be found.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const papers =
+        getSessionPapers(
+            subjectKey,
+            year,
+            folder
+        );
+
+
+    const title =
+        sessionName(
+            session.sessionCode
+        );
 
 
     app.innerHTML = `
@@ -1277,113 +1496,40 @@ async function showSession(
             </button>
 
             <h1>
-                ${year}
+                ${title}
             </h1>
 
             <p>
-                Loading papers...
+                ${subject.name}
+                ${subject.code}
             </p>
 
         </div>
 
 
-        <div class="loading">
+        <div class="paper-list">
 
-            <div class="spinner"></div>
-
-            Loading papers...
+            ${
+                papers.length
+                ? papers.map(
+                    paper =>
+                        renderPaper(
+                            paper,
+                            subject,
+                            year,
+                            title
+                        )
+                ).join("")
+                : `
+                    <div class="empty">
+                        No papers found.
+                    </div>
+                `
+            }
 
         </div>
 
     `;
-
-
-    try {
-
-        const files =
-            await getSessionFiles(
-                subjectKey,
-                year,
-                folder
-            );
-
-
-        const papers =
-            groupPapers(files);
-
-
-        const firstPaper =
-            papers[0];
-
-
-        const sessionTitle =
-            firstPaper
-                ? sessionName(
-                    firstPaper.sessionCode
-                )
-                : folder;
-
-
-        app.innerHTML = `
-
-            <div class="page-header">
-
-                <button
-                    class="back-btn"
-                    onclick="showSubject('${subjectKey}')"
-                >
-                    ← Back to ${subject.name}
-                </button>
-
-                <h1>
-                    ${sessionTitle}
-                </h1>
-
-                <p>
-                    ${subject.name}
-                    ${subject.code}
-                </p>
-
-            </div>
-
-
-            <div class="paper-list">
-
-                ${
-                    papers.length
-                    ? papers.map(
-                        paper =>
-                            renderPaper(
-                                paper,
-                                subject,
-                                year,
-                                sessionTitle
-                            )
-                    ).join("")
-                    : `
-                        <div class="empty">
-                            No papers found.
-                        </div>
-                    `
-                }
-
-            </div>
-
-        `;
-
-    } catch (error) {
-
-        console.error(error);
-
-        app.innerHTML += `
-
-            <div class="empty">
-                Could not load the papers.
-            </div>
-
-        `;
-
-    }
 
 }
 
@@ -1492,55 +1638,19 @@ function renderPaper(
 function openPDF(path) {
 
     const url =
-        `${RAW_BASE}/${path}`;
+        `${RAW_BASE}/${path
+            .split("/")
+            .map(
+                part => encodeURIComponent(part)
+            )
+            .join("/")
+        }`;
+
 
     window.open(
         url,
         "_blank"
     );
-
-}
-
-
-/* ============================================================
-   YEAR FILTER
-   ============================================================ */
-
-function filterYears(
-    subjectKey,
-    year
-) {
-
-    document
-        .querySelectorAll(".filter-btn")
-        .forEach(button => {
-
-            button.classList.remove("active");
-
-        });
-
-
-    event.target.classList.add("active");
-
-
-    document
-        .querySelectorAll(".year-section")
-        .forEach(section => {
-
-            if (
-                year === "all" ||
-                section.dataset.year === year
-            ) {
-
-                section.style.display = "";
-
-            } else {
-
-                section.style.display = "none";
-
-            }
-
-        });
 
 }
 
