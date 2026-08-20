@@ -3,7 +3,7 @@ const path = require("path");
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.07
+    Version Alpha 0.0.08
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -597,6 +597,9 @@ main {
     line-height: 1.5;
 }
 
+
+/* ---------------- YEAR CARDS ---------------- */
+
 .year-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -798,6 +801,7 @@ main {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    align-items: center;
 }
 
 .paper-button {
@@ -805,11 +809,43 @@ main {
     border-radius: 8px;
     padding: 10px 14px;
     background: #f0f1f6;
+    cursor: pointer;
 }
 
 .paper-button.primary {
     background: var(--primary);
     color: white;
+}
+
+
+/* ---------------- PAPER STATUS ---------------- */
+
+.paper-status {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #fff0f0;
+    color: #d94a4a;
+    font-size: 21px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.15s ease;
+    flex-shrink: 0;
+}
+
+.paper-status:hover {
+    transform: translateY(-1px);
+    border-color: #f0bcbc;
+}
+
+.paper-status.completed {
+    background: #e8f8ee;
+    border-color: #b9e8c8;
+    color: #2e9b52;
 }
 
 
@@ -959,6 +995,105 @@ ${body}
     Cashew Papers · Built for students
 </footer>
 
+
+<script>
+
+function getPaperStatus(key) {
+
+    return localStorage.getItem(
+        "cashew-paper-status-" + key
+    ) || "incomplete";
+
+}
+
+
+function renderPaperStatus(button, status) {
+
+    button.classList.remove(
+        "completed"
+    );
+
+
+    if (status === "completed") {
+
+        button.classList.add(
+            "completed"
+        );
+
+        button.textContent = "✓";
+        button.title = "Completed";
+        button.setAttribute(
+            "aria-label",
+            "Mark paper as incomplete"
+        );
+
+    } else {
+
+        button.textContent = "✕";
+        button.title = "Not completed";
+        button.setAttribute(
+            "aria-label",
+            "Mark paper as completed"
+        );
+
+    }
+
+}
+
+
+function togglePaperStatus(button) {
+
+    const key =
+        button.dataset.paperKey;
+
+    const current =
+        getPaperStatus(key);
+
+
+    const next =
+        current === "completed"
+            ? "incomplete"
+            : "completed";
+
+
+    localStorage.setItem(
+        "cashew-paper-status-" + key,
+        next
+    );
+
+
+    renderPaperStatus(
+        button,
+        next
+    );
+
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        document
+            .querySelectorAll(
+                ".paper-status"
+            )
+            .forEach(button => {
+
+                renderPaperStatus(
+                    button,
+                    getPaperStatus(
+                        button.dataset.paperKey
+                    )
+                );
+
+            });
+
+    }
+);
+
+</script>
+
 </body>
 
 </html>
@@ -1024,7 +1159,7 @@ function generateHome(subjects) {
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.07
+                    Version Alpha 0.0.08
                 </div>
 
             </section>
@@ -1451,141 +1586,164 @@ function generateSessionPage(
 
 
     const cards =
-    papers
-        .map(
-            (paper, index) => {
+        papers
+            .map(
+                (paper, index) => {
 
-                const currentGroup =
-                    String(paper.paper).charAt(0);
+                    const currentGroup =
+                        String(
+                            paper.paper
+                        ).charAt(0);
 
-                const previousGroup =
-                    index > 0
-                        ? String(
-                            papers[index - 1].paper
-                        ).charAt(0)
-                        : null;
+                    const previousGroup =
+                        index > 0
+                            ? String(
+                                papers[index - 1].paper
+                            ).charAt(0)
+                            : null;
 
-                const groupBreak =
-                    index > 0 &&
-                    currentGroup !== previousGroup;
+                    const groupBreak =
+                        index > 0 &&
+                        currentGroup !==
+                            previousGroup;
 
-                return `
 
-                    <div
-                        class="paper-card${groupBreak ? " group-break" : ""}"
-                    >
+                    const paperStatusKey =
+                        [
+                            subject.code,
+                            categoryKey || "",
+                            year,
+                            session.sessionCode,
+                            paper.paper
+                        ]
+                            .join("-");
 
-                        <div>
 
-                            <h3>
-                                Paper ${paper.paper}
-                            </h3>
+                    return `
 
-                            <div class="paper-code">
+                        <div
+                            class="
+                                paper-card
+                                ${groupBreak ? "group-break" : ""}
+                            "
+                        >
+
+                            <div>
+
+                                <h3>
+                                    Paper ${paper.paper}
+                                </h3>
+
+                                <div class="paper-code">
+                                    ${
+                                        paper.code ||
+                                        `Paper ${paper.paper}`
+                                    }
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="paper-actions"
+                            >
+
+                                <button
+                                    type="button"
+                                    class="paper-status"
+                                    data-paper-key="${paperStatusKey}"
+                                    onclick="
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        togglePaperStatus(this);
+                                    "
+                                >
+                                    ✕
+                                </button>
+
+
                                 ${
-                                    paper.code ||
-                                    `Paper ${paper.paper}`
+                                    paper.question
+                                        ? `
+                                            <a
+                                                class="
+                                                    paper-button
+                                                    primary
+                                                "
+                                                href="../${paper.question
+                                                    .split("/")
+                                                    .slice(-4)
+                                                    .join("/")
+                                                }"
+                                            >
+                                                📄 Question Paper
+                                            </a>
+                                        `
+                                        : ""
                                 }
+
+
+                                ${
+                                    paper.markScheme
+                                        ? `
+                                            <a
+                                                class="paper-button"
+                                                href="../${paper.markScheme
+                                                    .split("/")
+                                                    .slice(-4)
+                                                    .join("/")
+                                                }"
+                                            >
+                                                ✅ Mark Scheme
+                                            </a>
+                                        `
+                                        : ""
+                                }
+
+
+                                ${
+                                    paper.examinerReport
+                                        ? `
+                                            <a
+                                                class="paper-button"
+                                                href="../${paper.examinerReport
+                                                    .split("/")
+                                                    .slice(-4)
+                                                    .join("/")
+                                                }"
+                                            >
+                                                📋 Examiner Report
+                                            </a>
+                                        `
+                                        : ""
+                                }
+
+
+                                ${
+                                    paper.insert
+                                        ? `
+                                            <a
+                                                class="paper-button"
+                                                href="../${paper.insert
+                                                    .split("/")
+                                                    .slice(-4)
+                                                    .join("/")
+                                                }"
+                                            >
+                                                📎 Insert
+                                            </a>
+                                        `
+                                        : ""
+                                }
+
                             </div>
 
                         </div>
 
-
-                        <div
-                            class="paper-actions"
-                        >
-
-                            ${
-                                paper.question
-                                    ? `
-                                        <a
-                                            class="
-                                                paper-button
-                                                primary
-                                            "
-                                            href="../${paper.question
-                                                .split("/")
-                                                .slice(
-                                                    -4
-                                                )
-                                                .join("/")
-                                            }"
-                                        >
-                                            📄 Question Paper
-                                        </a>
-                                    `
-                                    : ""
-                            }
-
-
-                            ${
-                                paper.markScheme
-                                    ? `
-                                        <a
-                                            class="paper-button"
-                                            href="../${paper.markScheme
-                                                .split("/")
-                                                .slice(
-                                                    -4
-                                                )
-                                                .join("/")
-                                            }"
-                                        >
-                                            ✅ Mark Scheme
-                                        </a>
-                                    `
-                                    : ""
-                            }
-
-
-                            ${
-                                paper.examinerReport
-                                    ? `
-                                        <a
-                                            class="paper-button"
-                                            href="../${paper.examinerReport
-                                                .split("/")
-                                                .slice(
-                                                    -4
-                                                )
-                                                .join("/")
-                                            }"
-                                        >
-                                            📋 Examiner Report
-                                        </a>
-                                    `
-                                    : ""
-                            }
-
-
-                            ${
-                                paper.insert
-                                    ? `
-                                        <a
-                                            class="paper-button"
-                                            href="../${paper.insert
-                                                .split("/")
-                                                .slice(
-                                                    -4
-                                                )
-                                                .join("/")
-                                            }"
-                                        >
-                                            📎 Insert
-                                        </a>
-                                    `
-                                    : ""
-                            }
-
-                        </div>
-
-                    </div>
-
-                `;
-            }
-        )
-        .join("");
-            
+                    `;
+                }
+            )
+            .join("");
 
 
     return documentHTML(
@@ -1868,8 +2026,7 @@ function generate() {
                         ] = {
 
                             sessionCode:
-                                parsed
-                                    .sessionCode,
+                                parsed.sessionCode,
 
                             papers: {}
 
@@ -2075,6 +2232,7 @@ function generate() {
             }
 
         }
+
 
         /* Normal subjects */
 
