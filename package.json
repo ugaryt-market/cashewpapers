@@ -1,0 +1,11 @@
+{
+    "name": "cashew-papers",
+    "version": "0.0.6",
+    "private": true,
+    "scripts": {
+        "build": "node generator/generate.js"
+    },
+    "engines": {
+        "node": ">=24"
+    }
+}
