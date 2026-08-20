@@ -6,6 +6,14 @@
 
     <title>Cashew Past Papers</title>
 
+    <!-- JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
     <style>
         * {
             box-sizing: border-box;
@@ -418,17 +426,11 @@
             font-size: 18px;
         }
 
-        .paper-info p {
-            color: var(--muted);
-            font-size: 13px;
-            margin-top: 5px;
-        }
+        /* Paper filename/code */
 
-        /* NEW:
-           Filename/code shown underneath each paper */
         .paper-code {
             color: var(--muted);
-            font-family: "Courier New", monospace;
+            font-family: "JetBrains Mono", monospace;
             font-size: 13px;
             margin-top: 6px;
             font-weight: 600;
@@ -506,7 +508,7 @@
             background: #f5f6fa;
             border-radius: 12px;
             padding: 15px;
-            font-family: monospace;
+            font-family: "JetBrains Mono", monospace;
             font-size: 12px;
             overflow-x: auto;
             text-align: left;
@@ -637,6 +639,27 @@ const subjects = {
 
 
 /* ============================================================
+   MATHEMATICS CATEGORIES
+   ============================================================ */
+
+const mathematicsCategories = {
+
+    pure: {
+        name: "Pure",
+        icon: "📐",
+        description: "Pure Mathematics papers and mark schemes."
+    },
+
+    "statistics-mechanics": {
+        name: "Statistics / Mechanics",
+        icon: "📊",
+        description: "Statistics and Mechanics papers and mark schemes."
+    }
+
+};
+
+
+/* ============================================================
    DATABASE
    ============================================================ */
 
@@ -760,6 +783,22 @@ function buildPaperDatabase() {
             categoryKey =
                 parts[2].toLowerCase();
 
+            /*
+               Support both:
+
+               mathematics/statistics/...
+               mathematics/statistics-mechanics/...
+
+               Both appear under the same website category.
+            */
+
+            if (
+                categoryKey === "statistics"
+            ) {
+                categoryKey =
+                    "statistics-mechanics";
+            }
+
             year =
                 parts[3];
 
@@ -806,7 +845,8 @@ function buildPaperDatabase() {
 
 
         if (
-            subjectKey === "mathematics"
+            subjectKey ===
+            "mathematics"
         ) {
 
             if (
@@ -1037,20 +1077,16 @@ function addPaper(
 
 
 /* ============================================================
-   GET DISPLAY CODE
+   GET PAPER CODE
    ============================================================ */
 
-/*
-    For example:
+function getPaperCode(
+    paper
+) {
 
-    9709_s25_qp_11.pdf
-              ↓
-    9709_s25_qp_11
-*/
-
-function getPaperCode(paper) {
-
-    if (paper.questionFilename) {
+    if (
+        paper.questionFilename
+    ) {
 
         return paper.questionFilename
             .replace(
@@ -1061,7 +1097,9 @@ function getPaperCode(paper) {
     }
 
 
-    if (paper.markSchemeFilename) {
+    if (
+        paper.markSchemeFilename
+    ) {
 
         return paper.markSchemeFilename
             .replace(
@@ -1139,7 +1177,7 @@ function showHome() {
             </p>
 
             <div class="version">
-                Version Alpha 0.0.01
+                Version Alpha 0.0.02
             </div>
 
         </section>
@@ -1250,7 +1288,9 @@ function renderSubjectCards(
 }
 
 
-function searchSubjects(query) {
+function searchSubjects(
+    query
+) {
 
     document.getElementById(
         "subjectGrid"
@@ -1361,8 +1401,14 @@ function showMathematicsCategories() {
             .mathematics || {};
 
 
-    const categoryKeys =
-        Object.keys(categories);
+    /*
+       Only display the two categories we want.
+    */
+
+    const categoryKeys = [
+        "pure",
+        "statistics-mechanics"
+    ];
 
 
     app.innerHTML = `
@@ -1389,96 +1435,55 @@ function showMathematicsCategories() {
 
         <div class="category-grid">
 
-            ${
-                categoryKeys
-                    .map(
-                        key => {
+            ${categoryKeys.map(
+                key => {
 
-                            let name =
-                                key
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                key.slice(1);
+                    const category =
+                        mathematicsCategories[key];
 
 
-                            let icon =
-                                "📁";
+                    const hasPapers =
+                        Boolean(
+                            categories[key]
+                        );
 
 
-                            if (
-                                key ===
-                                "pure"
-                            ) {
+                    return `
 
-                                name =
-                                    "Pure Mathematics";
+                        <div
+                            class="category-card"
+                            onclick="${
+                                hasPapers
+                                ? `showMathCategory('${key}')`
+                                : ""
+                            }"
+                            style="${
+                                hasPapers
+                                ? ""
+                                : "opacity:0.55; cursor:default;"
+                            }"
+                        >
 
-                                icon =
-                                    "📐";
+                            <div class="category-icon">
+                                ${category.icon}
+                            </div>
 
-                            }
+                            <h3>
+                                ${category.name}
+                            </h3>
 
+                            <p>
+                                ${category.description}
+                            </p>
 
-                            if (
-                                key ===
-                                "statistics"
-                            ) {
+                        </div>
 
-                                name =
-                                    "Statistics";
+                    `;
 
-                                icon =
-                                    "📊";
-
-                            }
-
-
-                            return `
-
-                                <div
-                                    class="category-card"
-                                    onclick="showMathCategory(
-                                        '${key}'
-                                    )"
-                                >
-
-                                    <div class="category-icon">
-                                        ${icon}
-                                    </div>
-
-                                    <h3>
-                                        ${name}
-                                    </h3>
-
-                                    <p>
-                                        Browse
-                                        ${name.toLowerCase()}
-                                        papers.
-                                    </p>
-
-                                </div>
-
-                            `;
-
-                        }
-                    )
-                    .join("")
-            }
+                }
+            ).join("")}
 
         </div>
-
-
-        ${
-            categoryKeys.length === 0
-                ? `
-                    <div class="empty">
-
-                        No Mathematics papers were detected.
-
-                    </div>
-                `
-                : ""
-        }
 
     `;
 
@@ -1496,16 +1501,22 @@ function showMathCategory(
     const data =
         paperDatabase
             .mathematics
-            [categoryKey];
+            ?.[
+                categoryKey
+            ];
 
 
     if (!data) {
 
-        showMathematicsCategories();
-
         return;
 
     }
+
+
+    const category =
+        mathematicsCategories[
+            categoryKey
+        ];
 
 
     const years =
@@ -1515,32 +1526,6 @@ function showMathCategory(
                     Number(b) -
                     Number(a)
             );
-
-
-    let categoryName =
-        categoryKey;
-
-
-    if (
-        categoryKey ===
-        "pure"
-    ) {
-
-        categoryName =
-            "Pure Mathematics";
-
-    }
-
-
-    if (
-        categoryKey ===
-        "statistics"
-    ) {
-
-        categoryName =
-            "Statistics";
-
-    }
 
 
     const app =
@@ -1559,7 +1544,7 @@ function showMathCategory(
             </button>
 
             <h1>
-                ${categoryName}
+                ${category.name}
             </h1>
 
             <p>
@@ -1604,7 +1589,8 @@ function showMathCategory(
 
             ${renderYears(
                 data,
-                categoryKey
+                categoryKey,
+                "mathematics"
             )}
 
         </div>
@@ -1707,7 +1693,8 @@ function showNormalSubject(
 
                         ${renderYears(
                             data,
-                            null
+                            null,
+                            subjectKey
                         )}
 
                     </div>
@@ -1734,7 +1721,8 @@ function showNormalSubject(
 
 function renderYears(
     data,
-    categoryKey
+    categoryKey,
+    subjectKey
 ) {
 
     const years =
@@ -1777,10 +1765,10 @@ function renderYears(
                                         <div
                                             class="session-card"
                                             onclick='openSession(
+                                                "${subjectKey}",
                                                 "${categoryKey || ""}",
                                                 "${year}",
-                                                "${folder}",
-                                                "${categoryKey ? "mathematics" : "normal"}"
+                                                "${folder}"
                                             )'
                                         >
 
@@ -1848,23 +1836,19 @@ function renderYears(
    ============================================================ */
 
 function openSession(
+    subjectKey,
     categoryKey,
     year,
-    folder,
-    type
+    folder
 ) {
 
     let session;
-    let subjectKey;
 
 
     if (
-        type === "mathematics"
+        subjectKey ===
+        "mathematics"
     ) {
-
-        subjectKey =
-            "mathematics";
-
 
         session =
             paperDatabase
@@ -1877,55 +1861,17 @@ function openSession(
 
     else {
 
-        /*
-           Find the normal subject that contains
-           this year/session.
-        */
-
-        for (
-            const key of Object.keys(
-                paperDatabase
-            )
-        ) {
-
-            if (
-                key ===
-                "mathematics"
-            ) {
-                continue;
-            }
-
-
-            if (
-                paperDatabase[key]
+        session =
+            paperDatabase
+                [subjectKey]
                 [year]
-                ?.[folder]
-            ) {
-
-                subjectKey =
-                    key;
-
-                session =
-                    paperDatabase[key]
-                        [year]
-                        [folder];
-
-                break;
-
-            }
-
-        }
+                [folder];
 
     }
 
 
-    if (
-        !session ||
-        !subjectKey
-    ) {
-
+    if (!session) {
         return;
-
     }
 
 
@@ -2002,6 +1948,24 @@ function renderSession(
     }
 
 
+    let categoryText = "";
+
+
+    if (
+        subjectKey ===
+        "mathematics"
+    ) {
+
+        categoryText =
+            categoryKey === "pure"
+                ? " · Pure"
+                : categoryKey === "statistics-mechanics"
+                    ? " · Statistics / Mechanics"
+                    : "";
+
+    }
+
+
     const app =
         document.getElementById("app");
 
@@ -2024,22 +1988,7 @@ function renderSession(
             <p>
                 ${subject.name}
                 ${subject.code}
-
-                ${
-                    subjectKey ===
-                    "mathematics"
-
-                        ? ` · ${
-                            categoryKey === "pure"
-                                ? "Pure Mathematics"
-                                : categoryKey === "statistics"
-                                    ? "Statistics"
-                                    : categoryKey
-                        }`
-
-                        : ""
-                }
-
+                ${categoryText}
             </p>
 
         </div>
@@ -2098,7 +2047,6 @@ function renderPaper(
                 <h3>
                     Paper ${paper.paper}
                 </h3>
-
 
                 <div class="paper-code">
                     ${paperCode}
@@ -2320,8 +2268,8 @@ function showError(
                 Could not load the papers.
             </strong>
 
-            Make sure the GitHub repository is public
-            and the files are inside the
+            Make sure the GitHub repository is
+            public and the files are inside the
             <strong>papers</strong> folder.
 
             <br><br>
