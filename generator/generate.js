@@ -821,18 +821,19 @@ main {
 /* ---------------- PAPER STATUS ---------------- */
 
 .paper-status {
-    width: 42px;
     height: 42px;
+    padding: 0 13px;
     border: 1px solid var(--border);
     border-radius: 9px;
     background: #fff0f0;
     color: #d94a4a;
-    font-size: 21px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 7px;
     transition: 0.15s ease;
     flex-shrink: 0;
 }
@@ -1013,15 +1014,18 @@ function renderPaperStatus(button, status) {
         "completed"
     );
 
-
     if (status === "completed") {
 
         button.classList.add(
             "completed"
         );
 
-        button.textContent = "✓";
-        button.title = "Completed";
+        button.innerHTML =
+            "✓ Completed";
+
+        button.title =
+            "Click to mark as incomplete";
+
         button.setAttribute(
             "aria-label",
             "Mark paper as incomplete"
@@ -1029,15 +1033,18 @@ function renderPaperStatus(button, status) {
 
     } else {
 
-        button.textContent = "✕";
-        button.title = "Not completed";
+        button.innerHTML =
+            "☐ Mark as completed";
+
+        button.title =
+            "Click to mark as completed";
+
         button.setAttribute(
             "aria-label",
             "Mark paper as completed"
         );
 
     }
-
 }
 
 
@@ -1658,8 +1665,8 @@ function generateSessionPage(
                                         togglePaperStatus(this);
                                     "
                                 >
-                                    ✕
-                                </button>
+                                ☐ Mark as completed
+                            </button>
 
 
                                 ${
