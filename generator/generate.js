@@ -1219,16 +1219,59 @@ function generateCategoryPage(
                     Number(a)
             )
             .map(
-                year => `
+                year => {
 
-                    <a
-                        class="year-link"
-                        href="${year}/"
-                    >
-                        ${year}
-                    </a>
+                    const totalPapers =
+                        Object.values(years[year])
+                            .reduce(
+                                (total, session) =>
+                                    total +
+                                    Object.keys(session.papers).length,
+                                0
+                            );
 
-                `
+                    const sessionsCount =
+                        Object.keys(years[year]).length;
+
+                    return `
+
+                        <a
+                            class="year-link"
+                            href="${year}/"
+                        >
+
+                            <div class="year-link-left">
+
+                                <div class="year-link-icon">
+                                    📅
+                                </div>
+
+                                <div class="year-link-info">
+
+                                    <strong>
+                                        ${year}
+                                    </strong>
+
+                                    <div class="year-link-meta">
+                                        ${totalPapers}
+                                        paper${totalPapers !== 1 ? "s" : ""}
+                                        ·
+                                        ${sessionsCount}
+                                        session${sessionsCount !== 1 ? "s" : ""}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="year-link-arrow">
+                                →
+                            </div>
+
+                        </a>
+
+                    `;
+                }
             )
             .join("");
 
