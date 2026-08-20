@@ -1,0 +1,42 @@
+{
+  "mathematics": {
+    "name": "Mathematics",
+    "code": "9709",
+    "icon": "📐",
+    "description": "AS & A Level Mathematics past papers.",
+    "years": {
+      "2025": {
+        "May / June": {
+          "sessionCode": "s25",
+          "papers": [
+            "11"
+          ]
+        }
+      }
+    }
+  },
+
+  "physics": {
+    "name": "Physics",
+    "code": "9702",
+    "icon": "⚛️",
+    "description": "AS & A Level Physics past papers.",
+    "years": {}
+  },
+
+  "chemistry": {
+    "name": "Chemistry",
+    "code": "9701",
+    "icon": "🧪",
+    "description": "AS & A Level Chemistry past papers.",
+    "years": {}
+  },
+
+  "biology": {
+    "name": "Biology",
+    "code": "9700",
+    "icon": "🧬",
+    "description": "AS & A Level Biology past papers.",
+    "years": {}
+  }
+}
