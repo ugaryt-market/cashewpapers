@@ -610,10 +610,16 @@ main {
     padding: 24px;
     box-shadow: var(--shadow);
     transition: 0.2s ease;
+
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+
     min-height: 104px;
+
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
 }
 
 .year-link:hover {
