@@ -424,6 +424,16 @@
             margin-top: 5px;
         }
 
+        /* NEW:
+           Filename/code shown underneath each paper */
+        .paper-code {
+            color: var(--muted);
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
         .paper-actions {
             display: flex;
             gap: 8px;
@@ -491,9 +501,15 @@
             line-height: 1.6;
         }
 
-        .error-message strong {
-            display: block;
-            margin-bottom: 8px;
+        .debug-box {
+            margin-top: 20px;
+            background: #f5f6fa;
+            border-radius: 12px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            text-align: left;
         }
 
         /* ---------------- FOOTER ---------------- */
@@ -593,75 +609,46 @@ const subjects = {
         name: "Mathematics",
         code: "9709",
         icon: "📐",
-        description: "AS & A Level Mathematics past papers.",
-        hasCategories: true
+        description: "AS & A Level Mathematics past papers."
     },
 
     physics: {
         name: "Physics",
         code: "9702",
         icon: "⚛️",
-        description: "AS & A Level Physics past papers.",
-        hasCategories: false
+        description: "AS & A Level Physics past papers."
     },
 
     chemistry: {
         name: "Chemistry",
         code: "9701",
         icon: "🧪",
-        description: "AS & A Level Chemistry past papers.",
-        hasCategories: false
+        description: "AS & A Level Chemistry past papers."
     },
 
     biology: {
         name: "Biology",
         code: "9700",
         icon: "🧬",
-        description: "AS & A Level Biology past papers.",
-        hasCategories: false
+        description: "AS & A Level Biology past papers."
     }
 
 };
 
 
 /* ============================================================
-   MATHEMATICS CATEGORIES
+   DATABASE
    ============================================================ */
 
-const mathematicsCategories = {
-
-    pure: {
-        name: "Pure Mathematics",
-        icon: "📐",
-        description: "Pure Mathematics papers and mark schemes."
-    },
-
-    statistics: {
-        name: "Statistics",
-        icon: "📊",
-        description: "Statistics papers and mark schemes."
-    }
-
-};
-
-
-/* ============================================================
-   PAPER DATABASE
-   ============================================================ */
-
-let repositoryFiles = null;
+let repositoryFiles = [];
 let paperDatabase = {};
 
 
 /* ============================================================
-   LOAD GITHUB REPOSITORY
+   LOAD REPOSITORY
    ============================================================ */
 
 async function loadRepositoryFiles() {
-
-    if (repositoryFiles) {
-        return repositoryFiles;
-    }
 
     const response = await fetch(
         GITHUB_TREE_URL,
@@ -671,38 +658,39 @@ async function loadRepositoryFiles() {
     );
 
     if (!response.ok) {
-
         throw new Error(
             `GitHub returned ${response.status}`
         );
-
     }
 
     const data = await response.json();
 
-    if (data.truncated) {
-
+    if (!data.tree) {
         throw new Error(
-            "The repository contains too many files for the GitHub tree scanner."
+            "GitHub did not return a repository tree."
         );
-
     }
 
     repositoryFiles = data.tree.filter(
         item =>
             item.type === "blob" &&
-            item.path.toLowerCase().startsWith("papers/") &&
-            item.path.toLowerCase().endsWith(".pdf")
+            /^papers\//i.test(item.path) &&
+            /\.pdf$/i.test(item.path)
+    );
+
+    console.log(
+        "PDFs detected:",
+        repositoryFiles.map(
+            file => file.path
+        )
     );
 
     buildPaperDatabase();
-
-    return repositoryFiles;
 }
 
 
 /* ============================================================
-   PARSE PAPER FILENAME
+   PARSE FILENAMES
    ============================================================ */
 
 function parseFilename(filename) {
@@ -719,40 +707,9 @@ function parseFilename(filename) {
         code: match[1],
         sessionCode: match[2].toLowerCase(),
         type: match[3].toLowerCase(),
-        paper: match[4]
+        paper: match[4],
+        filename: filename
     };
-}
-
-
-/* ============================================================
-   SESSION NAME
-   ============================================================ */
-
-function sessionName(sessionCode) {
-
-    if (!sessionCode) {
-        return "Unknown Session";
-    }
-
-    const type =
-        sessionCode[0].toLowerCase();
-
-    const year =
-        `20${sessionCode.substring(1)}`;
-
-    if (type === "s") {
-        return `May / June ${year}`;
-    }
-
-    if (type === "w") {
-        return `October / November ${year}`;
-    }
-
-    if (type === "m") {
-        return `March ${year}`;
-    }
-
-    return sessionCode.toUpperCase();
 }
 
 
@@ -760,39 +717,32 @@ function sessionName(sessionCode) {
    BUILD DATABASE
    ============================================================ */
 
-/*
-   Non-Mathematics:
-
-   papers/physics/2025/mj/file.pdf
-
-   Mathematics:
-
-   papers/mathematics/pure/2025/mj/file.pdf
-   papers/mathematics/statistics/2025/mj/file.pdf
-*/
-
 function buildPaperDatabase() {
 
     paperDatabase = {};
+
 
     for (const file of repositoryFiles) {
 
         const parts =
             file.path.split("/");
 
+
         if (parts.length < 5) {
             continue;
         }
 
 
-        const subjectKey = parts[1];
+        const subjectKey =
+            parts[1].toLowerCase();
+
 
         if (!subjects[subjectKey]) {
             continue;
         }
 
 
-        let category = null;
+        let categoryKey = null;
         let year;
         let folder;
         let filename;
@@ -806,10 +756,18 @@ function buildPaperDatabase() {
                 continue;
             }
 
-            category = parts[2];
-            year = parts[3];
-            folder = parts[4];
-            filename = parts[5];
+
+            categoryKey =
+                parts[2].toLowerCase();
+
+            year =
+                parts[3];
+
+            folder =
+                parts[4];
+
+            filename =
+                parts.slice(5).join("/");
 
         }
 
@@ -818,9 +776,14 @@ function buildPaperDatabase() {
 
         else {
 
-            year = parts[2];
-            folder = parts[3];
-            filename = parts[4];
+            year =
+                parts[2];
+
+            folder =
+                parts[3];
+
+            filename =
+                parts.slice(4).join("/");
 
         }
 
@@ -842,40 +805,56 @@ function buildPaperDatabase() {
         }
 
 
-        if (!paperDatabase[subjectKey]) {
-            paperDatabase[subjectKey] = {};
-        }
-
-
-        /*
-           Mathematics:
-           subject → category → year → session
-
-           Others:
-           subject → year → session
-        */
-
-        if (subjectKey === "mathematics") {
-
-            if (!paperDatabase[subjectKey][category]) {
-                paperDatabase[subjectKey][category] = {};
-            }
+        if (
+            subjectKey === "mathematics"
+        ) {
 
             if (
-                !paperDatabase[subjectKey][category][year]
+                !paperDatabase.mathematics
             ) {
-                paperDatabase[subjectKey][category][year] = {};
+                paperDatabase.mathematics = {};
             }
 
+
             if (
-                !paperDatabase[subjectKey]
-                    [category]
+                !paperDatabase
+                    .mathematics
+                    [categoryKey]
+            ) {
+
+                paperDatabase
+                    .mathematics
+                    [categoryKey] = {};
+
+            }
+
+
+            if (
+                !paperDatabase
+                    .mathematics
+                    [categoryKey]
+                    [year]
+            ) {
+
+                paperDatabase
+                    .mathematics
+                    [categoryKey]
+                    [year] = {};
+
+            }
+
+
+            if (
+                !paperDatabase
+                    .mathematics
+                    [categoryKey]
                     [year]
                     [folder]
             ) {
 
-                paperDatabase[subjectKey]
-                    [category]
+                paperDatabase
+                    .mathematics
+                    [categoryKey]
                     [year]
                     [folder] = {
 
@@ -888,12 +867,16 @@ function buildPaperDatabase() {
 
             }
 
-            addPaperToSession(
-                paperDatabase[subjectKey]
-                    [category]
+
+            addPaper(
+                paperDatabase
+                    .mathematics
+                    [categoryKey]
                     [year]
                     [folder],
+
                 parsed,
+
                 file.path
             );
 
@@ -902,17 +885,39 @@ function buildPaperDatabase() {
 
         else {
 
-            if (!paperDatabase[subjectKey][year]) {
-                paperDatabase[subjectKey][year] = {};
-            }
-
             if (
                 !paperDatabase[subjectKey]
+            ) {
+
+                paperDatabase[
+                    subjectKey
+                ] = {};
+
+            }
+
+
+            if (
+                !paperDatabase
+                    [subjectKey]
+                    [year]
+            ) {
+
+                paperDatabase
+                    [subjectKey]
+                    [year] = {};
+
+            }
+
+
+            if (
+                !paperDatabase
+                    [subjectKey]
                     [year]
                     [folder]
             ) {
 
-                paperDatabase[subjectKey]
+                paperDatabase
+                    [subjectKey]
                     [year]
                     [folder] = {
 
@@ -925,11 +930,15 @@ function buildPaperDatabase() {
 
             }
 
-            addPaperToSession(
-                paperDatabase[subjectKey]
+
+            addPaper(
+                paperDatabase
+                    [subjectKey]
                     [year]
                     [folder],
+
                 parsed,
+
                 file.path
             );
 
@@ -937,14 +946,20 @@ function buildPaperDatabase() {
 
     }
 
+
+    console.log(
+        "Paper database:",
+        paperDatabase
+    );
+
 }
 
 
 /* ============================================================
-   ADD PAPER TO SESSION
+   ADD PAPER
    ============================================================ */
 
-function addPaperToSession(
+function addPaper(
     session,
     parsed,
     path
@@ -952,53 +967,150 @@ function addPaperToSession(
 
     if (!session.papers[parsed.paper]) {
 
-        session.papers[parsed.paper] = {
+        session.papers[
+            parsed.paper
+        ] = {
 
             paper: parsed.paper,
+
             question: null,
+
             markScheme: null,
+
             examinerReport: null,
-            insert: null
+
+            insert: null,
+
+            questionFilename: null,
+
+            markSchemeFilename: null
 
         };
 
     }
 
 
-    if (parsed.type === "qp") {
-
+    const paper =
         session.papers[
             parsed.paper
-        ].question = path;
+        ];
+
+
+    if (parsed.type === "qp") {
+
+        paper.question =
+            path;
+
+        paper.questionFilename =
+            parsed.filename;
 
     }
 
 
     if (parsed.type === "ms") {
 
-        session.papers[
-            parsed.paper
-        ].markScheme = path;
+        paper.markScheme =
+            path;
+
+        paper.markSchemeFilename =
+            parsed.filename;
 
     }
 
 
     if (parsed.type === "er") {
 
-        session.papers[
-            parsed.paper
-        ].examinerReport = path;
+        paper.examinerReport =
+            path;
 
     }
 
 
     if (parsed.type === "in") {
 
-        session.papers[
-            parsed.paper
-        ].insert = path;
+        paper.insert =
+            path;
 
     }
+
+}
+
+
+/* ============================================================
+   GET DISPLAY CODE
+   ============================================================ */
+
+/*
+    For example:
+
+    9709_s25_qp_11.pdf
+              ↓
+    9709_s25_qp_11
+*/
+
+function getPaperCode(paper) {
+
+    if (paper.questionFilename) {
+
+        return paper.questionFilename
+            .replace(
+                /\.pdf$/i,
+                ""
+            );
+
+    }
+
+
+    if (paper.markSchemeFilename) {
+
+        return paper.markSchemeFilename
+            .replace(
+                /\.pdf$/i,
+                ""
+            );
+
+    }
+
+
+    return `Paper ${paper.paper}`;
+
+}
+
+
+/* ============================================================
+   SESSION NAME
+   ============================================================ */
+
+function sessionName(
+    sessionCode
+) {
+
+    const code =
+        sessionCode.toLowerCase();
+
+    const type =
+        code[0];
+
+    const year =
+        `20${code.substring(1)}`;
+
+
+    if (type === "s") {
+        return `May / June ${year}`;
+    }
+
+
+    if (type === "w") {
+        return `October / November ${year}`;
+    }
+
+
+    if (type === "m") {
+        return `March ${year}`;
+    }
+
+
+    return code.toUpperCase();
 
 }
 
@@ -1011,6 +1123,7 @@ function showHome() {
 
     const app =
         document.getElementById("app");
+
 
     app.innerHTML = `
 
@@ -1026,7 +1139,7 @@ function showHome() {
             </p>
 
             <div class="version">
-                Version Alpha 0.0.03
+                Version Alpha 0.0.01
             </div>
 
         </section>
@@ -1041,7 +1154,6 @@ function showHome() {
                 </div>
 
                 <input
-                    id="homeSearch"
                     type="text"
                     placeholder="Search subjects..."
                     oninput="searchSubjects(this.value)"
@@ -1081,58 +1193,58 @@ function showHome() {
    SUBJECT CARDS
    ============================================================ */
 
-function renderSubjectCards(filter = "") {
+function renderSubjectCards(
+    filter = ""
+) {
 
     const query =
         filter.toLowerCase().trim();
 
-    return Object.entries(subjects)
-        .filter(([key, subject]) => {
 
-            return (
+    return Object.entries(subjects)
+        .filter(
+            ([key, subject]) =>
                 subject.name
                     .toLowerCase()
                     .includes(query) ||
+                subject.code.includes(query)
+        )
+        .map(
+            ([key, subject]) => `
 
-                subject.code
-                    .includes(query)
-            );
+                <div
+                    class="subject-card"
+                    onclick="showSubject('${key}')"
+                >
 
-        })
-        .map(([key, subject]) => `
+                    <div class="subject-top">
 
-            <div
-                class="subject-card"
-                onclick="showSubject('${key}')"
-            >
+                        <div class="subject-icon">
+                            ${subject.icon}
+                        </div>
 
-                <div class="subject-top">
+                        <div class="arrow">
+                            →
+                        </div>
 
-                    <div class="subject-icon">
-                        ${subject.icon}
                     </div>
 
-                    <div class="arrow">
-                        →
+                    <h3>
+                        ${subject.name}
+                    </h3>
+
+                    <div class="subject-code">
+                        Cambridge ${subject.code}
+                    </div>
+
+                    <div class="subject-description">
+                        ${subject.description}
                     </div>
 
                 </div>
 
-                <h3>
-                    ${subject.name}
-                </h3>
-
-                <div class="subject-code">
-                    Cambridge ${subject.code}
-                </div>
-
-                <div class="subject-description">
-                    ${subject.description}
-                </div>
-
-            </div>
-
-        `)
+            `
+        )
         .join("");
 
 }
@@ -1152,10 +1264,13 @@ function searchSubjects(query) {
    SUBJECT PAGE
    ============================================================ */
 
-async function showSubject(subjectKey) {
+async function showSubject(
+    subjectKey
+) {
 
     const subject =
         subjects[subjectKey];
+
 
     const app =
         document.getElementById("app");
@@ -1173,7 +1288,8 @@ async function showSubject(subjectKey) {
             </button>
 
             <h1>
-                ${subject.name} ${subject.code}
+                ${subject.name}
+                ${subject.code}
             </h1>
 
             <p>
@@ -1199,28 +1315,28 @@ async function showSubject(subjectKey) {
         await loadRepositoryFiles();
 
 
-        /*
-           Mathematics gets a category page.
-        */
-
-        if (subjectKey === "mathematics") {
+        if (
+            subjectKey ===
+            "mathematics"
+        ) {
 
             showMathematicsCategories();
 
-            return;
+        }
+
+        else {
+
+            showNormalSubject(
+                subjectKey
+            );
 
         }
 
+    }
 
-        /*
-           Other subjects go directly to years.
-        */
+    catch (error) {
 
-        renderSubjectYears(subjectKey);
-
-    } catch (error) {
-
-        showLoadingError(
+        showError(
             subject,
             error
         );
@@ -1231,13 +1347,22 @@ async function showSubject(subjectKey) {
 
 
 /* ============================================================
-   MATHEMATICS CATEGORY PAGE
+   MATHEMATICS CATEGORIES
    ============================================================ */
 
 function showMathematicsCategories() {
 
     const app =
         document.getElementById("app");
+
+
+    const categories =
+        paperDatabase
+            .mathematics || {};
+
+
+    const categoryKeys =
+        Object.keys(categories);
 
 
     app.innerHTML = `
@@ -1264,36 +1389,96 @@ function showMathematicsCategories() {
 
         <div class="category-grid">
 
-            ${Object.entries(
-                mathematicsCategories
-            ).map(
-                ([categoryKey, category]) => `
+            ${
+                categoryKeys
+                    .map(
+                        key => {
 
-                    <div
-                        class="category-card"
-                        onclick="showMathematicsCategory(
-                            '${categoryKey}'
-                        )"
-                    >
+                            let name =
+                                key
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                key.slice(1);
 
-                        <div class="category-icon">
-                            ${category.icon}
-                        </div>
 
-                        <h3>
-                            ${category.name}
-                        </h3>
+                            let icon =
+                                "📁";
 
-                        <p>
-                            ${category.description}
-                        </p>
 
-                    </div>
+                            if (
+                                key ===
+                                "pure"
+                            ) {
 
-                `
-            ).join("")}
+                                name =
+                                    "Pure Mathematics";
+
+                                icon =
+                                    "📐";
+
+                            }
+
+
+                            if (
+                                key ===
+                                "statistics"
+                            ) {
+
+                                name =
+                                    "Statistics";
+
+                                icon =
+                                    "📊";
+
+                            }
+
+
+                            return `
+
+                                <div
+                                    class="category-card"
+                                    onclick="showMathCategory(
+                                        '${key}'
+                                    )"
+                                >
+
+                                    <div class="category-icon">
+                                        ${icon}
+                                    </div>
+
+                                    <h3>
+                                        ${name}
+                                    </h3>
+
+                                    <p>
+                                        Browse
+                                        ${name.toLowerCase()}
+                                        papers.
+                                    </p>
+
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("")
+            }
 
         </div>
+
+
+        ${
+            categoryKeys.length === 0
+                ? `
+                    <div class="empty">
+
+                        No Mathematics papers were detected.
+
+                    </div>
+                `
+                : ""
+        }
 
     `;
 
@@ -1304,48 +1489,62 @@ function showMathematicsCategories() {
    MATHEMATICS CATEGORY
    ============================================================ */
 
-function showMathematicsCategory(
+function showMathCategory(
     categoryKey
 ) {
 
-    const category =
-        mathematicsCategories[categoryKey];
-
-
-    renderCategoryYears(
-        categoryKey,
-        category
-    );
-
-}
-
-
-/* ============================================================
-   RENDER MATHEMATICS YEARS
-   ============================================================ */
-
-function renderCategoryYears(
-    categoryKey,
-    category
-) {
-
-    const app =
-        document.getElementById("app");
-
-
-    const categoryData =
+    const data =
         paperDatabase
-            .mathematics?.[
-                categoryKey
-            ] || {};
+            .mathematics
+            [categoryKey];
+
+
+    if (!data) {
+
+        showMathematicsCategories();
+
+        return;
+
+    }
 
 
     const years =
-        Object.keys(categoryData)
+        Object.keys(data)
             .sort(
                 (a, b) =>
-                    Number(b) - Number(a)
+                    Number(b) -
+                    Number(a)
             );
+
+
+    let categoryName =
+        categoryKey;
+
+
+    if (
+        categoryKey ===
+        "pure"
+    ) {
+
+        categoryName =
+            "Pure Mathematics";
+
+    }
+
+
+    if (
+        categoryKey ===
+        "statistics"
+    ) {
+
+        categoryName =
+            "Statistics";
+
+    }
+
+
+    const app =
+        document.getElementById("app");
 
 
     app.innerHTML = `
@@ -1360,7 +1559,7 @@ function renderCategoryYears(
             </button>
 
             <h1>
-                ${category.name}
+                ${categoryName}
             </h1>
 
             <p>
@@ -1370,58 +1569,45 @@ function renderCategoryYears(
         </div>
 
 
-        ${
-            years.length
-            ? `
+        <div class="filters">
 
-                <div class="filters">
+            <button
+                class="filter-btn active"
+                onclick="filterYears(
+                    this,
+                    'all'
+                )"
+            >
+                All Years
+            </button>
+
+            ${years.map(
+                year => `
 
                     <button
-                        class="filter-btn active"
+                        class="filter-btn"
                         onclick="filterYears(
                             this,
-                            'all'
+                            '${year}'
                         )"
                     >
-                        All Years
+                        ${year}
                     </button>
 
-                    ${years.map(year => `
+                `
+            ).join("")}
 
-                        <button
-                            class="filter-btn"
-                            onclick="filterYears(
-                                this,
-                                '${year}'
-                            )"
-                        >
-                            ${year}
-                        </button>
-
-                    `).join("")}
-
-                </div>
+        </div>
 
 
-                <div id="yearContainer">
+        <div id="yearContainer">
 
-                    ${renderYearSections(
-                        "mathematics",
-                        categoryKey,
-                        years
-                    )}
+            ${renderYears(
+                data,
+                categoryKey
+            )}
 
-                </div>
-
-            `
-            : `
-
-                <div class="empty">
-                    No papers have been added yet.
-                </div>
-
-            `
-        }
+        </div>
 
     `;
 
@@ -1429,18 +1615,29 @@ function renderCategoryYears(
 
 
 /* ============================================================
-   RENDER NORMAL SUBJECT YEARS
+   NORMAL SUBJECT
    ============================================================ */
 
-function renderSubjectYears(subjectKey) {
+function showNormalSubject(
+    subjectKey
+) {
+
+    const data =
+        paperDatabase
+            [subjectKey] || {};
+
+
+    const years =
+        Object.keys(data)
+            .sort(
+                (a, b) =>
+                    Number(b) -
+                    Number(a)
+            );
+
 
     const subject =
         subjects[subjectKey];
-
-    const years =
-        getSubjectYears(
-            subjectKey
-        );
 
 
     const app =
@@ -1459,7 +1656,8 @@ function renderSubjectYears(subjectKey) {
             </button>
 
             <h1>
-                ${subject.name} ${subject.code}
+                ${subject.name}
+                ${subject.code}
             </h1>
 
             <p>
@@ -1471,55 +1669,58 @@ function renderSubjectYears(subjectKey) {
 
         ${
             years.length
-            ? `
 
-                <div class="filters">
+                ? `
 
-                    <button
-                        class="filter-btn active"
-                        onclick="filterYears(
-                            this,
-                            'all'
-                        )"
-                    >
-                        All Years
-                    </button>
-
-                    ${years.map(year => `
+                    <div class="filters">
 
                         <button
-                            class="filter-btn"
+                            class="filter-btn active"
                             onclick="filterYears(
                                 this,
-                                '${year}'
+                                'all'
                             )"
                         >
-                            ${year}
+                            All Years
                         </button>
 
-                    `).join("")}
+                        ${years.map(
+                            year => `
 
-                </div>
+                                <button
+                                    class="filter-btn"
+                                    onclick="filterYears(
+                                        this,
+                                        '${year}'
+                                    )"
+                                >
+                                    ${year}
+                                </button>
+
+                            `
+                        ).join("")}
+
+                    </div>
 
 
-                <div id="yearContainer">
+                    <div id="yearContainer">
 
-                    ${renderYearSections(
-                        subjectKey,
-                        null,
-                        years
-                    )}
+                        ${renderYears(
+                            data,
+                            null
+                        )}
 
-                </div>
+                    </div>
 
-            `
-            : `
+                `
 
-                <div class="empty">
-                    No papers have been added yet.
-                </div>
+                : `
 
-            `
+                    <div class="empty">
+                        No papers have been added yet.
+                    </div>
+
+                `
         }
 
     `;
@@ -1528,173 +1729,142 @@ function renderSubjectYears(subjectKey) {
 
 
 /* ============================================================
-   GET YEARS
+   RENDER YEARS
    ============================================================ */
 
-function getSubjectYears(
-    subjectKey
+function renderYears(
+    data,
+    categoryKey
 ) {
 
-    const data =
-        paperDatabase[subjectKey] || {};
-
-    return Object.keys(data)
-        .sort(
-            (a, b) =>
-                Number(b) - Number(a)
-        );
-
-}
+    const years =
+        Object.keys(data)
+            .sort(
+                (a, b) =>
+                    Number(b) -
+                    Number(a)
+            );
 
 
-/* ============================================================
-   RENDER YEAR SECTIONS
-   ============================================================ */
+    return years
+        .map(
+            year => {
 
-function renderYearSections(
-    subjectKey,
-    categoryKey,
-    years
-) {
+                const sessions =
+                    Object.entries(
+                        data[year]
+                    );
 
-    return years.map(
-        year => {
 
-            let data;
+                return `
 
-            if (subjectKey === "mathematics") {
+                    <section
+                        class="year-section"
+                        data-year="${year}"
+                    >
 
-                data =
-                    paperDatabase
-                        .mathematics
-                        [categoryKey]
-                        [year];
+                        <h2 class="year-title">
+                            ${year}
+                        </h2>
 
-            } else {
 
-                data =
-                    paperDatabase
-                        [subjectKey]
-                        [year];
+                        <div class="session-list">
+
+                            ${sessions
+                                .map(
+                                    ([folder, session]) => `
+
+                                        <div
+                                            class="session-card"
+                                            onclick='openSession(
+                                                "${categoryKey || ""}",
+                                                "${year}",
+                                                "${folder}",
+                                                "${categoryKey ? "mathematics" : "normal"}"
+                                            )'
+                                        >
+
+                                            <div class="session-left">
+
+                                                <div class="folder-icon">
+                                                    📁
+                                                </div>
+
+                                                <div>
+
+                                                    <div class="session-name">
+                                                        ${sessionName(
+                                                            session.sessionCode
+                                                        )}
+                                                    </div>
+
+                                                    <div class="session-count">
+
+                                                        ${
+                                                            Object.keys(
+                                                                session.papers
+                                                            ).length
+                                                        }
+
+                                                        paper${
+                                                            Object.keys(
+                                                                session.papers
+                                                            ).length !== 1
+                                                                ? "s"
+                                                                : ""
+                                                        }
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="session-arrow">
+                                                →
+                                            </div>
+
+                                        </div>
+
+                                    `
+                                )
+                                .join("")}
+
+                        </div>
+
+                    </section>
+
+                `;
 
             }
-
-
-            const sessions =
-                Object.entries(data || {});
-
-
-            return `
-
-                <section
-                    class="year-section"
-                    data-year="${year}"
-                >
-
-                    <h2 class="year-title">
-                        ${year}
-                    </h2>
-
-
-                    <div class="session-list">
-
-                        ${
-                            sessions.length
-                            ? sessions.map(
-                                ([folder, session]) => `
-
-                                    <div
-                                        class="session-card"
-                                        onclick='showSession(
-                                            "${subjectKey}",
-                                            "${categoryKey || ""}",
-                                            "${year}",
-                                            "${folder}"
-                                        )'
-                                    >
-
-                                        <div class="session-left">
-
-                                            <div class="folder-icon">
-                                                📁
-                                            </div>
-
-                                            <div>
-
-                                                <div class="session-name">
-                                                    ${sessionName(
-                                                        session.sessionCode
-                                                    )}
-                                                </div>
-
-                                                <div class="session-count">
-
-                                                    ${
-                                                        Object.keys(
-                                                            session.papers
-                                                        ).length
-                                                    }
-
-                                                    paper${
-                                                        Object.keys(
-                                                            session.papers
-                                                        ).length !== 1
-                                                            ? "s"
-                                                            : ""
-                                                    }
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                        <div class="session-arrow">
-                                            →
-                                        </div>
-
-                                    </div>
-
-                                `
-                            ).join("")
-                            : `
-                                <div class="empty">
-                                    No papers found for ${year}.
-                                </div>
-                            `
-                        }
-
-                    </div>
-
-                </section>
-
-            `;
-
-        }
-    ).join("");
+        )
+        .join("");
 
 }
 
 
 /* ============================================================
-   SESSION PAGE
+   OPEN SESSION
    ============================================================ */
 
-function showSession(
-    subjectKey,
+function openSession(
     categoryKey,
     year,
-    folder
+    folder,
+    type
 ) {
 
-    const subject =
-        subjects[subjectKey];
-
-
     let session;
+    let subjectKey;
 
 
-    if (subjectKey === "mathematics") {
+    if (
+        type === "mathematics"
+    ) {
+
+        subjectKey =
+            "mathematics";
+
 
         session =
             paperDatabase
@@ -1703,34 +1873,87 @@ function showSession(
                 [year]
                 [folder];
 
-    } else {
+    }
 
-        session =
-            paperDatabase
-                [subjectKey]
+    else {
+
+        /*
+           Find the normal subject that contains
+           this year/session.
+        */
+
+        for (
+            const key of Object.keys(
+                paperDatabase
+            )
+        ) {
+
+            if (
+                key ===
+                "mathematics"
+            ) {
+                continue;
+            }
+
+
+            if (
+                paperDatabase[key]
                 [year]
-                [folder];
+                ?.[folder]
+            ) {
+
+                subjectKey =
+                    key;
+
+                session =
+                    paperDatabase[key]
+                        [year]
+                        [folder];
+
+                break;
+
+            }
+
+        }
 
     }
 
 
-    const app =
-        document.getElementById("app");
-
-
-    if (!session) {
-
-        app.innerHTML = `
-
-            <div class="empty">
-                This session could not be found.
-            </div>
-
-        `;
+    if (
+        !session ||
+        !subjectKey
+    ) {
 
         return;
 
     }
+
+
+    renderSession(
+        subjectKey,
+        categoryKey,
+        year,
+        folder,
+        session
+    );
+
+}
+
+
+/* ============================================================
+   RENDER SESSION
+   ============================================================ */
+
+function renderSession(
+    subjectKey,
+    categoryKey,
+    year,
+    folder,
+    session
+) {
+
+    const subject =
+        subjects[subjectKey];
 
 
     const papers =
@@ -1741,7 +1964,9 @@ function showSession(
                 a.paper.localeCompare(
                     b.paper,
                     undefined,
-                    { numeric: true }
+                    {
+                        numeric: true
+                    }
                 )
         );
 
@@ -1752,17 +1977,42 @@ function showSession(
         );
 
 
+    let backAction;
+
+
+    if (
+        subjectKey ===
+        "mathematics"
+    ) {
+
+        backAction =
+            `showMathCategory(
+                '${categoryKey}'
+            )`;
+
+    }
+
+    else {
+
+        backAction =
+            `showNormalSubject(
+                '${subjectKey}'
+            )`;
+
+    }
+
+
+    const app =
+        document.getElementById("app");
+
+
     app.innerHTML = `
 
         <div class="page-header">
 
             <button
                 class="back-btn"
-                onclick="${
-                    subjectKey === "mathematics"
-                        ? `showMathematicsCategory('${categoryKey}')`
-                        : `showSubject('${subjectKey}')`
-                }"
+                onclick="${backAction}"
             >
                 ← Back
             </button>
@@ -1774,11 +2024,22 @@ function showSession(
             <p>
                 ${subject.name}
                 ${subject.code}
+
                 ${
-                    subjectKey === "mathematics"
-                        ? ` · ${mathematicsCategories[categoryKey].name}`
+                    subjectKey ===
+                    "mathematics"
+
+                        ? ` · ${
+                            categoryKey === "pure"
+                                ? "Pure Mathematics"
+                                : categoryKey === "statistics"
+                                    ? "Statistics"
+                                    : categoryKey
+                        }`
+
                         : ""
                 }
+
             </p>
 
         </div>
@@ -1788,20 +2049,23 @@ function showSession(
 
             ${
                 papers.length
-                ? papers.map(
-                    paper =>
-                        renderPaper(
-                            paper,
-                            subject,
-                            year,
-                            title
+
+                    ? papers
+                        .map(
+                            paper =>
+                                renderPaper(
+                                    paper
+                                )
                         )
-                ).join("")
-                : `
-                    <div class="empty">
-                        No papers found.
-                    </div>
-                `
+                        .join("")
+
+                    : `
+
+                        <div class="empty">
+                            No papers found.
+                        </div>
+
+                    `
             }
 
         </div>
@@ -1812,15 +2076,18 @@ function showSession(
 
 
 /* ============================================================
-   PAPER CARD
+   RENDER PAPER
    ============================================================ */
 
 function renderPaper(
-    paper,
-    subject,
-    year,
-    session
+    paper
 ) {
+
+    const paperCode =
+        getPaperCode(
+            paper
+        );
+
 
     return `
 
@@ -1832,12 +2099,10 @@ function renderPaper(
                     Paper ${paper.paper}
                 </h3>
 
-                <p>
-                    ${subject.name}
-                    ${subject.code}
-                    · ${year}
-                    · ${session}
-                </p>
+
+                <div class="paper-code">
+                    ${paperCode}
+                </div>
 
             </div>
 
@@ -1846,65 +2111,81 @@ function renderPaper(
 
                 ${
                     paper.question
-                    ? `
-                        <button
-                            class="paper-btn primary"
-                            onclick='openPDF(
-                                "${paper.question}"
-                            )'
-                        >
-                            📄 Question Paper
-                        </button>
-                    `
-                    : ""
+
+                        ? `
+
+                            <button
+                                class="paper-btn primary"
+                                onclick='openPDF(
+                                    "${paper.question}"
+                                )'
+                            >
+                                📄 Question Paper
+                            </button>
+
+                        `
+
+                        : ""
                 }
 
 
                 ${
                     paper.markScheme
-                    ? `
-                        <button
-                            class="paper-btn"
-                            onclick='openPDF(
-                                "${paper.markScheme}"
-                            )'
-                        >
-                            ✅ Mark Scheme
-                        </button>
-                    `
-                    : ""
+
+                        ? `
+
+                            <button
+                                class="paper-btn"
+                                onclick='openPDF(
+                                    "${paper.markScheme}"
+                                )'
+                            >
+                                ✅ Mark Scheme
+                            </button>
+
+                        `
+
+                        : ""
                 }
 
 
                 ${
                     paper.examinerReport
-                    ? `
-                        <button
-                            class="paper-btn"
-                            onclick='openPDF(
-                                "${paper.examinerReport}"
-                            )'
-                        >
-                            📋 Examiner Report
-                        </button>
-                    `
-                    : ""
+
+                        ? `
+
+                            <button
+                                class="paper-btn"
+                                onclick='openPDF(
+                                    "${paper.examinerReport}"
+                                )'
+                            >
+                                📋 Examiner Report
+                            </button>
+
+                        `
+
+                        : ""
                 }
 
 
                 ${
                     paper.insert
-                    ? `
-                        <button
-                            class="paper-btn"
-                            onclick='openPDF(
-                                "${paper.insert}"
-                            )'
-                        >
-                            📎 Insert
-                        </button>
-                    `
-                    : ""
+
+                        ? `
+
+                            <button
+                                class="paper-btn"
+                                onclick='openPDF(
+                                    "${paper.insert}"
+                                )'
+                            >
+                                📎 Insert
+                            </button>
+
+                        `
+
+                        : ""
                 }
 
             </div>
@@ -1920,14 +2201,18 @@ function renderPaper(
    OPEN PDF
    ============================================================ */
 
-function openPDF(path) {
+function openPDF(
+    path
+) {
 
     const url =
         `${RAW_BASE}/${path
             .split("/")
             .map(
                 part =>
-                    encodeURIComponent(part)
+                    encodeURIComponent(
+                        part
+                    )
             )
             .join("/")
         }`;
@@ -1951,14 +2236,15 @@ function filterYears(
 ) {
 
     document
-        .querySelectorAll(".filter-btn")
-        .forEach(btn => {
-
-            btn.classList.remove(
-                "active"
-            );
-
-        });
+        .querySelectorAll(
+            ".filter-btn"
+        )
+        .forEach(
+            btn =>
+                btn.classList.remove(
+                    "active"
+                )
+        );
 
 
     button.classList.add(
@@ -1970,33 +2256,38 @@ function filterYears(
         .querySelectorAll(
             ".year-section"
         )
-        .forEach(section => {
+        .forEach(
+            section => {
 
-            if (
-                year === "all" ||
-                section.dataset.year === year
-            ) {
+                if (
+                    year === "all" ||
+                    section.dataset.year ===
+                        year
+                ) {
 
-                section.style.display =
-                    "";
+                    section.style.display =
+                        "";
 
-            } else {
+                }
 
-                section.style.display =
-                    "none";
+                else {
+
+                    section.style.display =
+                        "none";
+
+                }
 
             }
-
-        });
+        );
 
 }
 
 
 /* ============================================================
-   ERROR PAGE
+   ERROR
    ============================================================ */
 
-function showLoadingError(
+function showError(
     subject,
     error
 ) {
@@ -2029,9 +2320,9 @@ function showLoadingError(
                 Could not load the papers.
             </strong>
 
-            Make sure your GitHub repository is
-            public and that the files are inside
-            the <strong>papers</strong> folder.
+            Make sure the GitHub repository is public
+            and the files are inside the
+            <strong>papers</strong> folder.
 
             <br><br>
 
