@@ -9,6 +9,7 @@
     <!-- JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet"
@@ -426,8 +427,6 @@
             font-size: 18px;
         }
 
-        /* Paper filename/code */
-
         .paper-code {
             color: var(--muted);
             font-family: "JetBrains Mono", monospace;
@@ -780,24 +779,46 @@ function buildPaperDatabase() {
             }
 
 
-            categoryKey =
-                parts[2].toLowerCase();
-
             /*
-               Support both:
+                Supported folder names:
 
-               mathematics/statistics/...
-               mathematics/statistics-mechanics/...
+                pure
+                statistics
+                statsmech
+                statistics-mechanics
 
-               Both appear under the same website category.
+                They all map to the same
+                Statistics / Mechanics category.
             */
 
+            categoryKey =
+                parts[2]
+                    .toLowerCase()
+                    .trim();
+
+
             if (
-                categoryKey === "statistics"
+                categoryKey === "statistics" ||
+                categoryKey === "statsmech" ||
+                categoryKey === "stats-mech" ||
+                categoryKey === "statistics-mechanics"
             ) {
+
                 categoryKey =
                     "statistics-mechanics";
+
             }
+
+
+            if (
+                categoryKey === "pure"
+            ) {
+
+                categoryKey =
+                    "pure";
+
+            }
+
 
             year =
                 parts[3];
@@ -844,9 +865,10 @@ function buildPaperDatabase() {
         }
 
 
+        /* ---------------- MATHEMATICS DATABASE ---------------- */
+
         if (
-            subjectKey ===
-            "mathematics"
+            subjectKey === "mathematics"
         ) {
 
             if (
@@ -922,6 +944,8 @@ function buildPaperDatabase() {
 
         }
 
+
+        /* ---------------- NORMAL SUBJECT DATABASE ---------------- */
 
         else {
 
@@ -1005,7 +1029,11 @@ function addPaper(
     path
 ) {
 
-    if (!session.papers[parsed.paper]) {
+    if (
+        !session.papers[
+            parsed.paper
+        ]
+    ) {
 
         session.papers[
             parsed.paper
@@ -1036,7 +1064,9 @@ function addPaper(
         ];
 
 
-    if (parsed.type === "qp") {
+    if (
+        parsed.type === "qp"
+    ) {
 
         paper.question =
             path;
@@ -1047,7 +1077,9 @@ function addPaper(
     }
 
 
-    if (parsed.type === "ms") {
+    if (
+        parsed.type === "ms"
+    ) {
 
         paper.markScheme =
             path;
@@ -1058,7 +1090,9 @@ function addPaper(
     }
 
 
-    if (parsed.type === "er") {
+    if (
+        parsed.type === "er"
+    ) {
 
         paper.examinerReport =
             path;
@@ -1066,7 +1100,9 @@ function addPaper(
     }
 
 
-    if (parsed.type === "in") {
+    if (
+        parsed.type === "in"
+    ) {
 
         paper.insert =
             path;
@@ -1133,18 +1169,30 @@ function sessionName(
         `20${code.substring(1)}`;
 
 
-    if (type === "s") {
+    if (
+        type === "s"
+    ) {
+
         return `May / June ${year}`;
+
     }
 
 
-    if (type === "w") {
+    if (
+        type === "w"
+    ) {
+
         return `October / November ${year}`;
+
     }
 
 
-    if (type === "m") {
+    if (
+        type === "m"
+    ) {
+
         return `March ${year}`;
+
     }
 
 
@@ -1160,7 +1208,9 @@ function sessionName(
 function showHome() {
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     app.innerHTML = `
@@ -1177,7 +1227,7 @@ function showHome() {
             </p>
 
             <div class="version">
-                Version Alpha 0.0.02
+                Version Alpha 0.0.03
             </div>
 
         </section>
@@ -1204,7 +1254,9 @@ function showHome() {
 
         <div class="section-title">
 
-            <h2>Subjects</h2>
+            <h2>
+                Subjects
+            </h2>
 
             <p>
                 Choose a subject to browse past papers.
@@ -1236,28 +1288,39 @@ function renderSubjectCards(
 ) {
 
     const query =
-        filter.toLowerCase().trim();
+        filter
+            .toLowerCase()
+            .trim();
 
 
-    return Object.entries(subjects)
+    return Object.entries(
+        subjects
+    )
         .filter(
             ([key, subject]) =>
                 subject.name
                     .toLowerCase()
                     .includes(query) ||
-                subject.code.includes(query)
+                subject.code
+                    .includes(query)
         )
         .map(
             ([key, subject]) => `
 
                 <div
                     class="subject-card"
-                    onclick="showSubject('${key}')"
+                    onclick="
+                        showSubject(
+                            '${key}'
+                        )
+                    "
                 >
 
                     <div class="subject-top">
 
-                        <div class="subject-icon">
+                        <div
+                            class="subject-icon"
+                        >
                             ${subject.icon}
                         </div>
 
@@ -1275,7 +1338,9 @@ function renderSubjectCards(
                         Cambridge ${subject.code}
                     </div>
 
-                    <div class="subject-description">
+                    <div
+                        class="subject-description"
+                    >
                         ${subject.description}
                     </div>
 
@@ -1295,7 +1360,9 @@ function searchSubjects(
     document.getElementById(
         "subjectGrid"
     ).innerHTML =
-        renderSubjectCards(query);
+        renderSubjectCards(
+            query
+        );
 
 }
 
@@ -1313,7 +1380,9 @@ async function showSubject(
 
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     app.innerHTML = `
@@ -1393,17 +1462,15 @@ async function showSubject(
 function showMathematicsCategories() {
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     const categories =
         paperDatabase
             .mathematics || {};
 
-
-    /*
-       Only display the two categories we want.
-    */
 
     const categoryKeys = [
         "pure",
@@ -1439,12 +1506,16 @@ function showMathematicsCategories() {
                 key => {
 
                     const category =
-                        mathematicsCategories[key];
+                        mathematicsCategories[
+                            key
+                        ];
 
 
                     const hasPapers =
                         Boolean(
-                            categories[key]
+                            categories[
+                                key
+                            ]
                         );
 
 
@@ -1452,19 +1523,29 @@ function showMathematicsCategories() {
 
                         <div
                             class="category-card"
+
                             onclick="${
                                 hasPapers
-                                ? `showMathCategory('${key}')`
+
+                                ? `
+                                    showMathCategory(
+                                        '${key}'
+                                    )
+                                `
+
                                 : ""
                             }"
+
                             style="${
                                 hasPapers
-                                ? ""
-                                : "opacity:0.55; cursor:default;"
+                                    ? ""
+                                    : "opacity:0.55; cursor:default;"
                             }"
                         >
 
-                            <div class="category-icon">
+                            <div
+                                class="category-icon"
+                            >
                                 ${category.icon}
                             </div>
 
@@ -1501,15 +1582,11 @@ function showMathCategory(
     const data =
         paperDatabase
             .mathematics
-            ?.[
-                categoryKey
-            ];
+            ?.[categoryKey];
 
 
     if (!data) {
-
         return;
-
     }
 
 
@@ -1529,7 +1606,9 @@ function showMathCategory(
 
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     app.innerHTML = `
@@ -1538,7 +1617,9 @@ function showMathCategory(
 
             <button
                 class="back-btn"
-                onclick="showMathematicsCategories()"
+                onclick="
+                    showMathematicsCategories()
+                "
             >
                 ← Back to Mathematics
             </button>
@@ -1558,23 +1639,28 @@ function showMathCategory(
 
             <button
                 class="filter-btn active"
-                onclick="filterYears(
-                    this,
-                    'all'
-                )"
+                onclick="
+                    filterYears(
+                        this,
+                        'all'
+                    )
+                "
             >
                 All Years
             </button>
+
 
             ${years.map(
                 year => `
 
                     <button
                         class="filter-btn"
-                        onclick="filterYears(
-                            this,
-                            '${year}'
-                        )"
+                        onclick="
+                            filterYears(
+                                this,
+                                '${year}'
+                            )
+                        "
                     >
                         ${year}
                     </button>
@@ -1609,8 +1695,9 @@ function showNormalSubject(
 ) {
 
     const data =
-        paperDatabase
-            [subjectKey] || {};
+        paperDatabase[
+            subjectKey
+        ] || {};
 
 
     const years =
@@ -1623,11 +1710,15 @@ function showNormalSubject(
 
 
     const subject =
-        subjects[subjectKey];
+        subjects[
+            subjectKey
+        ];
 
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     app.innerHTML = `
@@ -1662,23 +1753,28 @@ function showNormalSubject(
 
                         <button
                             class="filter-btn active"
-                            onclick="filterYears(
-                                this,
-                                'all'
-                            )"
+                            onclick="
+                                filterYears(
+                                    this,
+                                    'all'
+                                )
+                            "
                         >
                             All Years
                         </button>
+
 
                         ${years.map(
                             year => `
 
                                 <button
                                     class="filter-btn"
-                                    onclick="filterYears(
-                                        this,
-                                        '${year}'
-                                    )"
+                                    onclick="
+                                        filterYears(
+                                            this,
+                                            '${year}'
+                                        )
+                                    "
                                 >
                                     ${year}
                                 </button>
@@ -1689,7 +1785,9 @@ function showNormalSubject(
                     </div>
 
 
-                    <div id="yearContainer">
+                    <div
+                        id="yearContainer"
+                    >
 
                         ${renderYears(
                             data,
@@ -1751,12 +1849,16 @@ function renderYears(
                         data-year="${year}"
                     >
 
-                        <h2 class="year-title">
+                        <h2
+                            class="year-title"
+                        >
                             ${year}
                         </h2>
 
 
-                        <div class="session-list">
+                        <div
+                            class="session-list"
+                        >
 
                             ${sessions
                                 .map(
@@ -1764,29 +1866,42 @@ function renderYears(
 
                                         <div
                                             class="session-card"
-                                            onclick='openSession(
-                                                "${subjectKey}",
-                                                "${categoryKey || ""}",
-                                                "${year}",
-                                                "${folder}"
-                                            )'
+
+                                            onclick="
+                                                openSession(
+                                                    '${subjectKey}',
+                                                    '${categoryKey || ""}',
+                                                    '${year}',
+                                                    '${folder}'
+                                                )
+                                            "
                                         >
 
-                                            <div class="session-left">
+                                            <div
+                                                class="session-left"
+                                            >
 
-                                                <div class="folder-icon">
+                                                <div
+                                                    class="folder-icon"
+                                                >
                                                     📁
                                                 </div>
 
+
                                                 <div>
 
-                                                    <div class="session-name">
+                                                    <div
+                                                        class="session-name"
+                                                    >
                                                         ${sessionName(
                                                             session.sessionCode
                                                         )}
                                                     </div>
 
-                                                    <div class="session-count">
+
+                                                    <div
+                                                        class="session-count"
+                                                    >
 
                                                         ${
                                                             Object.keys(
@@ -1808,7 +1923,10 @@ function renderYears(
 
                                             </div>
 
-                                            <div class="session-arrow">
+
+                                            <div
+                                                class="session-arrow"
+                                            >
                                                 →
                                             </div>
 
@@ -1899,7 +2017,9 @@ function renderSession(
 ) {
 
     const subject =
-        subjects[subjectKey];
+        subjects[
+            subjectKey
+        ];
 
 
     const papers =
@@ -1948,7 +2068,8 @@ function renderSession(
     }
 
 
-    let categoryText = "";
+    let categoryText =
+        "";
 
 
     if (
@@ -1958,21 +2079,30 @@ function renderSession(
 
         categoryText =
             categoryKey === "pure"
+
                 ? " · Pure"
-                : categoryKey === "statistics-mechanics"
+
+                : categoryKey ===
+                    "statistics-mechanics"
+
                     ? " · Statistics / Mechanics"
+
                     : "";
 
     }
 
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     app.innerHTML = `
 
-        <div class="page-header">
+        <div
+            class="page-header"
+        >
 
             <button
                 class="back-btn"
@@ -1981,20 +2111,26 @@ function renderSession(
                 ← Back
             </button>
 
+
             <h1>
                 ${title}
             </h1>
 
+
             <p>
+
                 ${subject.name}
                 ${subject.code}
                 ${categoryText}
+
             </p>
 
         </div>
 
 
-        <div class="paper-list">
+        <div
+            class="paper-list"
+        >
 
             ${
                 papers.length
@@ -2010,7 +2146,9 @@ function renderSession(
 
                     : `
 
-                        <div class="empty">
+                        <div
+                            class="empty"
+                        >
                             No papers found.
                         </div>
 
@@ -2040,22 +2178,31 @@ function renderPaper(
 
     return `
 
-        <div class="paper-card">
+        <div
+            class="paper-card"
+        >
 
-            <div class="paper-info">
+            <div
+                class="paper-info"
+            >
 
                 <h3>
                     Paper ${paper.paper}
                 </h3>
 
-                <div class="paper-code">
+
+                <div
+                    class="paper-code"
+                >
                     ${paperCode}
                 </div>
 
             </div>
 
 
-            <div class="paper-actions">
+            <div
+                class="paper-actions"
+            >
 
                 ${
                     paper.question
@@ -2241,7 +2388,9 @@ function showError(
 ) {
 
     const app =
-        document.getElementById("app");
+        document.getElementById(
+            "app"
+        );
 
 
     app.innerHTML = `
@@ -2255,6 +2404,7 @@ function showError(
                 ← Back to subjects
             </button>
 
+
             <h1>
                 ${subject.name}
             </h1>
@@ -2262,17 +2412,22 @@ function showError(
         </div>
 
 
-        <div class="error-message">
+        <div
+            class="error-message"
+        >
 
             <strong>
                 Could not load the papers.
             </strong>
 
-            Make sure the GitHub repository is
-            public and the files are inside the
-            <strong>papers</strong> folder.
+
+            Make sure the GitHub repository
+            is public and the files are inside
+            the <strong>papers</strong> folder.
+
 
             <br><br>
+
 
             Technical error:
             ${error.message}
