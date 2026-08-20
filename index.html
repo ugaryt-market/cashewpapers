@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Past Papers</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f7f8fc;
+            --card: #ffffff;
+            --text: #202536;
+            --muted: #73798c;
+            --primary: #ff3976;
+            --primary-dark: #e92965;
+            --border: #e9ebf2;
+            --shadow: 0 8px 25px rgba(30, 35, 60, 0.08);
+        }
+
+        body {
+            font-family: Inter, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        /* NAVBAR */
+
+        nav {
+            width: 100%;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* MAIN */
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 55px 24px 80px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 6vw, 64px);
+            line-height: 1;
+            letter-spacing: -2px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            color: var(--muted);
+            max-width: 620px;
+            margin: auto;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        /* SEARCH */
+
+        .search-wrapper {
+            max-width: 700px;
+            margin: 30px auto 50px;
+        }
+
+        .search-box {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            padding: 6px 18px;
+        }
+
+        .search-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 15px 5px;
+            font-size: 16px;
+            color: var(--text);
+            background: transparent;
+        }
+
+        /* SUBJECTS */
+
+        .section-title {
+            margin-bottom: 20px;
+        }
+
+        .section-title h2 {
+            font-size: 24px;
+        }
+
+        .section-title p {
+            color: var(--muted);
+            margin-top: 5px;
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .subject-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 35px rgba(30, 35, 60, 0.12);
+            border-color: #ffd0df;
+        }
+
+        .subject-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subject-icon {
+            width: 50px;
+            height: 50px;
+            background: #fff0f5;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .arrow {
+            font-size: 22px;
+            color: var(--muted);
+        }
+
+        .subject-card h3 {
+            margin-top: 22px;
+            font-size: 23px;
+        }
+
+        .subject-code {
+            color: var(--muted);
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .subject-description {
+            color: var(--muted);
+            margin-top: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* PAGE HEADER */
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+        .back-btn {
+            border: none;
+            background: transparent;
+            color: var(--primary);
+            cursor: pointer;
+            margin-bottom: 18px;
+            font-weight: 700;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        /* YEAR FILTERS */
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .filter-btn {
+            border: none;
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 9px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* YEAR SECTIONS */
+
+        .year-section {
+            margin-top: 35px;
+        }
+
+        .year-title {
+            font-size: 25px;
+            margin-bottom: 14px;
+        }
+
+        .session-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .session-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .session-card:hover {
+            border-color: #ffd0df;
+            transform: translateX(3px);
+        }
+
+        .session-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .folder-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #f0fbfc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .session-name {
+            font-weight: 700;
+        }
+
+        .session-count {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .session-arrow {
+            color: var(--muted);
+        }
+
+        /* PAPERS */
+
+        .paper-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 25px;
+        }
+
+        .paper-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .paper-info h3 {
+            font-size: 17px;
+        }
+
+        .paper-info p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .paper-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .paper-btn {
+            border: none;
+            background: #f1f2f7;
+            padding: 9px 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .paper-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .paper-btn:hover {
+            opacity: 0.85;
+        }
+
+        /* EMPTY */
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        /* FOOTER */
+
+        footer {
+            text-align: center;
+            padding: 35px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            .nav-links {
+                display: none;
+            }
+
+            main {
+                padding: 40px 16px 60px;
+            }
+
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 46px;
+            }
+
+            .paper-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .paper-actions {
+                width: 100%;
+            }
+
+            .paper-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <div class="logo">
+            Past<span>Papers</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="#" onclick="showHome()">Home</a>
+            <a href="#">About</a>
+        </div>
+    </div>
+</nav>
+
+<main id="app"></main>
+
+<footer>
+    Past Papers · Built for students
+</footer>
+
+
+<script>
+
+    /*
+        =========================
+        DATA
+        =========================
+
+        Replace/add papers here.
+
+        Later, we can move this into
+        separate JSON files or a database.
+    */
+
+    const subjects = {
+
+        mathematics: {
+            name: "Mathematics",
+            code: "9709",
+            icon: "📐",
+            description: "AS & A Level Mathematics past papers.",
+            years: {
+
+                2025: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/mathematics/2025/mj/9709_qp_12.pdf",
+                            markscheme: "papers/mathematics/2025/mj/9709_ms_12.pdf"
+                        },
+                        {
+                            paper: "22",
+                            question: "papers/mathematics/2025/mj/9709_qp_22.pdf",
+                            markscheme: "papers/mathematics/2025/mj/9709_ms_22.pdf"
+                        }
+                    ],
+
+                    "October / November": [
+                        {
+                            paper: "12",
+                            question: "papers/mathematics/2025/on/9709_qp_12.pdf",
+                            markscheme: "papers/mathematics/2025/on/9709_ms_12.pdf"
+                        }
+                    ]
+                },
+
+                2024: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/mathematics/2024/mj/9709_qp_12.pdf",
+                            markscheme: "papers/mathematics/2024/mj/9709_ms_12.pdf"
+                        },
+                        {
+                            paper: "22",
+                            question: "papers/mathematics/2024/mj/9709_qp_22.pdf",
+                            markscheme: "papers/mathematics/2024/mj/9709_ms_22.pdf"
+                        }
+                    ]
+                }
+            }
+        },
+
+        physics: {
+            name: "Physics",
+            code: "9702",
+            icon: "⚛️",
+            description: "AS & A Level Physics past papers.",
+            years: {
+                2025: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/physics/2025/mj/9702_qp_12.pdf",
+                            markscheme: "papers/physics/2025/mj/9702_ms_12.pdf"
+                        }
+                    ]
+                },
+                2024: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/physics/2024/mj/9702_qp_12.pdf",
+                            markscheme: "papers/physics/2024/mj/9702_ms_12.pdf"
+                        }
+                    ]
+                }
+            }
+        },
+
+        chemistry: {
+            name: "Chemistry",
+            code: "9701",
+            icon: "🧪",
+            description: "AS & A Level Chemistry past papers.",
+            years: {
+                2025: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/chemistry/2025/mj/9701_qp_12.pdf",
+                            markscheme: "papers/chemistry/2025/mj/9701_ms_12.pdf"
+                        }
+                    ]
+                },
+                2024: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/chemistry/2024/mj/9701_qp_12.pdf",
+                            markscheme: "papers/chemistry/2024/mj/9701_ms_12.pdf"
+                        }
+                    ]
+                }
+            }
+        },
+
+        biology: {
+            name: "Biology",
+            code: "9700",
+            icon: "🧬",
+            description: "AS & A Level Biology past papers.",
+            years: {
+                2025: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/biology/2025/mj/9700_qp_12.pdf",
+                            markscheme: "papers/biology/2025/mj/9700_ms_12.pdf"
+                        }
+                    ]
+                },
+                2024: {
+                    "May / June": [
+                        {
+                            paper: "12",
+                            question: "papers/biology/2024/mj/9700_qp_12.pdf",
+                            markscheme: "papers/biology/2024/mj/9700_ms_12.pdf"
+                        }
+                    ]
+                }
+            }
+        }
+
+    };
+
+
+    /*
+        =========================
+        HOME PAGE
+        =========================
+    */
+
+    function showHome() {
+
+        const app = document.getElementById("app");
+
+        app.innerHTML = `
+            <section class="hero">
+
+                <h1>
+                    Find your <span>past papers.</span>
+                </h1>
+
+                <p>
+                    A simple, modern place to find past papers,
+                    mark schemes and revision materials.
+                </p>
+
+            </section>
+
+
+            <div class="search-wrapper">
+
+                <div class="search-box">
+
+                    <div class="search-icon">
+                        🔍
+                    </div>
+
+                    <input
+                        id="homeSearch"
+                        type="text"
+                        placeholder="Search subjects..."
+                        oninput="searchSubjects(this.value)"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="section-title">
+
+                <h2>Subjects</h2>
+
+                <p>
+                    Choose a subject to browse past papers.
+                </p>
+
+            </div>
+
+
+            <div
+                class="subject-grid"
+                id="subjectGrid"
+            >
+
+                ${renderSubjectCards()}
+
+            </div>
+        `;
+
+    }
+
+
+    function renderSubjectCards(filter = "") {
+
+        return Object.entries(subjects)
+
+            .filter(([key, subject]) => {
+
+                const query = filter.toLowerCase();
+
+                return (
+                    subject.name.toLowerCase().includes(query) ||
+                    subject.code.includes(query)
+                );
+
+            })
+
+            .map(([key, subject]) => `
+
+                <div
+                    class="subject-card"
+                    onclick="showSubject('${key}')"
+                >
+
+                    <div class="subject-top">
+
+                        <div class="subject-icon">
+                            ${subject.icon}
+                        </div>
+
+                        <div class="arrow">
+                            →
+                        </div>
+
+                    </div>
+
+                    <h3>
+                        ${subject.name}
+                    </h3>
+
+                    <div class="subject-code">
+                        Cambridge ${subject.code}
+                    </div>
+
+                    <div class="subject-description">
+                        ${subject.description}
+                    </div>
+
+                </div>
+
+            `)
+            .join("");
+
+    }
+
+
+    function searchSubjects(query) {
+
+        document.getElementById("subjectGrid").innerHTML =
+            renderSubjectCards(query);
+
+    }
+
+
+    /*
+        =========================
+        SUBJECT PAGE
+        =========================
+    */
+
+    function showSubject(subjectKey, selectedYear = "all") {
+
+        const subject = subjects[subjectKey];
+
+        const years = Object.keys(subject.years)
+            .sort((a, b) => b - a);
+
+        const filteredYears =
+            selectedYear === "all"
+                ? years
+                : years.filter(year => year === selectedYear);
+
+        const app = document.getElementById("app");
+
+        app.innerHTML = `
+
+            <div class="page-header">
+
+                <button
+                    class="back-btn"
+                    onclick="showHome()"
+                >
+                    ← Back to subjects
+                </button>
+
+                <h1>
+                    ${subject.name} ${subject.code}
+                </h1>
+
+                <p>
+                    ${subject.description}
+                </p>
+
+            </div>
+
+
+            <div class="search-box">
+
+                <div class="search-icon">
+                    🔍
+                </div>
+
+                <input
+                    id="paperSearch"
+                    type="text"
+                    placeholder="Search papers..."
+                    oninput="filterPapers('${subjectKey}', this.value)"
+                >
+
+            </div>
+
+
+            <div class="filters">
+
+                <button
+                    class="filter-btn ${selectedYear === "all" ? "active" : ""}"
+                    onclick="showSubject('${subjectKey}', 'all')"
+                >
+                    All
+                </button>
+
+                ${years.map(year => `
+
+                    <button
+                        class="filter-btn ${selectedYear === year ? "active" : ""}"
+                        onclick="showSubject('${subjectKey}', '${year}')"
+                    >
+                        ${year}
+                    </button>
+
+                `).join("")}
+
+            </div>
+
+
+            <div id="yearContainer">
+
+                ${
+                    filteredYears.length
+                        ? filteredYears
+                            .map(year => renderYear(subjectKey, year, subject.years[year]))
+                            .join("")
+                        : `
+                            <div class="empty">
+                                No papers found.
+                            </div>
+                        `
+                }
+
+            </div>
+        `;
+    }
+
+
+    /*
+        =========================
+        YEAR / SESSION
+        =========================
+    */
+
+    function renderYear(subjectKey, year, sessions) {
+
+        return `
+
+            <section class="year-section">
+
+                <h2 class="year-title">
+                    ${year}
+                </h2>
+
+
+                <div class="session-list">
+
+                    ${Object.entries(sessions)
+                        .map(([session, papers]) => `
+
+                            <div
+                                class="session-card"
+                                onclick="showSession(
+                                    '${subjectKey}',
+                                    '${year}',
+                                    '${session}'
+                                )"
+                            >
+
+                                <div class="session-left">
+
+                                    <div class="folder-icon">
+                                        📁
+                                    </div>
+
+                                    <div>
+
+                                        <div class="session-name">
+                                            ${session}
+                                        </div>
+
+                                        <div class="session-count">
+                                            ${papers.length} paper${papers.length !== 1 ? "s" : ""}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="session-arrow">
+                                    →
+                                </div>
+
+                            </div>
+
+                        `)
+                        .join("")}
+
+                </div>
+
+            </section>
+
+        `;
+
+    }
+
+
+    /*
+        =========================
+        SESSION PAGE
+        =========================
+    */
+
+    function showSession(subjectKey, year, session) {
+
+        const subject = subjects[subjectKey];
+
+        const papers =
+            subject.years[year][session];
+
+        const app = document.getElementById("app");
+
+        app.innerHTML = `
+
+            <div class="page-header">
+
+                <button
+                    class="back-btn"
+                    onclick="showSubject('${subjectKey}')"
+                >
+                    ← Back to ${subject.name}
+                </button>
+
+                <h1>
+                    ${year} · ${session}
+                </h1>
+
+                <p>
+                    ${subject.name} ${subject.code}
+                </p>
+
+            </div>
+
+
+            <div class="paper-list">
+
+                ${papers.map(paper => `
+
+                    <div class="paper-card">
+
+                        <div class="paper-info">
+
+                            <h3>
+                                Paper ${paper.paper}
+                            </h3>
+
+                            <p>
+                                ${subject.name}
+                                ${subject.code}
+                                · ${year}
+                                · ${session}
+                            </p>
+
+                        </div>
+
+
+                        <div class="paper-actions">
+
+                            <button
+                                class="paper-btn primary"
+                                onclick="openPDF('${paper.question}')"
+                            >
+                                📄 Question Paper
+                            </button>
+
+                            <button
+                                class="paper-btn"
+                                onclick="openPDF('${paper.markscheme}')"
+                            >
+                                ✅ Mark Scheme
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `).join("")}
+
+            </div>
+        `;
+    }
+
+
+    /*
+        =========================
+        OPEN PDF
+        =========================
+    */
+
+    function openPDF(path) {
+
+        /*
+            Eventually these paths will point
+            to your actual PDF files.
+
+            For now, this simply attempts to
+            open the path in a new tab.
+        */
+
+        window.open(path, "_blank");
+
+    }
+
+
+    /*
+        =========================
+        SEARCH PAPERS
+        =========================
+    */
+
+    function filterPapers(subjectKey, query) {
+
+        query = query.toLowerCase().trim();
+
+        const subject = subjects[subjectKey];
+
+        const container =
+            document.getElementById("yearContainer");
+
+        let html = "";
+
+        Object.entries(subject.years).forEach(([year, sessions]) => {
+
+            const filteredSessions = {};
+
+            Object.entries(sessions).forEach(([session, papers]) => {
+
+                const filteredPapers = papers.filter(paper => {
+
+                    return (
+                        year.includes(query) ||
+                        session.toLowerCase().includes(query) ||
+                        paper.paper.toLowerCase().includes(query)
+                    );
+
+                });
+
+                if (filteredPapers.length) {
+                    filteredSessions[session] = filteredPapers;
+                }
+
+            });
+
+            if (Object.keys(filteredSessions).length) {
+
+                html += renderYear(
+                    subjectKey,
+                    year,
+                    filteredSessions
+                );
+
+            }
+
+        });
+
+        container.innerHTML = html || `
+            <div class="empty">
+                No papers found for "${query}".
+            </div>
+        `;
+
+    }
+
+
+    /*
+        =========================
+        START WEBSITE
+        =========================
+    */
+
+    showHome();
+
+</script>
+
+</body>
+</html>
