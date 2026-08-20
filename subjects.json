@@ -1,26 +1,50 @@
 {
-    "mathematics": {
-        "name": "Mathematics",
-        "code": "9709",
-        "icon": "📐",
-        "description": "AS & A Level Mathematics past papers."
-    },
-    "physics": {
-        "name": "Physics",
-        "code": "9702",
-        "icon": "⚛️",
-        "description": "AS & A Level Physics past papers."
-    },
-    "chemistry": {
-        "name": "Chemistry",
-        "code": "9701",
-        "icon": "🧪",
-        "description": "AS & A Level Chemistry past papers."
-    },
-    "biology": {
-        "name": "Biology",
-        "code": "9700",
-        "icon": "🧬",
-        "description": "AS & A Level Biology past papers."
-    }
+  "mathematics": {
+    "name": "Maths",
+    "code": "9709",
+    "icon": "📐",
+    "description": "AS & A Level Mathematics past papers."
+  },
+  "physics": {
+    "name": "Physics",
+    "code": "9702",
+    "icon": "⚛️",
+    "description": "AS & A Level Physics past papers."
+  },
+  "biology": {
+    "name": "Biology",
+    "code": "9700",
+    "icon": "🧬",
+    "description": "AS & A Level Biology past papers."
+  },
+  "chemistry": {
+    "name": "Chemistry",
+    "code": "9701",
+    "icon": "🧪",
+    "description": "AS & A Level Chemistry past papers."
+  },
+  "economics": {
+    "name": "Economics",
+    "code": "0455",
+    "icon": "📈",
+    "description": "IGCSE Economics past papers."
+  },
+  "computer-science": {
+    "name": "Computer Science",
+    "code": "9618",
+    "icon": "💻",
+    "description": "AS & A Level Computer Science past papers."
+  },
+  "psychology": {
+    "name": "Psychology",
+    "code": "9990",
+    "icon": "🧠",
+    "description": "AS & A Level Psychology past papers."
+  },
+  "business": {
+    "name": "Business",
+    "code": "9609",
+    "icon": "💼",
+    "description": "AS & A Level Business past papers."
+  }
 }
