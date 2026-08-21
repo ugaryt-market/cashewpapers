@@ -1,5 +1,10 @@
 const fs = require("fs");
 const path = require("path");
+const {
+    generateSubjectSelectionPage
+} = require(
+    "./subject-selection"
+);
 
 /*
     Cashew Papers Static Site Generator
