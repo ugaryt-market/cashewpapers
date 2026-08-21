@@ -7,6 +7,7 @@ const generateSubjectSelectionPage =
 const {
     generateLoginPage,
     generateSignupPage,
+    generateEmailConfirmedPage,
     generateAccountPage
 } = require("./auth-pages");
 
