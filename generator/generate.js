@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.10
+    Version Alpha 0.0.11
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1192,7 +1192,24 @@ main {
 }
 
 
-/* ---------------- PAPER STATUS ---------------- */
+/* ---------------- PAPER PROGRESS ---------------- */
+
+.paper-progress {
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    max-width:
+        100%;
+}
 
 .paper-status {
     height:
@@ -1240,9 +1257,6 @@ main {
 
     flex-shrink:
         0;
-
-    margin-right:
-        14px;
 }
 
 .paper-status:hover {
@@ -1273,6 +1287,199 @@ main {
 .paper-status.completed:hover {
     background:
         #def4e6;
+}
+
+.paper-attempts {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+}
+
+.attempt-button {
+    height:
+        42px;
+
+    padding:
+        0 14px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        999px;
+
+    background:
+        #f0f1f6;
+
+    color:
+        var(--text);
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+}
+
+.attempt-button:hover {
+    background:
+        #e7e8ee;
+}
+
+.attempt-list {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+}
+
+.attempt-chip {
+    padding:
+        9px 12px;
+
+    border:
+        1px solid
+        #e1e3ea;
+
+    border-radius:
+        10px;
+
+    background:
+        #fafbfc;
+
+    color:
+        #555b6d;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.35;
+
+    white-space:
+        nowrap;
+}
+
+.attempt-form {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+}
+
+.attempt-input {
+    width:
+        110px;
+
+    height:
+        42px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        10px;
+
+    background:
+        white;
+
+    color:
+        var(--text);
+
+    font-size:
+        14px;
+}
+
+.attempt-save,
+.attempt-cancel {
+    height:
+        42px;
+
+    padding:
+        0 12px;
+
+    border:
+        none;
+
+    border-radius:
+        10px;
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+}
+
+.attempt-save {
+    background:
+        var(--primary);
+
+    color:
+        white;
+}
+
+.attempt-cancel {
+    background:
+        #f0f1f6;
+
+    color:
+        var(--text);
+}
+
+.paper-login-notice {
+    flex-basis:
+        100%;
+
+    margin-top:
+        1px;
+
+    font-size:
+        13px;
+
+    color:
+        var(--muted);
+}
+
+.paper-login-notice a {
+    color:
+        var(--primary);
+
+    font-weight:
+        700;
 }
 
 
@@ -1367,12 +1574,15 @@ footer {
             1;
     }
 
-    .paper-status {
-        margin-right:
-            0;
+    .paper-progress {
+        width:
+            100%;
+    }
 
-        margin-bottom:
-            4px;
+    .paper-status,
+    .attempt-button {
+        flex-shrink:
+            0;
     }
 
     .nav-actions {
@@ -1380,8 +1590,7 @@ footer {
             10px;
     }
 
-    .nav-account,
-    .nav-subjects {
+    .nav-account {
         font-size:
             12px;
     }
@@ -1551,6 +1760,7 @@ document.addEventListener(
     () => {
 
         updateAuthNavigation();
+        initializePaperProgress();
 
     }
 );
@@ -1561,6 +1771,7 @@ window.addEventListener(
     () => {
 
         updateAuthNavigation();
+        initializePaperProgress();
 
     }
 );
@@ -1574,6 +1785,135 @@ function getPaperStatus(
         "cashew-paper-status-" +
         key
     ) || "incomplete";
+
+}
+
+
+function setPaperStatus(
+    key,
+    status
+) {
+
+    localStorage.setItem(
+        "cashew-paper-status-" +
+        key,
+        status
+    );
+
+}
+
+
+function getPaperAttempts(
+    key
+) {
+
+    try {
+
+        const value =
+            localStorage.getItem(
+                "cashew-paper-attempts-" +
+                key
+            );
+
+        if (!value) {
+            return [];
+        }
+
+        const attempts =
+            JSON.parse(value);
+
+        return Array.isArray(attempts)
+            ? attempts
+            : [];
+
+    } catch (error) {
+
+        return [];
+
+    }
+
+}
+
+
+function setPaperAttempts(
+    key,
+    attempts
+) {
+
+    localStorage.setItem(
+        "cashew-paper-attempts-" +
+        key,
+        JSON.stringify(attempts)
+    );
+
+}
+
+
+function formatAttemptDate(
+    isoDate
+) {
+
+    const date =
+        new Date(isoDate);
+
+    if (Number.isNaN(date.getTime())) {
+        return isoDate || "Unknown date";
+    }
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function clearLoginNotice(
+    progress
+) {
+
+    const existing =
+        progress.querySelector(
+            ".paper-login-notice"
+        );
+
+    if (existing) {
+        existing.remove();
+    }
+
+}
+
+
+function showLoginRequired(
+    button
+) {
+
+    const progress =
+        button.closest(
+            ".paper-progress"
+        );
+
+    if (!progress) {
+        return;
+    }
+
+    clearLoginNotice(progress);
+
+    const notice =
+        document.createElement("div");
+
+    notice.className =
+        "paper-login-notice";
+
+    notice.innerHTML =
+        "You must be logged in to continue. " +
+        '<a href="${prefix}login/">Log in</a>';
+
+    progress.appendChild(notice);
 
 }
 
@@ -1626,66 +1966,330 @@ function renderPaperStatus(
 }
 
 
-function togglePaperStatus(
+function renderPaperAttempts(
+    progress,
+    key,
+    completed,
+    user
+) {
+
+    const attemptsContainer =
+        progress.querySelector(
+            "[data-paper-attempts]"
+        );
+
+    if (!attemptsContainer) {
+        return;
+    }
+
+    attemptsContainer.innerHTML = "";
+
+    clearLoginNotice(progress);
+
+    if (!completed || !user) {
+        return;
+    }
+
+    const attempts =
+        getPaperAttempts(key);
+
+    const addButton =
+        document.createElement("button");
+
+    addButton.type = "button";
+    addButton.className = "attempt-button";
+    addButton.textContent = "+ Add attempt";
+    addButton.addEventListener(
+        "click",
+        () => {
+            openAttemptForm(
+                progress,
+                key
+            );
+        }
+    );
+
+    attemptsContainer.appendChild(
+        addButton
+    );
+
+    if (attempts.length === 0) {
+        return;
+    }
+
+    const list =
+        document.createElement("div");
+
+    list.className =
+        "attempt-list";
+
+    attempts.forEach(
+        (attempt, index) => {
+
+            const chip =
+                document.createElement("div");
+
+            chip.className =
+                "attempt-chip";
+
+            chip.textContent =
+                \`Attempt \${index + 1} / \${attempt.score} / \${formatAttemptDate(attempt.date)}\`;
+
+            list.appendChild(chip);
+
+        }
+    );
+
+    attemptsContainer.appendChild(
+        list
+    );
+
+}
+
+
+function openAttemptForm(
+    progress,
+    key
+) {
+
+    const attemptsContainer =
+        progress.querySelector(
+            "[data-paper-attempts]"
+        );
+
+    if (!attemptsContainer) {
+        return;
+    }
+
+    attemptsContainer.innerHTML = "";
+
+    const form =
+        document.createElement("form");
+
+    form.className =
+        "attempt-form";
+
+    const input =
+        document.createElement("input");
+
+    input.className =
+        "attempt-input";
+
+    input.type = "number";
+    input.step = "any";
+    input.inputMode = "decimal";
+    input.placeholder = "Score";
+    input.setAttribute(
+        "aria-label",
+        "Attempt score"
+    );
+    input.required = true;
+
+    const saveButton =
+        document.createElement("button");
+
+    saveButton.type = "submit";
+    saveButton.className =
+        "attempt-save";
+    saveButton.textContent = "Save";
+
+    const cancelButton =
+        document.createElement("button");
+
+    cancelButton.type = "button";
+    cancelButton.className =
+        "attempt-cancel";
+    cancelButton.textContent = "Cancel";
+
+    cancelButton.addEventListener(
+        "click",
+        async () => {
+
+            const user =
+                await getCurrentUser();
+
+            renderPaperAttempts(
+                progress,
+                key,
+                getPaperStatus(key) === "completed",
+                user
+            );
+
+        }
+    );
+
+    form.appendChild(input);
+    form.appendChild(saveButton);
+    form.appendChild(cancelButton);
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const user =
+                await getCurrentUser();
+
+            if (!user) {
+
+                showLoginRequired(
+                    progress.querySelector(
+                        ".paper-status"
+                    )
+                );
+
+                return;
+
+            }
+
+            const score =
+                input.value.trim();
+
+            if (!score) {
+                input.focus();
+                return;
+            }
+
+            const attempts =
+                getPaperAttempts(key);
+
+            attempts.push({
+                score,
+                date: new Date().toISOString()
+            });
+
+            setPaperAttempts(
+                key,
+                attempts
+            );
+
+            renderPaperAttempts(
+                progress,
+                key,
+                true,
+                user
+            );
+
+        }
+    );
+
+    attemptsContainer.appendChild(
+        form
+    );
+
+    input.focus();
+
+}
+
+
+async function refreshPaperProgress(
+    progress
+) {
+
+    const button =
+        progress.querySelector(
+            ".paper-status"
+        );
+
+    const key =
+        button.dataset.paperKey;
+
+    const user =
+        await getCurrentUser();
+
+    const status =
+        user
+            ? getPaperStatus(key)
+            : "incomplete";
+
+    renderPaperStatus(
+        button,
+        status
+    );
+
+    renderPaperAttempts(
+        progress,
+        key,
+        status === "completed",
+        user
+    );
+
+}
+
+
+async function initializePaperProgress() {
+
+    const progressElements =
+        document.querySelectorAll(
+            ".paper-progress"
+        );
+
+    if (!progressElements.length) {
+        return;
+    }
+
+    await Promise.all(
+        Array.from(
+            progressElements
+        ).map(
+            refreshPaperProgress
+        )
+    );
+
+}
+
+
+async function togglePaperStatus(
     button
 ) {
 
     const key =
         button.dataset.paperKey;
 
-
-    const current =
-        getPaperStatus(
-            key
+    const progress =
+        button.closest(
+            ".paper-progress"
         );
 
+    const user =
+        await getCurrentUser();
+
+    if (!user) {
+
+        showLoginRequired(button);
+        return;
+
+    }
+
+    clearLoginNotice(progress);
+
+    const current =
+        getPaperStatus(key);
 
     const next =
-        current ===
-            "completed"
+        current === "completed"
             ? "incomplete"
             : "completed";
 
-
-    localStorage.setItem(
-        "cashew-paper-status-" +
+    setPaperStatus(
         key,
         next
     );
-
 
     renderPaperStatus(
         button,
         next
     );
 
+    renderPaperAttempts(
+        progress,
+        key,
+        next === "completed",
+        user
+    );
+
 }
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        document
-            .querySelectorAll(
-                ".paper-status"
-            )
-            .forEach(
-                button => {
-
-                    renderPaperStatus(
-                        button,
-
-                        getPaperStatus(
-                            button.dataset.paperKey
-                        )
-                    );
-
-                }
-            );
-
-    }
-);
 
 </script>
 
@@ -1759,7 +2363,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.10
+                    Version Alpha 0.0.11
                 </div>
 
             </section>
@@ -2383,18 +2987,30 @@ function generateSessionPage(
                                 class="paper-actions"
                             >
 
-                                <button
-                                    type="button"
-                                    class="paper-status"
-                                    data-paper-key="${paperStatusKey}"
-                                    onclick="
-                                        event.preventDefault();
-                                        event.stopPropagation();
-                                        togglePaperStatus(this);
-                                    "
+                                <div
+                                    class="paper-progress"
+                                    data-paper-progress
                                 >
-                                    ☐ Mark as completed
-                                </button>
+
+                                    <button
+                                        type="button"
+                                        class="paper-status"
+                                        data-paper-key="${paperStatusKey}"
+                                        onclick="
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            togglePaperStatus(this);
+                                        "
+                                    >
+                                        ☐ Mark as completed
+                                    </button>
+
+                                    <div
+                                        class="paper-attempts"
+                                        data-paper-attempts
+                                    ></div>
+
+                                </div>
 
 
                                 ${
