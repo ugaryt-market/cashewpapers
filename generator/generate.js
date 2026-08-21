@@ -12,7 +12,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.09
+    Version Alpha 0.0.10
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -20,8 +20,6 @@ const PAPERS_DIR = path.join(ROOT, "papers");
 const DIST_DIR = path.join(ROOT, "dist");
 const SUBJECTS_FILE = path.join(ROOT, "subjects.json");
 const WEB_DIR = path.join(ROOT, "web");
-
-
 
 
 /* ============================================================
@@ -32,26 +30,13 @@ function ensureDir(dir) {
     fs.mkdirSync(dir, { recursive: true });
 }
 
-
 function writeFile(file, content) {
     ensureDir(path.dirname(file));
     fs.writeFileSync(file, content, "utf8");
 }
 
-
 function readJSON(file) {
-    return JSON.parse(
-        fs.readFileSync(file, "utf8")
-    );
-}
-
-
-function slugify(value) {
-    return value
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
+    return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
 
@@ -134,24 +119,44 @@ function scanFiles(dir, base = dir) {
         return results;
     }
 
-    for (const entry of fs.readdirSync(dir, {
-        withFileTypes: true
-    })) {
+    for (
+        const entry
+        of fs.readdirSync(
+            dir,
+            {
+                withFileTypes: true
+            }
+        )
+    ) {
 
         const fullPath =
-            path.join(dir, entry.name);
+            path.join(
+                dir,
+                entry.name
+            );
 
         if (entry.isDirectory()) {
 
             results.push(
-                ...scanFiles(fullPath, base)
+                ...scanFiles(
+                    fullPath,
+                    base
+                )
             );
 
         } else {
 
             results.push({
-                absolute: fullPath,
-                relative: path.relative(base, fullPath)
+
+                absolute:
+                    fullPath,
+
+                relative:
+                    path.relative(
+                        base,
+                        fullPath
+                    )
+
             });
 
         }
@@ -169,7 +174,15 @@ function buildDatabase(subjects) {
 
     const database = {};
 
-    for (const [subjectKey, subject] of Object.entries(subjects)) {
+    for (
+        const [
+            subjectKey,
+            subject
+        ]
+        of Object.entries(
+            subjects
+        )
+    ) {
 
         const subjectPath =
             path.join(
@@ -182,16 +195,24 @@ function buildDatabase(subjects) {
         }
 
         database[subjectKey] = {
+
             subject,
+
             years: {}
+
         };
 
 
         const subjectFiles =
-            scanFiles(subjectPath);
+            scanFiles(
+                subjectPath
+            );
 
 
-        for (const file of subjectFiles) {
+        for (
+            const file
+            of subjectFiles
+        ) {
 
             if (
                 !file.relative
@@ -208,7 +229,6 @@ function buildDatabase(subjects) {
                 );
 
 
-            let category = null;
             let year;
             let sessionFolder;
             let filename;
@@ -229,13 +249,11 @@ function buildDatabase(subjects) {
                 "mathematics"
             ) {
 
-                if (parts.length < 4) {
+                if (
+                    parts.length < 4
+                ) {
                     continue;
                 }
-
-                category =
-                    parts[0]
-                        .toLowerCase();
 
                 year =
                     parts[1];
@@ -260,7 +278,9 @@ function buildDatabase(subjects) {
 
             else {
 
-                if (parts.length < 3) {
+                if (
+                    parts.length < 3
+                ) {
                     continue;
                 }
 
@@ -295,13 +315,19 @@ function buildDatabase(subjects) {
             }
 
 
-            if (!database[
-                subjectKey
-            ].years[year]) {
+            if (
+                !database[
+                    subjectKey
+                ].years[
+                    year
+                ]
+            ) {
 
                 database[
                     subjectKey
-                ].years[year] = {};
+                ].years[
+                    year
+                ] = {};
 
             }
 
@@ -313,18 +339,25 @@ function buildDatabase(subjects) {
             if (
                 !database[
                     subjectKey
-                ].years[year][
+                ].years[
+                    year
+                ][
                     sessionFolder
                 ]
             ) {
 
                 database[
                     subjectKey
-                ].years[year][
+                ].years[
+                    year
+                ][
                     sessionFolder
                 ] = {
+
                     sessionCode,
+
                     papers: {}
+
                 };
 
             }
@@ -465,123 +498,267 @@ const CSS = `
     --muted: #73798c;
     --primary: #ff3976;
     --border: #e7e9f0;
-    --shadow: 0 8px 25px rgba(30, 35, 60, 0.08);
+    --shadow:
+        0 8px 25px
+        rgba(30, 35, 60, 0.08);
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        var(--bg);
+
+    color:
+        var(--text);
+
+    min-height:
+        100vh;
 }
 
 a {
-    color: inherit;
-    text-decoration: none;
+    color:
+        inherit;
+
+    text-decoration:
+        none;
 }
 
 nav {
-    background: white;
-    border-bottom: 1px solid var(--border);
+    background:
+        white;
+
+    border-bottom:
+        1px solid
+        var(--border);
 }
 
 .nav-inner {
-    max-width: 1200px;
-    margin: auto;
-    padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    max-width:
+        1200px;
+
+    margin:
+        auto;
+
+    padding:
+        18px 24px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+}
+
+.nav-actions {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+}
+
+.nav-account {
+    color:
+        white;
+
+    background:
+        var(--primary);
+
+    padding:
+        9px 14px;
+
+    border-radius:
+        9px;
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+}
+
+.nav-account:hover {
+    opacity:
+        0.9;
 }
 
 .nav-subjects {
-    color: var(--primary);
-    font-weight: 700;
-    font-size: 14px;
+    color:
+        var(--primary);
+
+    font-weight:
+        700;
+
+    font-size:
+        14px;
 }
 
 .logo {
-    font-size: 22px;
-    font-weight: 800;
+    font-size:
+        22px;
+
+    font-weight:
+        800;
 }
 
 .logo span {
-    color: var(--primary);
+    color:
+        var(--primary);
 }
 
 main {
-    max-width: 1200px;
-    margin: auto;
-    padding: 50px 24px 80px;
+    max-width:
+        1200px;
+
+    margin:
+        auto;
+
+    padding:
+        50px 24px 80px;
 }
 
 .hero {
-    text-align: center;
-    margin-bottom: 45px;
+    text-align:
+        center;
+
+    margin-bottom:
+        45px;
 }
 
 .hero h1 {
-    font-size: clamp(42px, 7vw, 68px);
-    letter-spacing: -3px;
-    margin-bottom: 18px;
+    font-size:
+        clamp(
+            42px,
+            7vw,
+            68px
+        );
+
+    letter-spacing:
+        -3px;
+
+    margin-bottom:
+        18px;
 }
 
 .hero h1 span {
-    color: var(--primary);
+    color:
+        var(--primary);
 }
 
 .hero p {
-    max-width: 650px;
-    margin: auto;
-    color: var(--muted);
-    font-size: 17px;
-    line-height: 1.6;
+    max-width:
+        650px;
+
+    margin:
+        auto;
+
+    color:
+        var(--muted);
+
+    font-size:
+        17px;
+
+    line-height:
+        1.6;
 }
 
 .version {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #9a9ead;
-    font-weight: 600;
+    margin-top:
+        10px;
+
+    font-size:
+        12px;
+
+    color:
+        #9a9ead;
+
+    font-weight:
+        600;
 }
 
 .page-header {
-    margin-bottom: 30px;
+    margin-bottom:
+        30px;
 }
 
 .back {
-    color: var(--primary);
-    font-weight: 700;
-    display: inline-block;
-    margin-bottom: 18px;
+    color:
+        var(--primary);
+
+    font-weight:
+        700;
+
+    display:
+        inline-block;
+
+    margin-bottom:
+        18px;
 }
 
 .page-header h1 {
-    font-size: 36px;
-    letter-spacing: -1px;
+    font-size:
+        36px;
+
+    letter-spacing:
+        -1px;
 }
 
 .page-header p {
-    color: var(--muted);
-    margin-top: 8px;
-    line-height: 1.5;
+    color:
+        var(--muted);
+
+    margin-top:
+        8px;
+
+    line-height:
+        1.5;
 }
 
 .subject-grid,
 .category-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            1fr
+        );
+
+    gap:
+        20px;
 }
 
 .subject-card,
 .category-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: var(--shadow);
-    transition: 0.2s ease;
+    background:
+        white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        20px;
+
+    padding:
+        28px;
+
+    box-shadow:
+        var(--shadow);
+
+    transition:
+        0.2s ease;
 }
 
 .subject-card:hover,
@@ -589,161 +766,270 @@ main {
 .session-card:hover,
 .paper-card:hover,
 .year-session-card:hover {
-    transform: translateY(-3px);
-    border-color: #ffd0df;
+
+    transform:
+        translateY(
+            -3px
+        );
+
+    border-color:
+        #ffd0df;
 }
 
 .subject-card h2,
 .category-card h2 {
-    margin-top: 18px;
+    margin-top:
+        18px;
 }
 
 .card-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 14px;
-    background: #fff0f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 23px;
+    width:
+        50px;
+
+    height:
+        50px;
+
+    border-radius:
+        14px;
+
+    background:
+        #fff0f5;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        23px;
 }
 
 .card-description {
-    color: var(--muted);
-    margin-top: 8px;
-    line-height: 1.5;
+    color:
+        var(--muted);
+
+    margin-top:
+        8px;
+
+    line-height:
+        1.5;
 }
 
 
 /* ---------------- YEAR CARDS ---------------- */
 
 .year-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            1fr
+        );
+
+    gap:
+        20px;
 }
 
 .year-link {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: var(--shadow);
-    transition: 0.2s ease;
+    background:
+        white;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border:
+        1px solid
+        var(--border);
 
-    min-height: 104px;
+    border-radius:
+        20px;
 
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 29px;
-    font-weight: 700;
-    text-align: center;
+    padding:
+        24px;
+
+    box-shadow:
+        var(--shadow);
+
+    transition:
+        0.2s ease;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        104px;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size:
+        29px;
+
+    font-weight:
+        700;
+
+    text-align:
+        center;
 }
 
 .year-link:hover {
-    transform: translateY(-3px);
-    border-color: #ffd0df;
-    box-shadow: 0 14px 35px rgba(30, 35, 60, 0.12);
-}
 
-.year-link-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
+    transform:
+        translateY(
+            -3px
+        );
 
-.year-link-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #fff0f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 25px;
-    flex-shrink: 0;
-}
+    border-color:
+        #ffd0df;
 
-.year-link-info strong {
-    font-size: 19px;
-    line-height: 1.4;
-}
-
-.year-link-meta {
-    color: var(--muted);
-    margin-top: 5px;
-    font-size: 13px;
-}
-
-.year-link-arrow {
-    color: var(--muted);
-    font-size: 22px;
-    margin-left: 16px;
-    flex-shrink: 0;
+    box-shadow:
+        0 14px 35px
+        rgba(
+            30,
+            35,
+            60,
+            0.12
+        );
 }
 
 
 /* ---------------- YEAR SESSION CARDS ---------------- */
 
 .year-session-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            1fr
+        );
+
+    gap:
+        20px;
 }
 
 .year-session-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: var(--shadow);
-    transition: 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 104px;
+    background:
+        white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        20px;
+
+    padding:
+        24px;
+
+    box-shadow:
+        var(--shadow);
+
+    transition:
+        0.2s ease;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    min-height:
+        104px;
 }
 
 .year-session-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    min-width: 0;
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        16px;
+
+    min-width:
+        0;
 }
 
 .year-session-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #eefbfc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 25px;
-    flex-shrink: 0;
+    width:
+        52px;
+
+    height:
+        52px;
+
+    border-radius:
+        14px;
+
+    background:
+        #eefbfc;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        25px;
+
+    flex-shrink:
+        0;
 }
 
 .year-session-name {
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 1.4;
+    font-size:
+        17px;
+
+    font-weight:
+        700;
+
+    line-height:
+        1.4;
 }
 
 .year-session-count {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 6px;
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+    margin-top:
+        6px;
 }
 
 .year-session-arrow {
-    color: var(--muted);
-    font-size: 22px;
-    margin-left: 16px;
-    flex-shrink: 0;
+    color:
+        var(--muted);
+
+    font-size:
+        22px;
+
+    margin-left:
+        16px;
+
+    flex-shrink:
+        0;
 }
 
 
@@ -751,156 +1037,297 @@ main {
 
 .session-list,
 .paper-list {
-    display: grid;
-    gap: 14px;
+    display:
+        grid;
+
+    gap:
+        14px;
 }
 
 .session-card,
 .paper-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-    transition: 0.2s ease;
+    background:
+        white;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        15px;
+
+    padding:
+        20px;
+
+    box-shadow:
+        var(--shadow);
+
+    transition:
+        0.2s ease;
 }
 
 .session-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
 }
 
 .session-left {
-    display: flex;
-    gap: 14px;
-    align-items: center;
+    display:
+        flex;
+
+    gap:
+        14px;
+
+    align-items:
+        center;
 }
 
 .folder {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: #eefbfc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width:
+        44px;
+
+    height:
+        44px;
+
+    border-radius:
+        10px;
+
+    background:
+        #eefbfc;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
 }
 
 .muted {
-    color: var(--muted);
-    margin-top: 5px;
-    font-size: 13px;
+    color:
+        var(--muted);
+
+    margin-top:
+        5px;
+
+    font-size:
+        13px;
 }
 
 
 /* ---------------- PAPER CARDS ---------------- */
 
 .paper-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        20px;
 }
 
 .paper-card.group-break {
-    margin-top: 18px;
+    margin-top:
+        18px;
 }
 
 .paper-code {
-    font-family: "JetBrains Mono", monospace;
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 7px;
-    font-weight: 600;
+    font-family:
+        "JetBrains Mono",
+        monospace;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+    margin-top:
+        7px;
+
+    font-weight:
+        600;
 }
 
 .paper-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    align-items:
+        center;
 }
 
 .paper-button {
-    border: none;
-    border-radius: 8px;
-    padding: 10px 14px;
-    background: #f0f1f6;
-    cursor: pointer;
+    border:
+        none;
+
+    border-radius:
+        8px;
+
+    padding:
+        10px 14px;
+
+    background:
+        #f0f1f6;
+
+    cursor:
+        pointer;
 }
 
 .paper-button.primary {
-    background: var(--primary);
-    color: white;
+    background:
+        var(--primary);
+
+    color:
+        white;
 }
 
 
 /* ---------------- PAPER STATUS ---------------- */
 
-.paper-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
 .paper-status {
-    height: 42px;
-    padding: 0 16px;
-    border: 1px dashed #cfd2dc;
-    border-radius: 999px;
-    background: #fafbfc;
-    color: #73798c;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    transition: 0.15s ease;
-    flex-shrink: 0;
-    margin-right: 14px;
+    height:
+        42px;
+
+    padding:
+        0 16px;
+
+    border:
+        1px dashed
+        #cfd2dc;
+
+    border-radius:
+        999px;
+
+    background:
+        #fafbfc;
+
+    color:
+        #73798c;
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    transition:
+        0.15s ease;
+
+    flex-shrink:
+        0;
+
+    margin-right:
+        14px;
 }
 
 .paper-status:hover {
-    transform: translateY(-1px);
-    border-color: #b9becb;
-    background: #f5f6f9;
+    transform:
+        translateY(
+            -1px
+        );
+
+    border-color:
+        #b9becb;
+
+    background:
+        #f5f6f9;
 }
 
 .paper-status.completed {
-    background: #e8f8ee;
-    border: 1px solid #b9e8c8;
-    color: #2e9b52;
+    background:
+        #e8f8ee;
+
+    border:
+        1px solid
+        #b9e8c8;
+
+    color:
+        #2e9b52;
 }
 
 .paper-status.completed:hover {
-    background: #def4e6;
+    background:
+        #def4e6;
 }
 
 
 /* ---------------- EMPTY ---------------- */
 
 .empty {
-    background: white;
-    border: 1px dashed var(--border);
-    border-radius: 15px;
-    padding: 50px 20px;
-    text-align: center;
-    color: var(--muted);
+    background:
+        white;
+
+    border:
+        1px dashed
+        var(--border);
+
+    border-radius:
+        15px;
+
+    padding:
+        50px 20px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
 }
 
 
 /* ---------------- FOOTER ---------------- */
 
 footer {
-    text-align: center;
-    padding: 35px;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 13px;
+    text-align:
+        center;
+
+    padding:
+        35px;
+
+    border-top:
+        1px solid
+        var(--border);
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
 }
 
 
@@ -909,41 +1336,64 @@ footer {
 @media (max-width: 700px) {
 
     main {
-        padding: 40px 16px 60px;
+        padding:
+            40px 16px 60px;
     }
 
     .subject-grid,
     .category-grid,
     .year-grid,
     .year-session-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
     .paper-card,
     .session-card {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
     }
 
     .year-session-card {
-        padding: 20px;
+        padding:
+            20px;
     }
 
     .year-session-name {
-        font-size: 16px;
+        font-size:
+            16px;
     }
 
     .paper-actions {
-        width: 100%;
+        width:
+            100%;
     }
 
     .paper-button {
-        flex: 1;
+        flex:
+            1;
     }
 
     .paper-status {
-        margin-right: 0;
-        margin-bottom: 4px;
+        margin-right:
+            0;
+
+        margin-bottom:
+            4px;
+    }
+
+    .nav-actions {
+        gap:
+            10px;
+    }
+
+    .nav-account,
+    .nav-subjects {
+        font-size:
+            12px;
     }
 
 }
@@ -962,7 +1412,10 @@ function documentHTML(
 ) {
 
     const prefix =
-        "../".repeat(depth);
+        "../".repeat(
+            depth
+        );
+
 
     return `
 
@@ -1026,12 +1479,24 @@ function documentHTML(
             Cashew<span>Papers</span>
         </a>
 
-        <a
-            href="${prefix}select-subjects/"
-            class="nav-subjects"
-        >
-            Edit subjects
-        </a>
+        <div class="nav-actions">
+
+            <a
+                id="authNav"
+                href="${prefix}login/"
+                class="nav-account"
+            >
+                Login / Signup
+            </a>
+
+            <a
+                href="${prefix}select-subjects/"
+                class="nav-subjects"
+            >
+                Edit subjects
+            </a>
+
+        </div>
 
     </div>
 
@@ -1044,28 +1509,104 @@ ${body}
 </main>
 
 <footer>
+
     Cashew Papers · Built for students
+
 </footer>
 
 
 <script>
 
-function getPaperStatus(key) {
+async function updateAuthNavigation() {
+
+    const authNav =
+        document.getElementById(
+            "authNav"
+        );
+
+
+    if (
+        !authNav ||
+        typeof getCurrentUser !==
+            "function"
+    ) {
+
+        return;
+
+    }
+
+
+    const user =
+        await getCurrentUser();
+
+
+    if (user) {
+
+        authNav.href =
+            "${prefix}account/";
+
+        authNav.textContent =
+            "Profile";
+
+    } else {
+
+        authNav.href =
+            "${prefix}login/";
+
+        authNav.textContent =
+            "Login / Signup";
+
+    }
+
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        updateAuthNavigation();
+
+    }
+);
+
+
+window.addEventListener(
+    "cashew-auth-change",
+    () => {
+
+        updateAuthNavigation();
+
+    }
+);
+
+
+function getPaperStatus(
+    key
+) {
 
     return localStorage.getItem(
-        "cashew-paper-status-" + key
+        "cashew-paper-status-" +
+        key
     ) || "incomplete";
 
 }
 
 
-function renderPaperStatus(button, status) {
+function renderPaperStatus(
+    button,
+    status
+) {
 
     button.classList.remove(
         "completed"
     );
 
-    if (status === "completed") {
+
+    if (
+        status ===
+        "completed"
+    ) {
 
         button.classList.add(
             "completed"
@@ -1096,26 +1637,34 @@ function renderPaperStatus(button, status) {
         );
 
     }
+
 }
 
 
-function togglePaperStatus(button) {
+function togglePaperStatus(
+    button
+) {
 
     const key =
         button.dataset.paperKey;
 
+
     const current =
-        getPaperStatus(key);
+        getPaperStatus(
+            key
+        );
 
 
     const next =
-        current === "completed"
+        current ===
+            "completed"
             ? "incomplete"
             : "completed";
 
 
     localStorage.setItem(
-        "cashew-paper-status-" + key,
+        "cashew-paper-status-" +
+        key,
         next
     );
 
@@ -1136,16 +1685,19 @@ document.addEventListener(
             .querySelectorAll(
                 ".paper-status"
             )
-            .forEach(button => {
+            .forEach(
+                button => {
 
-                renderPaperStatus(
-                    button,
-                    getPaperStatus(
-                        button.dataset.paperKey
-                    )
-                );
+                    renderPaperStatus(
+                        button,
 
-            });
+                        getPaperStatus(
+                            button.dataset.paperKey
+                        )
+                    );
+
+                }
+            );
 
     }
 );
@@ -1164,40 +1716,44 @@ document.addEventListener(
    PAGE GENERATORS
    ============================================================ */
 
-function generateHome(subjects) {
+function generateHome(
+    subjects
+) {
 
     const cards =
-        Object.entries(subjects)
-            .map(
-                ([key, subject]) => `
+        Object.entries(
+            subjects
+        )
+        .map(
+            ([key, subject]) => `
 
-                    <a
-                        class="subject-card"
-                        data-subject="${key}"
-                        href="${key}/"
-                    >
+                <a
+                    class="subject-card"
+                    data-subject="${key}"
+                    href="${key}/"
+                >
 
-                        <div class="card-icon">
-                            ${subject.icon}
-                        </div>
+                    <div class="card-icon">
+                        ${subject.icon}
+                    </div>
 
-                        <h2>
-                            ${subject.name}
-                        </h2>
+                    <h2>
+                        ${subject.name}
+                    </h2>
 
-                        <div class="muted">
-                            Cambridge ${subject.code}
-                        </div>
+                    <div class="muted">
+                        Cambridge ${subject.code}
+                    </div>
 
-                        <div class="card-description">
-                            ${subject.description}
-                        </div>
+                    <div class="card-description">
+                        ${subject.description}
+                    </div>
 
-                    </a>
+                </a>
 
-                `
-            )
-            .join("");
+            `
+        )
+        .join("");
 
 
     return documentHTML(
@@ -1218,7 +1774,7 @@ function generateHome(subjects) {
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.09
+                    Version Alpha 0.0.10
                 </div>
 
             </section>
@@ -1247,34 +1803,42 @@ function generateHome(subjects) {
                     );
 
 
-                if (!selectionComplete) {
+                /*
+                    Guests can browse all subjects.
 
-                    window.location.href =
-                        "select-subjects/";
+                    Once subjects have been selected,
+                    only those subjects are shown.
+                */
 
-                } else {
+                if (
+                    selectionComplete &&
+                    selectedSubjects.length > 0
+                ) {
 
                     document
                         .querySelectorAll(
                             "[data-subject]"
                         )
-                        .forEach(card => {
+                        .forEach(
+                            card => {
 
-                            const subject =
-                                card.dataset.subject;
+                                const subject =
+                                    card.dataset.subject;
 
-                            if (
-                                !selectedSubjects.includes(
-                                    subject
-                                )
-                            ) {
 
-                                card.style.display =
-                                    "none";
+                                if (
+                                    !selectedSubjects.includes(
+                                        subject
+                                    )
+                                ) {
+
+                                    card.style.display =
+                                        "none";
+
+                                }
 
                             }
-
-                        });
+                        );
 
                 }
 
@@ -1307,7 +1871,11 @@ function generateSubjectPage(
 
         const categories =
             [
-                ["pure", "Pure", "📐"],
+                [
+                    "pure",
+                    "Pure",
+                    "📐"
+                ],
                 [
                     "statsmech",
                     "Statistics / Mechanics",
@@ -1319,7 +1887,13 @@ function generateSubjectPage(
         const cards =
             categories
                 .map(
-                    ([key, name, icon]) => `
+                    (
+                        [
+                            key,
+                            name,
+                            icon
+                        ]
+                    ) => `
 
                         <a
                             class="category-card"
@@ -1382,6 +1956,7 @@ function generateSubjectPage(
 
             1
         );
+
     }
 
 
@@ -1389,11 +1964,14 @@ function generateSubjectPage(
         Object.keys(
             data.years
         )
-            .sort(
-                (a, b) =>
-                    Number(b) -
-                    Number(a)
-            );
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                Number(b) -
+                Number(a)
+        );
 
 
     const links =
@@ -1440,7 +2018,9 @@ function generateSubjectPage(
 
 
             <div class="year-grid">
+
                 ${links}
+
             </div>
 
         `,
@@ -1467,25 +2047,30 @@ function generateCategoryPage(
 
 
     const links =
-        Object.keys(years)
-            .sort(
-                (a, b) =>
-                    Number(b) -
-                    Number(a)
-            )
-            .map(
-                year => `
+        Object.keys(
+            years
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                Number(b) -
+                Number(a)
+        )
+        .map(
+            year => `
 
-                    <a
-                        class="year-link"
-                        href="${year}/"
-                    >
-                        ${year}
-                    </a>
+                <a
+                    class="year-link"
+                    href="${year}/"
+                >
+                    ${year}
+                </a>
 
-                `
-            )
-            .join("");
+            `
+        )
+        .join("");
 
 
     return documentHTML(
@@ -1514,7 +2099,9 @@ function generateCategoryPage(
 
 
             <div class="year-grid">
+
                 ${links}
+
             </div>
 
         `,
@@ -1540,17 +2127,24 @@ function generateYearPage(
             sessions
         )
         .map(
-            ([folder, session]) => {
+            (
+                [
+                    folder,
+                    session
+                ]
+            ) => {
 
                 const slug =
                     sessionSlug(
                         session.sessionCode
                     );
 
+
                 const count =
                     Object.keys(
                         session.papers
                     ).length;
+
 
                 return `
 
@@ -1563,20 +2157,26 @@ function generateYearPage(
                             class="year-session-left"
                         >
 
-                            <div class="year-session-icon">
+                            <div
+                                class="year-session-icon"
+                            >
                                 📅
                             </div>
 
                             <div>
 
-                                <div class="year-session-name">
+                                <div
+                                    class="year-session-name"
+                                >
                                     ${sessionName(
                                         session.sessionCode,
                                         year
                                     )}
                                 </div>
 
-                                <div class="year-session-count">
+                                <div
+                                    class="year-session-count"
+                                >
                                     ${count}
                                     paper${count !== 1 ? "s" : ""}
                                 </div>
@@ -1585,7 +2185,9 @@ function generateYearPage(
 
                         </div>
 
-                        <div class="year-session-arrow">
+                        <div
+                            class="year-session-arrow"
+                        >
                             →
                         </div>
 
@@ -1647,7 +2249,9 @@ function generateYearPage(
             </div>
 
 
-            <div class="year-session-grid">
+            <div
+                class="year-session-grid"
+            >
 
                 ${sessionCards}
 
@@ -1683,7 +2287,10 @@ function generateSessionPage(
             session.papers
         )
         .sort(
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
                 a.paper.localeCompare(
                     b.paper,
                     undefined,
@@ -1697,19 +2304,26 @@ function generateSessionPage(
     const cards =
         papers
             .map(
-                (paper, index) => {
+                (
+                    paper,
+                    index
+                ) => {
 
                     const currentGroup =
                         String(
                             paper.paper
                         ).charAt(0);
 
+
                     const previousGroup =
                         index > 0
                             ? String(
-                                papers[index - 1].paper
+                                papers[
+                                    index - 1
+                                ].paper
                             ).charAt(0)
                             : null;
+
 
                     const groupBreak =
                         index > 0 &&
@@ -1725,7 +2339,7 @@ function generateSessionPage(
                             session.sessionCode,
                             paper.paper
                         ]
-                            .join("-");
+                        .join("-");
 
 
                     return `
@@ -1733,7 +2347,11 @@ function generateSessionPage(
                         <div
                             class="
                                 paper-card
-                                ${groupBreak ? "group-break" : ""}
+                                ${
+                                    groupBreak
+                                        ? "group-break"
+                                        : ""
+                                }
                             "
                         >
 
@@ -1743,7 +2361,9 @@ function generateSessionPage(
                                     Paper ${paper.paper}
                                 </h3>
 
-                                <div class="paper-code">
+                                <div
+                                    class="paper-code"
+                                >
                                     ${
                                         paper.code ||
                                         `Paper ${paper.paper}`
@@ -1834,6 +2454,7 @@ function generateSessionPage(
                         </div>
 
                     `;
+
                 }
             )
             .join("");
@@ -1844,7 +2465,9 @@ function generateSessionPage(
 
         `
 
-            <div class="page-header">
+            <div
+                class="page-header"
+            >
 
                 <a
                     class="back"
@@ -1858,23 +2481,29 @@ function generateSessionPage(
                 </h1>
 
                 <p>
+
                     ${subject.name}
                     ${subject.code}
+
                     ${
                         categoryKey
                             ? ` · ${
-                                categoryKey === "pure"
+                                categoryKey ===
+                                    "pure"
                                     ? "Pure"
                                     : "Statistics / Mechanics"
                             }`
                             : ""
                     }
+
                 </p>
 
             </div>
 
 
-            <div class="paper-list">
+            <div
+                class="paper-list"
+            >
 
                 ${cards}
 
@@ -1914,8 +2543,11 @@ function generate() {
         fs.rmSync(
             DIST_DIR,
             {
-                recursive: true,
-                force: true
+                recursive:
+                    true,
+
+                force:
+                    true
             }
         );
 
@@ -1978,43 +2610,46 @@ function generate() {
         )
     );
 
+
     /* Authentication pages */
 
-writeFile(
-    path.join(
-        DIST_DIR,
-        "login",
-        "index.html"
-    ),
-    generateLoginPage()
-);
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "login",
+            "index.html"
+        ),
+        generateLoginPage()
+    );
 
 
-writeFile(
-    path.join(
-        DIST_DIR,
-        "signup",
-        "index.html"
-    ),
-    generateSignupPage()
-);
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "signup",
+            "index.html"
+        ),
+        generateSignupPage()
+    );
 
 
-writeFile(
-    path.join(
-        DIST_DIR,
-        "account",
-        "index.html"
-    ),
-    generateAccountPage()
-);
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "account",
+            "index.html"
+        ),
+        generateAccountPage()
+    );
 
 
     /* Copy PDFs */
 
     for (
         const file
-        of scanFiles(PAPERS_DIR)
+        of scanFiles(
+            PAPERS_DIR
+        )
     ) {
 
         const target =
@@ -2088,20 +2723,9 @@ writeFile(
                 ]
             ) {
 
-                const categoryData =
-                    data.years;
-
-
-                /*
-                    Split mathematics data
-                    by category.
-
-                    The current database scanner
-                    needs category-aware storage.
-                */
-
                 const categoryYears =
                     {};
+
 
                 for (
                     const file
