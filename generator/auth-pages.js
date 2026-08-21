@@ -37,7 +37,7 @@ function authPageHTML(
 
     <link
         rel="preconnect"
-        href="https://fonts.googleapis.com"
+        href="https://fonts.gstatic.com"
         crossorigin
     >
 
@@ -162,13 +162,26 @@ function authPageHTML(
             cursor: pointer;
         }
 
+
+        .confirmation-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: #e8f8ee;
+            color: #2e9b52;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 22px;
+        }
+
     </style>
 
 </head>
 
 
 <body>
-
 
 <nav>
 
@@ -180,19 +193,6 @@ function authPageHTML(
         >
             Cashew<span>Papers</span>
         </a>
-
-
-        <div class="nav-actions">
-
-    <a
-        id="authNav"
-        href="../login/"
-        class="nav-account"
-    >
-        Login / Signup
-    </a>
-
-</div>
 
     </div>
 
@@ -216,55 +216,6 @@ function authPageHTML(
 ${script}
 
 
-<script>
-
-async function updateAuthNavigation() {
-
-    const authNav =
-        document.getElementById(
-            "authNav"
-        );
-
-
-    if (
-        !authNav ||
-        typeof getCurrentUser !==
-            "function"
-    ) {
-        return;
-    }
-
-
-    const user =
-        await getCurrentUser();
-
-
-    if (user) {
-
-        authNav.href =
-            "../account/";
-
-        authNav.textContent =
-            "Profile";
-
-    } else {
-
-        authNav.href =
-            "../login/";
-
-        authNav.textContent =
-            "Login / Signup";
-
-    }
-
-}
-
-
-updateAuthNavigation();
-
-</script>
-
-
 </body>
 
 </html>
@@ -273,6 +224,10 @@ updateAuthNavigation();
 
 }
 
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
 
 function generateLoginPage() {
 
@@ -408,13 +363,6 @@ function generateLoginPage() {
                         );
 
 
-                        /*
-                            The homepage decides whether
-                            to show the user's selected
-                            subjects or the full guest
-                            subject list.
-                        */
-
                         window.location.href =
                             "../";
 
@@ -436,6 +384,10 @@ function generateLoginPage() {
 
 }
 
+
+/* ============================================================
+   SIGN UP
+   ============================================================ */
 
 function generateSignupPage() {
 
@@ -599,20 +551,39 @@ function generateSignupPage() {
 
 
                     message.textContent =
-                        "Creating account...";
+                        "Creating your account...";
 
 
                     try {
 
-                        await signUpUser(
-                            email,
-                            password
-                        );
+                        const data =
+                            await signUpUser(
+                                email,
+                                password
+                            );
 
 
                         /*
-                            Subject selection is shown
-                            immediately after signup.
+                            No session means email
+                            confirmation is required.
+                        */
+
+                        if (
+                            !data.session
+                        ) {
+
+                            message.innerHTML =
+                                "Account created successfully.<br><br>" +
+                                "Please check your email and click the verification link before continuing.";
+
+                            return;
+
+                        }
+
+
+                        /*
+                            Fallback for projects where
+                            email confirmation is disabled.
                         */
 
                         window.location.href =
@@ -636,6 +607,112 @@ function generateSignupPage() {
 
 }
 
+
+/* ============================================================
+   EMAIL CONFIRMED
+   ============================================================ */
+
+function generateEmailConfirmedPage() {
+
+    return authPageHTML(
+
+        "Email Verified",
+
+        `
+
+        <div class="auth-page">
+
+            <div class="auth-card">
+
+                <div
+                    class="confirmation-icon"
+                >
+                    ✓
+                </div>
+
+
+                <h1>
+                    Email verified
+                </h1>
+
+
+                <p
+                    class="auth-subtitle"
+                    id="confirmationMessage"
+                >
+                    Your email has been verified.
+                    Taking you to subject selection...
+                </p>
+
+            </div>
+
+        </div>
+
+        `,
+
+        `
+
+        <script>
+
+        async function finishVerification() {
+
+            const message =
+                document.getElementById(
+                    "confirmationMessage"
+                );
+
+
+            const user =
+                await getCurrentUser();
+
+
+            if (!user) {
+
+                message.textContent =
+                    "Your email was verified, but your session could not be loaded. Please log in to continue.";
+
+                setTimeout(
+                    () => {
+
+                        window.location.href =
+                            "../login/";
+
+                    },
+                    2500
+                );
+
+                return;
+
+            }
+
+
+            setTimeout(
+                () => {
+
+                    window.location.href =
+                        "../select-subjects/";
+
+                },
+                1200
+            );
+
+        }
+
+
+        finishVerification();
+
+        </script>
+
+        `
+
+    );
+
+}
+
+
+/* ============================================================
+   ACCOUNT
+   ============================================================ */
 
 function generateAccountPage() {
 
@@ -662,7 +739,9 @@ function generateAccountPage() {
                 </p>
 
 
-                <div class="account-actions">
+                <div
+                    class="account-actions"
+                >
 
                     <button
                         id="editSubjects"
@@ -714,7 +793,8 @@ function generateAccountPage() {
                     "accountEmail"
                 )
                 .textContent =
-                    user.email || "Account";
+                    user.email ||
+                    "Account";
 
         }
 
@@ -773,7 +853,13 @@ function generateAccountPage() {
 
 
 module.exports = {
+
     generateLoginPage,
+
     generateSignupPage,
+
+    generateEmailConfirmedPage,
+
     generateAccountPage
+
 };
