@@ -1758,22 +1758,18 @@ function generateSessionPage(
 
                                 ${
                                     paper.question
-                                        ? `
+                                       ? `
                                             <a
                                                 class="
                                                     paper-button
                                                     primary
                                                 "
-                                                href="../${paper.question
-                                                    .split("/")
-                                                    .slice(-4)
-                                                    .join("/")
-                                                }"
-                                            >
+                                                    href="../../../../${paper.question}"
+                                        >
                                                 📄 Question Paper
                                             </a>
-                                        `
-                                        : ""
+                                    `
+                                    : ""
                                 }
 
 
