@@ -2648,6 +2648,15 @@ function generate() {
         generateAccountPage()
     );
 
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "email-confirmed",
+            "index.html"
+        ),
+        generateEmailConfirmedPage()
+    );
+
 
     /* Copy PDFs */
 
