@@ -12,6 +12,8 @@ const DIST_DIR = path.join(ROOT, "dist");
 const SUBJECTS_FILE = path.join(ROOT, "subjects.json");
 
 
+
+
 /* ============================================================
    BASIC HELPERS
    ============================================================ */
@@ -480,6 +482,12 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.nav-subjects {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 14px;
 }
 
 .logo {
@@ -1000,6 +1008,13 @@ function documentHTML(
             Cashew<span>Papers</span>
         </a>
 
+        <a
+            href="${prefix}select-subjects/"
+            class="nav-subjects"
+        >
+            Edit subjects
+        </a>
+
     </div>
 
 </nav>
@@ -1140,6 +1155,7 @@ function generateHome(subjects) {
 
                     <a
                         class="subject-card"
+                        data-subject="${key}"
                         href="${key}/"
                     >
 
@@ -1195,6 +1211,56 @@ function generateHome(subjects) {
                 ${cards}
 
             </div>
+
+
+            <script>
+
+                const selectedSubjects =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "cashew-selected-subjects"
+                        ) || "[]"
+                    );
+
+
+                const selectionComplete =
+                    localStorage.getItem(
+                        "cashew-subject-selection-complete"
+                    );
+
+
+                if (!selectionComplete) {
+
+                    window.location.href =
+                        "select-subjects/";
+
+                } else {
+
+                    document
+                        .querySelectorAll(
+                            "[data-subject]"
+                        )
+                        .forEach(card => {
+
+                            const subject =
+                                card.dataset.subject;
+
+                            if (
+                                !selectedSubjects.includes(
+                                    subject
+                                )
+                            ) {
+
+                                card.style.display =
+                                    "none";
+
+                            }
+
+                        });
+
+                }
+
+            </script>
 
         `,
 
@@ -1873,14 +1939,28 @@ function generate() {
     /* Home */
 
     writeFile(
-        path.join(
-            DIST_DIR,
-            "index.html"
-        ),
-        generateHome(
-            subjects
-        )
-    );
+    path.join(
+        DIST_DIR,
+        "index.html"
+    ),
+    generateHome(
+        subjects
+    )
+);
+
+
+/* Subject selection */
+
+writeFile(
+    path.join(
+        DIST_DIR,
+        "select-subjects",
+        "index.html"
+    ),
+    generateSubjectSelectionPage(
+        subjects
+    )
+);
 
 
     /* Copy PDFs */
