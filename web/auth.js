@@ -8,7 +8,14 @@ const SUPABASE_PUBLISHABLE_KEY =
 const cashewSupabase =
     window.supabase.createClient(
         SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            }
+        }
     );
 
 
@@ -26,7 +33,7 @@ async function signUpUser(
             password,
             options: {
                 emailRedirectTo:
-                    "https://ugaryt-market.github.io/cashewpapers/"
+                    "https://ugaryt-market.github.io/cashewpapers/email-confirmed/"
             }
         });
 
@@ -36,18 +43,11 @@ async function signUpUser(
     }
 
 
-    /*
-        Supabase can return an obfuscated user
-        when the email already belongs to an
-        existing account.
-
-        A normal newly-created email account
-        has an email identity.
-    */
-
     if (
         data.user &&
-        Array.isArray(data.user.identities) &&
+        Array.isArray(
+            data.user.identities
+        ) &&
         data.user.identities.length === 0
     ) {
 
@@ -61,6 +61,7 @@ async function signUpUser(
     return data;
 }
 
+
 async function signInUser(
     email,
     password
@@ -70,10 +71,11 @@ async function signInUser(
         data,
         error
     } =
-        await cashewSupabase.auth.signInWithPassword({
-            email,
-            password
-        });
+        await cashewSupabase.auth
+            .signInWithPassword({
+                email,
+                password
+            });
 
 
     if (error) {
