@@ -23,10 +23,12 @@ function authPageHTML(
         ${title} · Cashew Papers
     </title>
 
+
     <link
         rel="stylesheet"
         href="../style.css"
     >
+
 
     <link
         rel="preconnect"
@@ -35,22 +37,26 @@ function authPageHTML(
 
     <link
         rel="preconnect"
-        href="https://fonts.gstatic.com"
+        href="https://fonts.googleapis.com"
         crossorigin
     >
+
 
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet"
     >
 
+
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
+
     <script
         src="../auth.js"
     ></script>
+
 
     <style>
 
@@ -58,6 +64,7 @@ function authPageHTML(
             max-width: 460px;
             margin: 70px auto;
         }
+
 
         .auth-card {
             background: white;
@@ -67,9 +74,11 @@ function authPageHTML(
             box-shadow: var(--shadow);
         }
 
+
         .auth-card h1 {
             margin-bottom: 10px;
         }
+
 
         .auth-subtitle {
             color: var(--muted);
@@ -77,15 +86,18 @@ function authPageHTML(
             line-height: 1.5;
         }
 
+
         .auth-field {
             margin-bottom: 18px;
         }
+
 
         .auth-field label {
             display: block;
             font-weight: 700;
             margin-bottom: 7px;
         }
+
 
         .auth-field input {
             width: 100%;
@@ -94,6 +106,7 @@ function authPageHTML(
             border-radius: 10px;
             font-size: 15px;
         }
+
 
         .auth-submit {
             width: 100%;
@@ -107,12 +120,14 @@ function authPageHTML(
             cursor: pointer;
         }
 
+
         .auth-message {
             margin-top: 15px;
             font-size: 14px;
             color: var(--muted);
             line-height: 1.5;
         }
+
 
         .auth-switch {
             margin-top: 20px;
@@ -121,16 +136,19 @@ function authPageHTML(
             font-size: 14px;
         }
 
+
         .auth-switch a {
             color: var(--primary);
             font-weight: 700;
         }
+
 
         .account-actions {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+
 
         .secondary-button {
             width: 100%;
@@ -151,6 +169,7 @@ function authPageHTML(
 
 <body>
 
+
 <nav>
 
     <div class="nav-inner">
@@ -161,6 +180,27 @@ function authPageHTML(
         >
             Cashew<span>Papers</span>
         </a>
+
+
+        <div class="nav-actions">
+
+            <a
+                id="authNav"
+                href="../login/"
+                class="nav-account"
+            >
+                Login / Signup
+            </a>
+
+
+            <a
+                href="../select-subjects/"
+                class="nav-subjects"
+            >
+                Edit subjects
+            </a>
+
+        </div>
 
     </div>
 
@@ -182,6 +222,55 @@ function authPageHTML(
 
 
 ${script}
+
+
+<script>
+
+async function updateAuthNavigation() {
+
+    const authNav =
+        document.getElementById(
+            "authNav"
+        );
+
+
+    if (
+        !authNav ||
+        typeof getCurrentUser !==
+            "function"
+    ) {
+        return;
+    }
+
+
+    const user =
+        await getCurrentUser();
+
+
+    if (user) {
+
+        authNav.href =
+            "../account/";
+
+        authNav.textContent =
+            "Profile";
+
+    } else {
+
+        authNav.href =
+            "../login/";
+
+        authNav.textContent =
+            "Login / Signup";
+
+    }
+
+}
+
+
+updateAuthNavigation();
+
+</script>
 
 
 </body>
@@ -208,6 +297,7 @@ function generateLoginPage() {
                 <h1>
                     Log in
                 </h1>
+
 
                 <p class="auth-subtitle">
                     Log in to save your subjects,
@@ -293,22 +383,26 @@ function generateLoginPage() {
 
                     event.preventDefault();
 
+
                     const email =
                         document
                             .getElementById("email")
                             .value
                             .trim();
 
+
                     const password =
                         document
                             .getElementById("password")
                             .value;
+
 
                     const message =
                         document
                             .getElementById(
                                 "authMessage"
                             );
+
 
                     message.textContent =
                         "Logging in...";
@@ -321,8 +415,16 @@ function generateLoginPage() {
                             password
                         );
 
+
+                        /*
+                            The homepage decides whether
+                            to show the user's selected
+                            subjects or the full guest
+                            subject list.
+                        */
+
                         window.location.href =
-                            "../account/";
+                            "../";
 
                     } catch (error) {
 
@@ -358,6 +460,7 @@ function generateSignupPage() {
                 <h1>
                     Create your account
                 </h1>
+
 
                 <p class="auth-subtitle">
                     Create an account to save your
@@ -461,16 +564,19 @@ function generateSignupPage() {
 
                     event.preventDefault();
 
+
                     const email =
                         document
                             .getElementById("email")
                             .value
                             .trim();
 
+
                     const password =
                         document
                             .getElementById("password")
                             .value;
+
 
                     const confirmPassword =
                         document
@@ -478,6 +584,7 @@ function generateSignupPage() {
                                 "confirmPassword"
                             )
                             .value;
+
 
                     const message =
                         document
@@ -505,24 +612,19 @@ function generateSignupPage() {
 
                     try {
 
-                        const data =
-                            await signUpUser(
-                                email,
-                                password
-                            );
+                        await signUpUser(
+                            email,
+                            password
+                        );
 
 
-                        if (!data.session) {
+                        /*
+                            Subject selection is shown
+                            immediately after signup.
+                        */
 
-                            message.textContent =
-                                "Account created. Check your email to confirm your account.";
-
-                        } else {
-
-                            window.location.href =
-                                "../account/";
-
-                        }
+                        window.location.href =
+                            "../select-subjects/";
 
                     } catch (error) {
 
@@ -547,7 +649,7 @@ function generateAccountPage() {
 
     return authPageHTML(
 
-        "My Account",
+        "Profile",
 
         `
 
@@ -556,8 +658,9 @@ function generateAccountPage() {
             <div class="auth-card">
 
                 <h1>
-                    My account
+                    Profile
                 </h1>
+
 
                 <p
                     id="accountEmail"
@@ -620,7 +723,6 @@ function generateAccountPage() {
                 )
                 .textContent =
                     user.email || "Account";
-
 
         }
 
