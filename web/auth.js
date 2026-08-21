@@ -36,9 +36,30 @@ async function signUpUser(
     }
 
 
+    /*
+        Supabase can return an obfuscated user
+        when the email already belongs to an
+        existing account.
+
+        A normal newly-created email account
+        has an email identity.
+    */
+
+    if (
+        data.user &&
+        Array.isArray(data.user.identities) &&
+        data.user.identities.length === 0
+    ) {
+
+        throw new Error(
+            "An account with this email already exists. Please log in instead."
+        );
+
+    }
+
+
     return data;
 }
-
 
 async function signInUser(
     email,
