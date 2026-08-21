@@ -6,13 +6,14 @@ const generateSubjectSelectionPage =
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.08
+    Version Alpha 0.0.09
 */
 
 const ROOT = path.resolve(__dirname, "..");
 const PAPERS_DIR = path.join(ROOT, "papers");
 const DIST_DIR = path.join(ROOT, "dist");
 const SUBJECTS_FILE = path.join(ROOT, "subjects.json");
+const WEB_DIR = path.join(ROOT, "web");
 
 
 
@@ -996,6 +997,14 @@ function documentHTML(
         rel="stylesheet"
     >
 
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <script
+        src="${prefix}auth.js"
+    ></script>
+
 </head>
 
 <body>
@@ -1203,7 +1212,7 @@ function generateHome(subjects) {
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.08
+                    Version Alpha 0.0.09
                 </div>
 
             </section>
@@ -1752,24 +1761,24 @@ function generateSessionPage(
                                         togglePaperStatus(this);
                                     "
                                 >
-                                ☐ Mark as completed
-                            </button>
+                                    ☐ Mark as completed
+                                </button>
 
 
                                 ${
                                     paper.question
-                                       ? `
+                                        ? `
                                             <a
                                                 class="
                                                     paper-button
                                                     primary
                                                 "
-                                                    href="../../../../${paper.question}"
-                                        >
+                                                href="../../../../${paper.question}"
+                                            >
                                                 📄 Question Paper
                                             </a>
-                                    `
-                                    : ""
+                                        `
+                                        : ""
                                 }
 
 
@@ -1778,11 +1787,7 @@ function generateSessionPage(
                                         ? `
                                             <a
                                                 class="paper-button"
-                                                href="../${paper.markScheme
-                                                    .split("/")
-                                                    .slice(-4)
-                                                    .join("/")
-                                                }"
+                                                href="../../../../${paper.markScheme}"
                                             >
                                                 ✅ Mark Scheme
                                             </a>
@@ -1796,11 +1801,7 @@ function generateSessionPage(
                                         ? `
                                             <a
                                                 class="paper-button"
-                                                href="../${paper.examinerReport
-                                                    .split("/")
-                                                    .slice(-4)
-                                                    .join("/")
-                                                }"
+                                                href="../../../../${paper.examinerReport}"
                                             >
                                                 📋 Examiner Report
                                             </a>
@@ -1814,11 +1815,7 @@ function generateSessionPage(
                                         ? `
                                             <a
                                                 class="paper-button"
-                                                href="../${paper.insert
-                                                    .split("/")
-                                                    .slice(-4)
-                                                    .join("/")
-                                                }"
+                                                href="../../../../${paper.insert}"
                                             >
                                                 📎 Insert
                                             </a>
@@ -1935,31 +1932,45 @@ function generate() {
     );
 
 
+    /* Authentication */
+
+    fs.copyFileSync(
+        path.join(
+            WEB_DIR,
+            "auth.js"
+        ),
+        path.join(
+            DIST_DIR,
+            "auth.js"
+        )
+    );
+
+
     /* Home */
 
     writeFile(
-    path.join(
-        DIST_DIR,
-        "index.html"
-    ),
-    generateHome(
-        subjects
-    )
-);
+        path.join(
+            DIST_DIR,
+            "index.html"
+        ),
+        generateHome(
+            subjects
+        )
+    );
 
 
-/* Subject selection */
+    /* Subject selection */
 
-writeFile(
-    path.join(
-        DIST_DIR,
-        "select-subjects",
-        "index.html"
-    ),
-    generateSubjectSelectionPage(
-        subjects
-    )
-);
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "select-subjects",
+            "index.html"
+        ),
+        generateSubjectSelectionPage(
+            subjects
+        )
+    );
 
 
     /* Copy PDFs */
