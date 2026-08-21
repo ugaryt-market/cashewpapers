@@ -592,17 +592,6 @@ nav {
         0.9;
 }
 
-.nav-subjects {
-    color:
-        var(--primary);
-
-    font-weight:
-        700;
-
-    font-size:
-        14px;
-}
-
 .logo {
     font-size:
         22px;
@@ -1489,14 +1478,7 @@ function documentHTML(
                 Login / Signup
             </a>
 
-            <a
-                href="${prefix}select-subjects/"
-                class="nav-subjects"
-            >
-                Edit subjects
-            </a>
-
-        </div>
+</div>
 
     </div>
 
@@ -1789,60 +1771,81 @@ function generateHome(
 
             <script>
 
-                const selectedSubjects =
-                    JSON.parse(
-                        localStorage.getItem(
-                            "cashew-selected-subjects"
-                        ) || "[]"
-                    );
+async function applySubjectFilter() {
+
+    const user =
+        typeof getCurrentUser === "function"
+            ? await getCurrentUser()
+            : null;
 
 
-                const selectionComplete =
-                    localStorage.getItem(
-                        "cashew-subject-selection-complete"
-                    );
+    /*
+        Guests always see every subject.
+    */
+
+    if (!user) {
+        return;
+    }
 
 
-                /*
-                    Guests can browse all subjects.
+    /*
+        Signed-in users only see their
+        selected subjects.
+    */
 
-                    Once subjects have been selected,
-                    only those subjects are shown.
-                */
+    const selectedSubjects =
+        JSON.parse(
+            localStorage.getItem(
+                "cashew-selected-subjects"
+            ) || "[]"
+        );
+
+
+    const selectionComplete =
+        localStorage.getItem(
+            "cashew-subject-selection-complete"
+        );
+
+
+    if (
+        !selectionComplete ||
+        selectedSubjects.length === 0
+    ) {
+        return;
+    }
+
+
+    document
+        .querySelectorAll(
+            "[data-subject]"
+        )
+        .forEach(
+            card => {
+
+                const subject =
+                    card.dataset.subject;
+
 
                 if (
-                    selectionComplete &&
-                    selectedSubjects.length > 0
+                    !selectedSubjects.includes(
+                        subject
+                    )
                 ) {
 
-                    document
-                        .querySelectorAll(
-                            "[data-subject]"
-                        )
-                        .forEach(
-                            card => {
-
-                                const subject =
-                                    card.dataset.subject;
-
-
-                                if (
-                                    !selectedSubjects.includes(
-                                        subject
-                                    )
-                                ) {
-
-                                    card.style.display =
-                                        "none";
-
-                                }
-
-                            }
-                        );
+                    card.style.display =
+                        "none";
 
                 }
 
-            </script>
+            }
+        );
+
+}
+
+
+applySubjectFilter();
+
+</script>
 
         `,
 
