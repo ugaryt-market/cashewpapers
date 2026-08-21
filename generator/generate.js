@@ -1199,7 +1199,7 @@ main {
         flex;
 
     flex-direction:
-        column;
+        row;
 
     align-items:
         flex-start;
