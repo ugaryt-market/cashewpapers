@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
-const {
-    generateSubjectSelectionPage
-} = require(
+const generateSubjectSelectionPage =
+    require("./subject-selection");
+
     "./subject-selection"
 );
 
