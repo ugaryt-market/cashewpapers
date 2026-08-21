@@ -4,6 +4,12 @@ const path = require("path");
 const generateSubjectSelectionPage =
     require("./subject-selection");
 
+const {
+    generateLoginPage,
+    generateSignupPage,
+    generateAccountPage
+} = require("./auth-pages");
+
 /*
     Cashew Papers Static Site Generator
     Version Alpha 0.0.09
@@ -1971,6 +1977,37 @@ function generate() {
             subjects
         )
     );
+
+    /* Authentication pages */
+
+writeFile(
+    path.join(
+        DIST_DIR,
+        "login",
+        "index.html"
+    ),
+    generateLoginPage()
+);
+
+
+writeFile(
+    path.join(
+        DIST_DIR,
+        "signup",
+        "index.html"
+    ),
+    generateSignupPage()
+);
+
+
+writeFile(
+    path.join(
+        DIST_DIR,
+        "account",
+        "index.html"
+    ),
+    generateAccountPage()
+);
 
 
     /* Copy PDFs */
