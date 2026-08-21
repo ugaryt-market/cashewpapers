@@ -1472,11 +1472,13 @@ function documentHTML(
 
             <a
                 id="authNav"
-                href="${prefix}login/"
+                 href="${prefix}login/"
                 class="nav-account"
             >
                 Login / Signup
             </a>
+
+</div>
 
 </div>
 
