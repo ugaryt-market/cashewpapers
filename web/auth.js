@@ -5,7 +5,7 @@ const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_b1gQuYfPVWB74DJG0WB5Gg_E7itdOMn";
 
 
-const supabase =
+const cashewSupabase =
     window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_PUBLISHABLE_KEY
@@ -21,7 +21,7 @@ async function signUpUser(
         data,
         error
     } =
-        await supabase.auth.signUp({
+        await cashewSupabase.auth.signUp({
             email,
             password,
             options: {
@@ -49,7 +49,7 @@ async function signInUser(
         data,
         error
     } =
-        await supabase.auth.signInWithPassword({
+        await cashewSupabase.auth.signInWithPassword({
             email,
             password
         });
@@ -69,7 +69,7 @@ async function signOutUser() {
     const {
         error
     } =
-        await supabase.auth.signOut();
+        await cashewSupabase.auth.signOut();
 
 
     if (error) {
@@ -85,7 +85,7 @@ async function getCurrentUser() {
         data,
         error
     } =
-        await supabase.auth.getUser();
+        await cashewSupabase.auth.getUser();
 
 
     if (error) {
@@ -97,7 +97,7 @@ async function getCurrentUser() {
 }
 
 
-supabase.auth.onAuthStateChange(
+cashewSupabase.auth.onAuthStateChange(
     (
         event,
         session
