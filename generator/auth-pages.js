@@ -184,23 +184,15 @@ function authPageHTML(
 
         <div class="nav-actions">
 
-            <a
-                id="authNav"
-                href="../login/"
-                class="nav-account"
-            >
-                Login / Signup
-            </a>
+    <a
+        id="authNav"
+        href="../login/"
+        class="nav-account"
+    >
+        Login / Signup
+    </a>
 
-
-            <a
-                href="../select-subjects/"
-                class="nav-subjects"
-            >
-                Edit subjects
-            </a>
-
-        </div>
+</div>
 
     </div>
 
