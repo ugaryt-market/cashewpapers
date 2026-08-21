@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.11
+    Version Alpha 0.0.12
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1198,11 +1198,11 @@ main {
     display:
         flex;
 
-    flex-wrap:
-        wrap;
+    flex-direction:
+        column;
 
     align-items:
-        center;
+        flex-start;
 
     gap:
         8px;
@@ -1293,14 +1293,17 @@ main {
     display:
         flex;
 
-    align-items:
-        center;
+    flex-direction:
+        column;
 
-    flex-wrap:
-        wrap;
+    align-items:
+        flex-start;
 
     gap:
         8px;
+
+    max-width:
+        100%;
 }
 
 .attempt-button {
@@ -1331,6 +1334,9 @@ main {
 
     cursor:
         pointer;
+
+    flex-shrink:
+        0;
 }
 
 .attempt-button:hover {
@@ -1338,21 +1344,13 @@ main {
         #e7e8ee;
 }
 
-.attempt-list {
-    display:
-        flex;
+.attempt-history {
+    min-width:
+        230px;
 
-    align-items:
-        center;
+    max-width:
+        100%;
 
-    flex-wrap:
-        wrap;
-
-    gap:
-        7px;
-}
-
-.attempt-chip {
     padding:
         9px 12px;
 
@@ -1361,7 +1359,7 @@ main {
         #e1e3ea;
 
     border-radius:
-        10px;
+        12px;
 
     background:
         #fafbfc;
@@ -1374,9 +1372,89 @@ main {
 
     line-height:
         1.35;
+}
 
-    white-space:
-        nowrap;
+.attempt-row {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding:
+        5px 0;
+}
+
+.attempt-row + .attempt-row {
+    border-top:
+        1px solid
+        #e8e9ee;
+}
+
+.attempt-row-text {
+    min-width:
+        0;
+
+    overflow-wrap:
+        anywhere;
+}
+
+.attempt-remove {
+    width:
+        24px;
+
+    height:
+        24px;
+
+    flex-shrink:
+        0;
+
+    border:
+        none;
+
+    border-radius:
+        50%;
+
+    background:
+        transparent;
+
+    color:
+        #8b90a0;
+
+    font-size:
+        18px;
+
+    line-height:
+        1;
+
+    cursor:
+        pointer;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        0;
+}
+
+.attempt-remove:hover {
+    background:
+        #eceef3;
+
+    color:
+        #5e6372;
 }
 
 .attempt-form {
@@ -1461,9 +1539,6 @@ main {
 }
 
 .paper-login-notice {
-    flex-basis:
-        100%;
-
     margin-top:
         1px;
 
@@ -1576,12 +1651,23 @@ footer {
 
     .paper-progress {
         width:
+            auto;
+
+        max-width:
             100%;
     }
 
     .paper-status,
     .attempt-button {
         flex-shrink:
+            0;
+    }
+
+    .attempt-history {
+        width:
+            100%;
+
+        min-width:
             0;
     }
 
@@ -2017,31 +2103,103 @@ function renderPaperAttempts(
         return;
     }
 
-    const list =
+    const history =
         document.createElement("div");
 
-    list.className =
-        "attempt-list";
+    history.className =
+        "attempt-history";
 
     attempts.forEach(
         (attempt, index) => {
 
-            const chip =
+            const row =
                 document.createElement("div");
 
-            chip.className =
-                "attempt-chip";
+            row.className =
+                "attempt-row";
 
-            chip.textContent =
+            const text =
+                document.createElement("div");
+
+            text.className =
+                "attempt-row-text";
+
+            text.textContent =
                 \`Attempt \${index + 1} / \${attempt.score} / \${formatAttemptDate(attempt.date)}\`;
 
-            list.appendChild(chip);
+            const removeButton =
+                document.createElement("button");
+
+            removeButton.type = "button";
+            removeButton.className =
+                "attempt-remove";
+            removeButton.textContent = "×";
+            removeButton.setAttribute(
+                "aria-label",
+                \`Remove attempt \${index + 1}\`
+            );
+            removeButton.title =
+                "Remove attempt";
+
+            removeButton.addEventListener(
+                "click",
+                async () => {
+
+                    const currentUser =
+                        await getCurrentUser();
+
+                    if (!currentUser) {
+
+                        showLoginRequired(
+                            progress.querySelector(
+                                ".paper-status"
+                            )
+                        );
+
+                        return;
+
+                    }
+
+                    const currentAttempts =
+                        getPaperAttempts(key);
+
+                    currentAttempts.splice(
+                        index,
+                        1
+                    );
+
+                    setPaperAttempts(
+                        key,
+                        currentAttempts
+                    );
+
+                    renderPaperAttempts(
+                        progress,
+                        key,
+                        getPaperStatus(key) === "completed",
+                        currentUser
+                    );
+
+                }
+            );
+
+            row.appendChild(
+                text
+            );
+
+            row.appendChild(
+                removeButton
+            );
+
+            history.appendChild(
+                row
+            );
 
         }
     );
 
     attemptsContainer.appendChild(
-        list
+        history
     );
 
 }
@@ -2061,7 +2219,14 @@ function openAttemptForm(
         return;
     }
 
-    attemptsContainer.innerHTML = "";
+    const existingForm =
+        attemptsContainer.querySelector(
+            ".attempt-form"
+        );
+
+    if (existingForm) {
+        return;
+    }
 
     const form =
         document.createElement("form");
@@ -2363,7 +2528,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.11
+                    Version Alpha 0.0.12
                 </div>
 
             </section>
