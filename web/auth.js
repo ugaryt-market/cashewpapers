@@ -7,7 +7,7 @@ const SUPABASE_PUBLISHABLE_KEY =
 
 const supabase =
     window.supabase.createClient(
-        bbchhwjftvwomwnicwhj,
+        https://bbchhwjftvwomwnicwhj.supabase.co,
         sb_publishable_b1gQuYfPVWB74DJG0WB5Gg_E7itdOMn
     );
 
@@ -49,11 +49,10 @@ async function signInUser(
         data,
         error
     } =
-        await supabase.auth
-            .signInWithPassword({
-                email,
-                password
-            });
+        await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
 
 
     if (error) {
