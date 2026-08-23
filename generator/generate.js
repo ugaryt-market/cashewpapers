@@ -41,6 +41,7 @@ const CATEGORY_ICON_FILES = {
 
 const IMAGE_ASSETS = [
     "cashewpapers.svg",
+    "email-logo.png",
     "favicon.svg",
     "16.svg",
     "17.svg",
