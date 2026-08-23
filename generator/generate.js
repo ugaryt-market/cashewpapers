@@ -1876,7 +1876,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css"
+        href="${prefix}style.css?v=0.0.16"
     >
 
     <link
