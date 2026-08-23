@@ -2668,8 +2668,11 @@ function generateHome(
                 </h1>
 
                 <p>
-                    A simple, modern place to find
-                    past papers and mark schemes.
+                    all the papers, with none of the mess.
+                </p>
+
+                <p>
+                    organized like a study tool, not a filing cabinet.
                 </p>
 
                 <div class="version">
