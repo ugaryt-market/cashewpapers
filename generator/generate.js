@@ -685,7 +685,7 @@ nav {
 }
 
 .logo img {
-    height: 48px;
+    height: 84px;
     width: auto;
     display: block;
 }
@@ -2641,8 +2641,8 @@ function generateHome(
             <section class="hero">
 
                 <h1>
-                    Find your
-                    <span>past papers.</span>
+                    by students, 
+                    <span>for students.</span>
                 </h1>
 
                 <p>
