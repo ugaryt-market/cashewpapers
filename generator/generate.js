@@ -685,7 +685,7 @@ nav {
 }
 
 .logo img {
-    height: 30px;
+    height: 35px;
     width: auto;
     display: block;
 }
@@ -718,21 +718,16 @@ main {
         50px 24px 80px;
 }
 
-.hero {
-    text-align:
-        center;
-
-    margin-bottom:
-        45px;
+.hero h1 {
+    font-size: clamp(42px, 7vw, 68px);
+    letter-spacing: -3px;
+    margin-bottom: 18px;
+    font-weight: 400;
+    color: var(--text);
 }
 
 .hero h1 span {
     color: var(--text);
-    font-weight: 400;
-}
-
-.hero h1 span {
-    color: var(--primary);
     font-weight: 400;
 }
 
