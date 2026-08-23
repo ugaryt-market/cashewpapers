@@ -1897,7 +1897,7 @@ function documentHTML(
     rel="icon"
     type="image/svg+xml"
     href="${prefix}assets/favicon.svg"
-    >
+>
 
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
