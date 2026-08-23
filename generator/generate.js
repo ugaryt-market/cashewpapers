@@ -718,17 +718,47 @@ main {
         50px 24px 80px;
 }
 
+.hero {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
 .hero h1 {
-    font-size: clamp(42px, 7vw, 68px);
-    letter-spacing: -3px;
-    margin-bottom: 18px;
-    font-weight: 400;
-    color: var(--text);
+    font-size:
+        clamp(
+            42px,
+            7vw,
+            68px
+        );
+
+    letter-spacing:
+        -3px;
+
+    margin-bottom:
+        18px;
+
+    font-weight:
+        400;
+
+    color:
+        var(--text);
+
+    text-align:
+        center;
+
+    white-space:
+        normal;
+
+    line-height:
+        1.15;
 }
 
 .hero h1 span {
-    color: var(--text);
-    font-weight: 400;
+    color:
+        var(--text);
+
+    font-weight:
+        400;
 }
 
 .hero p {
