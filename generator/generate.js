@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.12
+    Version Alpha 0.0.14
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -493,19 +493,21 @@ const CSS = `
 }
 
 :root {
-    --bg: #f7f8fc;
-    --card: #ffffff;
-    --text: #202536;
-    --muted: #73798c;
-    --primary: #ff3976;
-    --border: #e7e9f0;
+    --bg: #333438;
+    --card: #2c2e31;
+    --text: #c5c4ba;
+    --muted: #646669;
+    --primary: #ff964f;
+    --subdued: #936b3c;
+    --border: #46484b;
     --shadow:
         0 8px 25px
-        rgba(30, 35, 60, 0.08);
+        rgba(0, 0, 0, 0.18);
 }
 
 body {
     font-family:
+        "Questrial",
         Arial,
         Helvetica,
         sans-serif;
@@ -530,7 +532,7 @@ a {
 
 nav {
     background:
-        white;
+        var(--card);
 
     border-bottom:
         1px solid
@@ -638,6 +640,9 @@ main {
 
     margin-bottom:
         18px;
+
+    color:
+        var(--primary);
 }
 
 .hero h1 span {
@@ -670,7 +675,7 @@ main {
         12px;
 
     color:
-        #9a9ead;
+        var(--subdued);
 
     font-weight:
         600;
@@ -701,6 +706,9 @@ main {
 
     letter-spacing:
         -1px;
+
+    color:
+        var(--primary);
 }
 
 .page-header p {
@@ -732,7 +740,7 @@ main {
 .subject-card,
 .category-card {
     background:
-        white;
+        var(--card);
 
     border:
         1px solid
@@ -763,13 +771,16 @@ main {
         );
 
     border-color:
-        #ffd0df;
+        var(--subdued);
 }
 
 .subject-card h2,
 .category-card h2 {
     margin-top:
         18px;
+
+    color:
+        var(--primary);
 }
 
 .card-icon {
@@ -783,7 +794,7 @@ main {
         14px;
 
     background:
-        #fff0f5;
+        #2c2e31;
 
     display:
         flex;
@@ -828,7 +839,7 @@ main {
 
 .year-link {
     background:
-        white;
+        var(--card);
 
     border:
         1px solid
@@ -859,6 +870,7 @@ main {
         104px;
 
     font-family:
+        "Questrial",
         Arial,
         Helvetica,
         sans-serif;
@@ -881,7 +893,7 @@ main {
         );
 
     border-color:
-        #ffd0df;
+        var(--subdued);
 
     box-shadow:
         0 14px 35px
@@ -912,7 +924,7 @@ main {
 
 .year-session-card {
     background:
-        white;
+        var(--card);
 
     border:
         1px solid
@@ -968,7 +980,7 @@ main {
         14px;
 
     background:
-        #eefbfc;
+        #2c2e31;
 
     display:
         flex;
@@ -1037,7 +1049,7 @@ main {
 .session-card,
 .paper-card {
     background:
-        white;
+        var(--card);
 
     border:
         1px solid
@@ -1089,7 +1101,7 @@ main {
         10px;
 
     background:
-        #eefbfc;
+        #2c2e31;
 
     display:
         flex;
@@ -1177,7 +1189,10 @@ main {
         10px 14px;
 
     background:
-        #f0f1f6;
+        #2c2e31;
+
+    color:
+        var(--text);
 
     cursor:
         pointer;
@@ -1220,13 +1235,13 @@ main {
 
     border:
         1px dashed
-        #cfd2dc;
+        #646669;
 
     border-radius:
         999px;
 
     background:
-        #fafbfc;
+        #2c2e31;
 
     color:
         #73798c;
@@ -1266,27 +1281,27 @@ main {
         );
 
     border-color:
-        #b9becb;
+        var(--muted);
 
     background:
-        #f5f6f9;
+        #3a3c3f;
 }
 
 .paper-status.completed {
     background:
-        #e8f8ee;
+        #3a3127;
 
     border:
         1px solid
-        #b9e8c8;
+        var(--subdued);
 
     color:
-        #2e9b52;
+        var(--primary);
 }
 
 .paper-status.completed:hover {
     background:
-        #def4e6;
+        #40382e;
 }
 
 .paper-attempts {
@@ -1321,7 +1336,7 @@ main {
         999px;
 
     background:
-        #f0f1f6;
+        #2c2e31;
 
     color:
         var(--text);
@@ -1341,7 +1356,7 @@ main {
 
 .attempt-button:hover {
     background:
-        #e7e8ee;
+        #3a3c3f;
 }
 
 .attempt-history {
@@ -1356,16 +1371,16 @@ main {
 
     border:
         1px solid
-        #e1e3ea;
+        #46484b;
 
     border-radius:
         12px;
 
     background:
-        #fafbfc;
+        #2c2e31;
 
     color:
-        #555b6d;
+        var(--text);
 
     font-size:
         12px;
@@ -1394,7 +1409,7 @@ main {
 .attempt-row + .attempt-row {
     border-top:
         1px solid
-        #e8e9ee;
+        #46484b;
 }
 
 .attempt-row-text {
@@ -1425,7 +1440,7 @@ main {
         transparent;
 
     color:
-        #8b90a0;
+        var(--muted);
 
     font-size:
         18px;
@@ -1451,10 +1466,10 @@ main {
 
 .attempt-remove:hover {
     background:
-        #eceef3;
+        #3a3c3f;
 
     color:
-        #5e6372;
+        var(--text);
 }
 
 .attempt-form {
@@ -1489,7 +1504,7 @@ main {
         10px;
 
     background:
-        white;
+        var(--card);
 
     color:
         var(--text);
@@ -1532,7 +1547,7 @@ main {
 
 .attempt-cancel {
     background:
-        #f0f1f6;
+        #2c2e31;
 
     color:
         var(--text);
@@ -1562,7 +1577,7 @@ main {
 
 .empty {
     background:
-        white;
+        var(--card);
 
     border:
         1px dashed
@@ -1737,7 +1752,7 @@ function documentHTML(
     >
 
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Questrial&display=swap"
         rel="stylesheet"
     >
 
@@ -2506,7 +2521,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.13
+                    Version Alpha 0.0.14
                 </div>
 
             </section>
