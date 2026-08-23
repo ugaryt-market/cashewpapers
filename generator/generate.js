@@ -1974,32 +1974,10 @@ function clearLoginNotice(
 }
 
 
-function showLoginRequired(
-    button
-) {
+function showLoginRequired() {
 
-    const progress =
-        button.closest(
-            ".paper-progress"
-        );
-
-    if (!progress) {
-        return;
-    }
-
-    clearLoginNotice(progress);
-
-    const notice =
-        document.createElement("div");
-
-    notice.className =
-        "paper-login-notice";
-
-    notice.innerHTML =
-        "You must be logged in to continue. " +
-        '<a href="${prefix}login/">Log in</a>';
-
-    progress.appendChild(notice);
+    window.location.href =
+        "${prefix}login/";
 
 }
 
