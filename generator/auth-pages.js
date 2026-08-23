@@ -20,7 +20,7 @@ function authPageHTML(
     >
 
     <title>
-        ${title} · Cashew Papers
+        ${String(title).toLowerCase()} · cashew papers
     </title>
 
 
@@ -43,7 +43,7 @@ function authPageHTML(
 
 
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Questrial&display=swap"
         rel="stylesheet"
     >
 
@@ -60,6 +60,43 @@ function authPageHTML(
 
     <style>
 
+        body {
+            font-family:
+                "Questrial",
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            font-weight:
+                400;
+
+            text-transform:
+                lowercase;
+        }
+
+        button,
+        input {
+            font: inherit;
+            text-transform: lowercase;
+        }
+
+        .brand-logo {
+            width:
+                150px;
+
+            height:
+                38px;
+
+            display:
+                block;
+
+            object-fit:
+                cover;
+
+            object-position:
+                center;
+        }
+
         .auth-page {
             max-width: 460px;
             margin: 70px auto;
@@ -67,7 +104,7 @@ function authPageHTML(
 
 
         .auth-card {
-            background: white;
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 32px;
@@ -94,7 +131,8 @@ function authPageHTML(
 
         .auth-field label {
             display: block;
-            font-weight: 700;
+            font-weight:
+            400;
             margin-bottom: 7px;
         }
 
@@ -104,7 +142,22 @@ function authPageHTML(
             padding: 12px 14px;
             border: 1px solid var(--border);
             border-radius: 10px;
+            background: #3a3c3f;
+            color: var(--text);
             font-size: 15px;
+            font-weight: 400;
+        }
+
+        .auth-field input::placeholder {
+            color: var(--muted);
+        }
+
+        .auth-field input:-webkit-autofill,
+        .auth-field input:-webkit-autofill:hover,
+        .auth-field input:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text);
+            box-shadow: 0 0 0 1000px #3a3c3f inset;
+            transition: background-color 9999s ease-out 0s;
         }
 
 
@@ -114,9 +167,10 @@ function authPageHTML(
             border-radius: 10px;
             padding: 13px;
             background: var(--primary);
-            color: white;
+            color: #333438;
             font-size: 15px;
-            font-weight: 700;
+            font-weight:
+            400;
             cursor: pointer;
         }
 
@@ -139,7 +193,8 @@ function authPageHTML(
 
         .auth-switch a {
             color: var(--primary);
-            font-weight: 700;
+            font-weight:
+            400;
         }
 
 
@@ -155,10 +210,11 @@ function authPageHTML(
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 13px;
-            background: #f0f1f6;
+            background: #3a3c3f;
             color: var(--text);
             font-size: 15px;
-            font-weight: 700;
+            font-weight:
+            400;
             cursor: pointer;
         }
 
@@ -167,8 +223,8 @@ function authPageHTML(
             width: 64px;
             height: 64px;
             border-radius: 18px;
-            background: #e8f8ee;
-            color: #2e9b52;
+            background: #3a3127;
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -190,8 +246,13 @@ function authPageHTML(
         <a
             class="logo"
             href="../"
+            aria-label="cashewpapers"
         >
-            Cashew<span>Papers</span>
+            <img
+                class="brand-logo"
+                src="../assets/cashewpapers.svg"
+                alt="cashewpapers"
+            >
         </a>
 
     </div>
@@ -208,7 +269,7 @@ function authPageHTML(
 
 <footer>
 
-    Cashew Papers · Built for students
+    cashew papers · built for students
 
 </footer>
 
