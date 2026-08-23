@@ -679,19 +679,14 @@ nav {
 }
 
 .logo {
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    text-decoration:
-        none;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
 }
 
 .logo img {
-    width: 200px;
-    height: auto;
+    height: 48px;
+    width: auto;
     display: block;
 }
 
@@ -736,16 +731,7 @@ main {
     letter-spacing: -3px;
     margin-bottom: 18px;
     font-weight: 400;
-}
-
-    letter-spacing:
-        -3px;
-
-    margin-bottom:
-        18px;
-
-    color:
-        var(--primary);
+    color: var(--text);
 }
 
 .hero h1 span {
