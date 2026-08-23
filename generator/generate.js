@@ -1906,7 +1906,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js"
+        src="${prefix}auth.js?v=0.0.16"
     ></script>
 
 </head>
