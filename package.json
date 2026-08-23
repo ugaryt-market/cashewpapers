@@ -1,13 +1,14 @@
 {
     "name": "cashew-papers",
-    "version": "0.0.6",
+    "version": "0.0.13",
     "private": true,
+    "main": "server.js",
     "scripts": {
         "build": "node generator/generate.js",
         "start": "node server.js"
     },
     "engines": {
-        "node": ">=24"
+        "node": "22.x"
     },
     "dependencies": {
         "express": "^5.1.0"
