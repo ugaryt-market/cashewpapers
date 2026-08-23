@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.15
+    Version Alpha 0.0.16
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -41,6 +41,7 @@ const CATEGORY_ICON_FILES = {
 
 const IMAGE_ASSETS = [
     "cashewpapers.svg",
+    "favicon.svg",
     "16.svg",
     "17.svg",
     "18.svg",
