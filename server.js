@@ -20,8 +20,7 @@ app.use(
 );
 
 
-app.get(
-    "*",
+app.use(
     (req, res) => {
 
         res.sendFile(
