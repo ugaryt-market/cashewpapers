@@ -689,6 +689,12 @@ nav {
         none;
 }
 
+.logo img {
+    width: 200px;
+    height: auto;
+    display: block;
+}
+
 .brand-logo {
     width:
         150px;
