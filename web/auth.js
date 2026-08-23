@@ -33,7 +33,7 @@ async function signUpUser(
             password,
             options: {
                 emailRedirectTo:
-                    "https://ugaryt-market.github.io/cashewpapers/email-confirmed/"
+                    "https://cashewpapers.com/email-confirmed/"
             }
         });
 
