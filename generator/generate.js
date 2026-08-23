@@ -726,12 +726,11 @@ main {
 }
 
 .hero h1 {
-    font-size:
-        clamp(
-            42px,
-            7vw,
-            68px
-        );
+    font-size: clamp(42px, 7vw, 68px);
+    letter-spacing: -3px;
+    margin-bottom: 18px;
+    font-weight: 400;
+}
 
     letter-spacing:
         -3px;
@@ -744,8 +743,8 @@ main {
 }
 
 .hero h1 span {
-    color:
-        var(--primary);
+    color: var(--primary);
+    font-weight: 400;
 }
 
 .hero p {
