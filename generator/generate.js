@@ -685,7 +685,7 @@ nav {
 }
 
 .logo img {
-    height: 35px;
+    height: 40px;
     width: auto;
     display: block;
 }
