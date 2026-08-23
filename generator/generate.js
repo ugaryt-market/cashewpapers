@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.14
+    Version Alpha 0.0.15
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -21,6 +21,37 @@ const PAPERS_DIR = path.join(ROOT, "papers");
 const DIST_DIR = path.join(ROOT, "dist");
 const SUBJECTS_FILE = path.join(ROOT, "subjects.json");
 const WEB_DIR = path.join(ROOT, "web");
+const ASSETS_DIR = path.join(ROOT, "assets");
+
+const SUBJECT_ICON_FILES = {
+    mathematics: "16.svg",
+    physics: "17.svg",
+    biology: "18.svg",
+    chemistry: "19.svg",
+    economics: "20.svg",
+    computerscience: "21.svg",
+    psychology: "22.svg",
+    business: "23.svg"
+};
+
+const CATEGORY_ICON_FILES = {
+    pure: "pure.svg",
+    statsmech: "stats.svg"
+};
+
+const IMAGE_ASSETS = [
+    "cashewpapers.svg",
+    "16.svg",
+    "17.svg",
+    "18.svg",
+    "19.svg",
+    "20.svg",
+    "21.svg",
+    "22.svg",
+    "23.svg",
+    "pure.svg",
+    "stats.svg"
+];
 
 
 /* ============================================================
@@ -38,6 +69,46 @@ function writeFile(file, content) {
 
 function readJSON(file) {
     return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
+function normalizeSubjectKey(key) {
+    return String(key)
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+}
+
+function assetPath(filename, depth = 0) {
+    return ("../".repeat(depth)) + "assets/" + filename;
+}
+
+function getSubjectIconFile(subjectKey) {
+    return SUBJECT_ICON_FILES[
+        normalizeSubjectKey(subjectKey)
+    ] || null;
+}
+
+function getCategoryIconFile(categoryKey) {
+    return CATEGORY_ICON_FILES[categoryKey] || null;
+}
+
+function copyImageAssets() {
+
+    const targetDir = path.join(DIST_DIR, "assets");
+    ensureDir(targetDir);
+
+    for (const filename of IMAGE_ASSETS) {
+
+        const source = path.join(ASSETS_DIR, filename);
+
+        if (!fs.existsSync(source)) {
+            throw new Error(`Missing image asset: ${source}`);
+        }
+
+        fs.copyFileSync(
+            source,
+            path.join(targetDir, filename)
+        );
+    }
 }
 
 
@@ -520,6 +591,12 @@ body {
 
     min-height:
         100vh;
+
+    font-weight:
+        400;
+
+    text-transform:
+        lowercase;
 }
 
 a {
@@ -528,6 +605,12 @@ a {
 
     text-decoration:
         none;
+}
+
+button,
+input {
+    font: inherit;
+    text-transform: lowercase;
 }
 
 nav {
@@ -587,7 +670,7 @@ nav {
         14px;
 
     font-weight:
-        700;
+        400;
 }
 
 .nav-account:hover {
@@ -596,16 +679,31 @@ nav {
 }
 
 .logo {
-    font-size:
-        22px;
+    display:
+        inline-flex;
 
-    font-weight:
-        800;
+    align-items:
+        center;
+
+    text-decoration:
+        none;
 }
 
-.logo span {
-    color:
-        var(--primary);
+.brand-logo {
+    width:
+        150px;
+
+    height:
+        38px;
+
+    display:
+        block;
+
+    object-fit:
+        cover;
+
+    object-position:
+        center;
 }
 
 main {
@@ -678,7 +776,7 @@ main {
         var(--subdued);
 
     font-weight:
-        600;
+        400;
 }
 
 .page-header {
@@ -691,7 +789,7 @@ main {
         var(--primary);
 
     font-weight:
-        700;
+        400;
 
     display:
         inline-block;
@@ -794,7 +892,10 @@ main {
         14px;
 
     background:
-        #2c2e31;
+        #3a3c3f;
+
+    border:
+        1px solid var(--border);
 
     display:
         flex;
@@ -807,6 +908,23 @@ main {
 
     font-size:
         23px;
+}
+
+.card-icon-image {
+    width:
+        34px;
+
+    height:
+        34px;
+
+    object-fit:
+        cover;
+
+    object-position:
+        center;
+
+    display:
+        block;
 }
 
 .card-description {
@@ -879,7 +997,7 @@ main {
         29px;
 
     font-weight:
-        700;
+        400;
 
     text-align:
         center;
@@ -980,7 +1098,10 @@ main {
         14px;
 
     background:
-        #2c2e31;
+        #3a3c3f;
+
+    border:
+        1px solid var(--border);
 
     display:
         flex;
@@ -1003,7 +1124,7 @@ main {
         17px;
 
     font-weight:
-        700;
+        400;
 
     line-height:
         1.4;
@@ -1101,7 +1222,10 @@ main {
         10px;
 
     background:
-        #2c2e31;
+        #3a3c3f;
+
+    border:
+        1px solid var(--border);
 
     display:
         flex;
@@ -1161,7 +1285,7 @@ main {
         7px;
 
     font-weight:
-        600;
+        400;
 }
 
 .paper-actions {
@@ -1180,7 +1304,7 @@ main {
 
 .paper-button {
     border:
-        none;
+        1px solid var(--border);
 
     border-radius:
         8px;
@@ -1189,7 +1313,7 @@ main {
         10px 14px;
 
     background:
-        #2c2e31;
+        #3a3c3f;
 
     color:
         var(--text);
@@ -1244,13 +1368,13 @@ main {
         #2c2e31;
 
     color:
-        #73798c;
+        var(--muted);
 
     font-size:
         14px;
 
     font-weight:
-        700;
+        400;
 
     cursor:
         pointer;
@@ -1345,7 +1469,7 @@ main {
         14px;
 
     font-weight:
-        700;
+        400;
 
     cursor:
         pointer;
@@ -1531,7 +1655,7 @@ main {
         13px;
 
     font-weight:
-        700;
+        400;
 
     cursor:
         pointer;
@@ -1569,7 +1693,7 @@ main {
         var(--primary);
 
     font-weight:
-        700;
+        400;
 }
 
 
@@ -1732,7 +1856,7 @@ function documentHTML(
     >
 
     <title>
-        ${title} · Cashew Papers
+        ${String(title).toLowerCase()} · cashew papers
     </title>
 
     <link
@@ -1775,8 +1899,13 @@ function documentHTML(
         <a
             class="logo"
             href="${prefix}index.html"
+            aria-label="cashewpapers"
         >
-            Cashew<span>Papers</span>
+            <img
+                class="brand-logo"
+                src="${assetPath("cashewpapers.svg", depth)}"
+                alt="cashewpapers"
+            >
         </a>
 
         <div class="nav-actions">
@@ -1805,7 +1934,7 @@ ${body}
 
 <footer>
 
-    Cashew Papers · Built for students
+    cashew papers · built for students
 
 </footer>
 
@@ -2481,7 +2610,17 @@ function generateHome(
                 >
 
                     <div class="card-icon">
-                        ${subject.icon}
+                        ${
+                            getSubjectIconFile(key)
+                                ? `
+                                    <img
+                                        class="card-icon-image"
+                                        src="${assetPath(getSubjectIconFile(key), 0)}"
+                                        alt=""
+                                    >
+                                `
+                                : subject.icon
+                        }
                     </div>
 
                     <h2>
@@ -2669,7 +2808,17 @@ function generateSubjectPage(
                         >
 
                             <div class="card-icon">
-                                ${icon}
+                                ${
+                                    getCategoryIconFile(key)
+                                        ? `
+                                            <img
+                                                class="card-icon-image"
+                                                src="${assetPath(getCategoryIconFile(key), 1)}"
+                                                alt=""
+                                            >
+                                        `
+                                        : icon
+                                }
                             </div>
 
                             <h2>
@@ -3337,6 +3486,11 @@ function generate() {
     ensureDir(
         DIST_DIR
     );
+
+
+    /* Image assets */
+
+    copyImageAssets();
 
 
     /* Shared CSS */
