@@ -2668,11 +2668,11 @@ function generateHome(
                 </h1>
 
                 <p>
-                    all the papers, with none of the mess.
+                    organized like a study tool, not a filing cabinet.
                 </p>
 
                 <p>
-                    organized like a study tool, not a filing cabinet.
+                    all the papers, with none of the mess.
                 </p>
 
                 <div class="version">
