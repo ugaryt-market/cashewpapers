@@ -2506,7 +2506,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.12
+                    Version Alpha 0.0.13
                 </div>
 
             </section>
