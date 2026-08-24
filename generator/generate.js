@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.17
+    Version Alpha 0.0.18
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1757,50 +1757,56 @@ footer {
 }
 
 
-/* ---------------- HOME PAGE COMPACT LAYOUT ---------------- */
+/* ---------------- HOME PAGE BALANCED DESKTOP LAYOUT ---------------- */
 
 .home-page {
-    padding-top: 4px;
+    padding-top: 8px;
 }
 
 .home-page .hero {
-    margin-bottom: 22px;
+    margin-bottom: 30px;
 }
 
 .home-page .hero h1 {
     font-size:
-        clamp(32px, 4.2vw, 48px);
+        clamp(38px, 4.5vw, 54px);
 
     letter-spacing:
         -2px;
 
     margin-bottom:
-        7px;
+        10px;
 
     line-height:
-        1.1;
+        1.12;
 }
 
 .home-page .hero p {
     font-size:
-        12px;
+        13px;
 
     line-height:
-        1.3;
+        1.35;
 
     margin-top:
-        2px;
+        3px;
 }
 
 .home-page .version {
     margin-top:
-        5px;
+        7px;
 
     font-size:
-        10px;
+        11px;
 }
 
 .home-page .subject-grid {
+    width:
+        min(100%, 1080px);
+
+    margin:
+        0 auto;
+
     grid-template-columns:
         repeat(
             4,
@@ -1808,45 +1814,57 @@ footer {
         );
 
     gap:
-        12px;
+        16px;
 }
 
 .home-page .subject-card {
     border-radius:
-        12px;
+        14px;
 
     padding:
-        14px;
+        18px;
+
+    min-height:
+        145px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        flex-start;
 }
 
 .home-page .subject-card h2 {
     margin-top:
-        9px;
+        11px;
 
     font-size:
-        18px;
+        20px;
 }
 
 .home-page .card-icon {
     width:
-        42px;
+        46px;
 
     height:
-        42px;
+        46px;
 
     border-radius:
-        11px;
+        12px;
 
     font-size:
-        19px;
+        20px;
 }
 
 .home-page .card-icon-image {
     width:
-        28px;
+        31px;
 
     height:
-        28px;
+        31px;
 }
 
 .home-page .subject-card .muted {
@@ -1854,7 +1872,7 @@ footer {
         4px;
 
     font-size:
-        11px;
+        12px;
 }
 
 /* ---------------- MOBILE ---------------- */
@@ -2783,7 +2801,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.17
+                    Version Alpha 0.0.18
                 </div>
 
             </section>
