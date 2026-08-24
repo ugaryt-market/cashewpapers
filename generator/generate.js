@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.21
+    Version Alpha 0.0.22
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1768,7 +1768,7 @@ footer {
 
     min-height:
         calc(
-            100dvh - 78px
+            100dvh - 118px
         );
 
     padding-top:
@@ -1862,10 +1862,7 @@ footer {
         0 auto;
 
     flex:
-        1;
-
-    min-height:
-        0;
+        0 0 auto;
 
     grid-template-columns:
         repeat(
@@ -1876,9 +1873,12 @@ footer {
     grid-template-rows:
         repeat(
             2,
-            minmax(
-                0,
-                1fr
+            clamp(
+                105px,
+                calc(
+                    (100dvh - 430px) / 2
+                ),
+                145px
             )
         );
 
@@ -1950,27 +1950,55 @@ footer {
         12px;
 }
 
+/* Homepage-only viewport handling. */
 body:has(.home-page) {
     overflow:
         hidden;
 }
 
-body:has(.home-page) footer {
-    display:
-        none;
-}
-
 body:has(.home-page) main {
     height:
         calc(
-            100dvh - 78px
+            100dvh - 118px
         );
 
     overflow:
         hidden;
 
     padding-bottom:
-        20px;
+        8px;
+}
+
+body:has(.home-page) footer {
+    display:
+        block;
+
+    position:
+        fixed;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    bottom:
+        0;
+
+    padding:
+        10px 20px;
+
+    height:
+        40px;
+
+    background:
+        var(--bg);
+
+    border-top:
+        1px solid var(--border);
+
+    z-index:
+        10;
 }
 
 /* ---------------- MOBILE ---------------- */
@@ -2092,7 +2120,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.21"
+        href="${prefix}style.css?v=0.0.22"
     >
 
     <link
@@ -2122,7 +2150,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.21"
+        src="${prefix}auth.js?v=0.0.22"
     ></script>
 
 </head>
@@ -2898,7 +2926,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.21
+                    Version Alpha 0.0.22
                 </div>
 
             </section>
