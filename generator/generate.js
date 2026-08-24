@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.24
+    Version Alpha 0.0.25
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1760,21 +1760,55 @@ footer {
 /* ---------------- HOME PAGE DESKTOP LAYOUT ---------------- */
 
 .home-page {
+    min-height:
+        calc(
+            100dvh - 118px
+        );
+
     padding-top:
         8px;
 
+    overflow:
+        hidden;
+}
+
+.home-page .home-scalable {
     --home-scale:
         1;
+
+    width:
+        100%;
+
+    margin:
+        0 auto;
+
+    transform:
+        scale(
+            var(--home-scale)
+        );
+
+    transform-origin:
+        top center;
 }
 
 .home-page .hero {
+    width:
+        100%;
+
     margin-bottom:
         30px;
+
+    text-align:
+        center;
 }
 
 .home-page .hero h1 {
     font-size:
-        54px;
+        clamp(
+            38px,
+            4.5vw,
+            54px
+        );
 
     letter-spacing:
         -2px;
@@ -1836,36 +1870,16 @@ footer {
         11px;
 }
 
-/*
-   The main homepage composition scales as one unit.
-   The JavaScript below sets --home-scale from viewport height.
-*/
-.home-page .hero,
 .home-page .subject-grid {
     width:
-        calc(
-            100% / var(--home-scale)
+        min(
+            100%,
+            1080px
         );
 
-    margin-left:
-        auto;
+    margin:
+        0 auto;
 
-    margin-right:
-        auto;
-}
-
-.home-page .hero,
-.home-page .subject-grid {
-    transform:
-        scale(
-            var(--home-scale)
-        );
-
-    transform-origin:
-        top center;
-}
-
-.home-page .subject-grid {
     display:
         grid;
 
@@ -1877,16 +1891,16 @@ footer {
 
     gap:
         16px;
-
-    max-width:
-        1080px;
 }
 
 .home-page .subject-card {
-    min-height:
-        145px;
+    width:
+        100%;
 
     height:
+        145px;
+
+    min-height:
         145px;
 
     border-radius:
@@ -1946,7 +1960,6 @@ footer {
         12px;
 }
 
-/* Homepage-only viewport handling. */
 body:has(.home-page) {
     overflow:
         hidden;
@@ -2117,7 +2130,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.24"
+        href="${prefix}style.css?v=0.0.25"
     >
 
     <link
@@ -2147,7 +2160,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.24"
+        src="${prefix}auth.js?v=0.0.25"
     ></script>
 
 </head>
@@ -2908,6 +2921,9 @@ function generateHome(
 
             <div class="home-page">
 
+                <div class="home-scalable">
+
+
             <section class="hero">
 
                 <h1 aria-label="by students, for students.">
@@ -2923,7 +2939,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.24
+                    Version Alpha 0.0.25
                 </div>
 
             </section>
@@ -2934,6 +2950,8 @@ function generateHome(
                 ${cards}
 
             </div>
+
+                </div>
 
             </div>
 
@@ -2972,6 +2990,116 @@ if (heroTyping) {
 
     typeHeroText();
 }
+
+/* -------------------------------------------------------------
+   HOMEPAGE CONTENT-AWARE SCALING
+   ------------------------------------------------------------- */
+
+function updateHomeScale() {
+
+    const page =
+        document.querySelector(".home-page");
+
+    const scalable =
+        document.querySelector(".home-scalable");
+
+    if (!page || !scalable) {
+        return;
+    }
+
+    const main =
+        page.closest("main");
+
+    if (!main) {
+        return;
+    }
+
+    /*
+       Measure the natural composition before applying a transform.
+       This makes the calculation independent of previous resizes.
+    */
+    scalable.style.transform =
+        "none";
+
+    const contentHeight =
+        scalable.scrollHeight;
+
+    const contentWidth =
+        scalable.scrollWidth;
+
+    const availableHeight =
+        Math.max(
+            1,
+            main.clientHeight - 18
+        );
+
+    const availableWidth =
+        Math.max(
+            1,
+            main.clientWidth - 24
+        );
+
+    /*
+       Use almost all of the available space, while leaving a
+       small visual margin. Keep sensible lower/upper bounds.
+    */
+    const heightScale =
+        (availableHeight * 0.94) /
+        Math.max(
+            1,
+            contentHeight
+        );
+
+    const widthScale =
+        (availableWidth * 0.98) /
+        Math.max(
+            1,
+            contentWidth
+        );
+
+    const scale =
+        Math.max(
+            0.85,
+            Math.min(
+                1.25,
+                heightScale,
+                widthScale
+            )
+        );
+
+    scalable.style.setProperty(
+        "--home-scale",
+        scale.toFixed(4)
+    );
+
+    scalable.style.transform =
+        "scale(" +
+        scale.toFixed(4) +
+        ")";
+}
+
+function scheduleHomeScale() {
+    window.requestAnimationFrame(
+        updateHomeScale
+    );
+}
+
+scheduleHomeScale();
+
+window.addEventListener(
+    "resize",
+    scheduleHomeScale
+);
+
+window.addEventListener(
+    "orientationchange",
+    scheduleHomeScale
+);
+
+window.addEventListener(
+    "load",
+    scheduleHomeScale
+);
 
 async function applySubjectFilter() {
 
@@ -3043,57 +3171,6 @@ async function applySubjectFilter() {
         );
 
 }
-
-/* -------------------------------------------------------------
-   HOMEPAGE PROPORTIONAL SCALING
-   Keeps the design proportions consistent across screen heights.
-   Reference height: 900px.
-   Range: 0.88x to 1.12x.
-   ------------------------------------------------------------- */
-
-function updateHomeScale() {
-
-    const page =
-        document.querySelector(".home-page");
-
-    if (!page) {
-        return;
-    }
-
-    const referenceHeight = 900;
-
-    const minScale = 0.88;
-    const maxScale = 1.12;
-
-    const viewportHeight =
-        window.innerHeight;
-
-    const scale =
-        Math.max(
-            minScale,
-            Math.min(
-                maxScale,
-                viewportHeight / referenceHeight
-            )
-        );
-
-    page.style.setProperty(
-        "--home-scale",
-        scale.toFixed(4)
-    );
-}
-
-updateHomeScale();
-
-window.addEventListener(
-    "resize",
-    updateHomeScale
-);
-
-window.addEventListener(
-    "orientationchange",
-    updateHomeScale
-);
 
 
 applySubjectFilter();
