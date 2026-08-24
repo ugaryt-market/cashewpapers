@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.20
+    Version Alpha 0.0.21
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1757,19 +1757,39 @@ footer {
 }
 
 
-/* ---------------- HOME PAGE BALANCED DESKTOP LAYOUT ---------------- */
+/* ---------------- HOME PAGE DESKTOP LAYOUT ---------------- */
 
 .home-page {
-    padding-top: 8px;
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    min-height:
+        calc(
+            100dvh - 78px
+        );
+
+    padding-top:
+        8px;
 }
 
 .home-page .hero {
-    margin-bottom: 30px;
+    flex-shrink:
+        0;
+
+    margin-bottom:
+        30px;
 }
 
 .home-page .hero h1 {
     font-size:
-        clamp(38px, 4.5vw, 54px);
+        clamp(
+            38px,
+            4.5vw,
+            54px
+        );
 
     letter-spacing:
         -2px;
@@ -1801,12 +1821,14 @@ footer {
 @keyframes typingCursor {
     0%,
     49% {
-        opacity: 1;
+        opacity:
+            1;
     }
 
     50%,
     100% {
-        opacity: 0;
+        opacity:
+            0;
     }
 }
 
@@ -1831,15 +1853,33 @@ footer {
 
 .home-page .subject-grid {
     width:
-        min(100%, 1080px);
+        min(
+            100%,
+            1080px
+        );
 
     margin:
         0 auto;
+
+    flex:
+        1;
+
+    min-height:
+        0;
 
     grid-template-columns:
         repeat(
             4,
             1fr
+        );
+
+    grid-template-rows:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
         );
 
     gap:
@@ -1854,7 +1894,10 @@ footer {
         18px;
 
     min-height:
-        145px;
+        0;
+
+    height:
+        100%;
 
     display:
         flex;
@@ -1886,6 +1929,9 @@ footer {
 
     font-size:
         20px;
+
+    flex-shrink:
+        0;
 }
 
 .home-page .card-icon-image {
@@ -1902,6 +1948,29 @@ footer {
 
     font-size:
         12px;
+}
+
+body:has(.home-page) {
+    overflow:
+        hidden;
+}
+
+body:has(.home-page) footer {
+    display:
+        none;
+}
+
+body:has(.home-page) main {
+    height:
+        calc(
+            100dvh - 78px
+        );
+
+    overflow:
+        hidden;
+
+    padding-bottom:
+        20px;
 }
 
 /* ---------------- MOBILE ---------------- */
@@ -2023,7 +2092,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.20"
+        href="${prefix}style.css?v=0.0.21"
     >
 
     <link
@@ -2053,7 +2122,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.20"
+        src="${prefix}auth.js?v=0.0.21"
     ></script>
 
 </head>
@@ -2829,7 +2898,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.20
+                    Version Alpha 0.0.21
                 </div>
 
             </section>
