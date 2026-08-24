@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.28
+    Version Alpha 0.0.26
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2130,7 +2130,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.28"
+        href="${prefix}style.css?v=0.0.26"
     >
 
     <link
@@ -2160,7 +2160,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.28"
+        src="${prefix}auth.js?v=0.0.26"
     ></script>
 
 </head>
@@ -2939,7 +2939,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.28
+                    Version Alpha 0.0.26
                 </div>
 
             </section>
@@ -2993,8 +2993,6 @@ if (heroTyping) {
 
 /* -------------------------------------------------------------
    HOMEPAGE CONTENT-AWARE SCALING
-   max scale intentionally increased to 1.80x so taller displays
-   do not get stuck at the same size as shorter displays.
    ------------------------------------------------------------- */
 
 function updateHomeScale() {
@@ -3046,7 +3044,7 @@ function updateHomeScale() {
        small visual margin. Keep sensible lower/upper bounds.
     */
     const heightScale =
-        (availableHeight * 0.98) /
+        (availableHeight * 0.99) /
         Math.max(
             1,
             contentHeight
@@ -3059,33 +3057,15 @@ function updateHomeScale() {
             contentWidth
         );
 
-    /*
-       Height is the primary driver. Width is only used as a
-       safety limit when the scaled composition would actually
-       overflow horizontally.
-    */
-    let scale =
+    const scale =
         Math.max(
             0.90,
             Math.min(
-                1.80,
-                heightScale
+                1.40,
+                heightScale,
+                widthScale
             )
         );
-
-    if (
-        scale * contentWidth >
-        availableWidth
-    ) {
-        scale =
-            Math.max(
-                0.90,
-                Math.min(
-                    1.80,
-                    widthScale
-                )
-            );
-    }
 
     scalable.style.setProperty(
         "--home-scale",
