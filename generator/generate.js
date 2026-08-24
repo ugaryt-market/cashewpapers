@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.27
+    Version Alpha 0.0.28
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2130,7 +2130,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.27"
+        href="${prefix}style.css?v=0.0.28"
     >
 
     <link
@@ -2160,7 +2160,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.27"
+        src="${prefix}auth.js?v=0.0.28"
     ></script>
 
 </head>
@@ -2939,7 +2939,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.27
+                    Version Alpha 0.0.28
                 </div>
 
             </section>
@@ -2993,6 +2993,8 @@ if (heroTyping) {
 
 /* -------------------------------------------------------------
    HOMEPAGE CONTENT-AWARE SCALING
+   max scale intentionally increased to 1.80x so taller displays
+   do not get stuck at the same size as shorter displays.
    ------------------------------------------------------------- */
 
 function updateHomeScale() {
@@ -3066,7 +3068,7 @@ function updateHomeScale() {
         Math.max(
             0.90,
             Math.min(
-                1.40,
+                1.80,
                 heightScale
             )
         );
@@ -3079,7 +3081,7 @@ function updateHomeScale() {
             Math.max(
                 0.90,
                 Math.min(
-                    1.40,
+                    1.80,
                     widthScale
                 )
             );
