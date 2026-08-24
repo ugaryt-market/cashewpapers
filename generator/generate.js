@@ -1757,29 +1757,29 @@ footer {
 }
 
 
-/* ---------------- HOME PAGE RESPONSIVE DESKTOP LAYOUT ---------------- */
+/* ---------------- HOME PAGE DESKTOP LAYOUT ---------------- */
 
 .home-page {
-    padding-top: 0;
-    min-height: calc(100dvh - 140px);
-    display: flex;
-    flex-direction: column;
+    padding-top: 8px;
 }
 
 .home-page .hero {
-    margin-bottom: clamp(16px, 3vh, 30px);
-    flex-shrink: 0;
+    margin-bottom: 30px;
 }
 
 .home-page .hero h1 {
     font-size:
-        clamp(34px, 5.5vh, 54px);
+        clamp(
+            42px,
+            4.5vw,
+            54px
+        );
 
     letter-spacing:
         -2px;
 
     margin-bottom:
-        clamp(6px, 1vh, 10px);
+        10px;
 
     line-height:
         1.12;
@@ -1787,32 +1787,32 @@ footer {
 
 .home-page .hero p {
     font-size:
-        clamp(12px, 1.8vh, 14px);
+        13px;
 
     line-height:
-        1.3;
+        1.35;
 
     margin-top:
-        clamp(2px, 0.5vh, 4px);
+        3px;
 }
 
 .home-page .version {
     margin-top:
-        clamp(5px, 0.8vh, 8px);
+        7px;
 
     font-size:
-        clamp(10px, 1.4vh, 11px);
+        11px;
 }
 
 .home-page .subject-grid {
     width:
-        min(100%, 1080px);
+        min(
+            100%,
+            1080px
+        );
 
     margin:
         0 auto;
-
-    flex: 1;
-    min-height: 0;
 
     grid-template-columns:
         repeat(
@@ -1820,20 +1820,8 @@ footer {
             1fr
         );
 
-    grid-template-rows:
-        repeat(
-            2,
-            minmax(
-                96px,
-                13vh
-            )
-        );
-
-    align-content:
-        start;
-
     gap:
-        clamp(10px, 1.8vh, 16px);
+        16px;
 }
 
 .home-page .subject-card {
@@ -1841,13 +1829,10 @@ footer {
         14px;
 
     padding:
-        clamp(12px, 2vh, 18px);
+        18px;
 
     min-height:
-        0;
-
-    height:
-        100%;
+        145px;
 
     display:
         flex;
@@ -1861,56 +1846,56 @@ footer {
 
 .home-page .subject-card h2 {
     margin-top:
-        clamp(8px, 1.2vh, 11px);
+        11px;
 
     font-size:
-        clamp(17px, 2.4vh, 20px);
+        20px;
 }
 
 .home-page .card-icon {
     width:
-        clamp(42px, 5.5vh, 46px);
+        46px;
 
     height:
-        clamp(42px, 5.5vh, 46px);
+        46px;
 
     border-radius:
         12px;
 
     font-size:
-        clamp(18px, 2.5vh, 20px);
+        20px;
 }
 
 .home-page .card-icon-image {
     width:
-        clamp(28px, 4vh, 31px);
+        31px;
 
     height:
-        clamp(28px, 4vh, 31px);
+        31px;
 }
 
 .home-page .subject-card .muted {
     margin-top:
-        clamp(2px, 0.5vh, 4px);
+        4px;
 
     font-size:
-        clamp(10px, 1.5vh, 12px);
+        12px;
 }
 
-.home-body main {
-    padding-top:
-        clamp(22px, 3vh, 40px);
+/* Keep the homepage within the desktop viewport. */
+body:has(.home-page) {
+    overflow:
+        hidden;
+}
 
+body:has(.home-page) footer {
+    display:
+        none;
+}
+
+body:has(.home-page) main {
     padding-bottom:
-        clamp(18px, 2vh, 28px);
-}
-
-.home-body footer {
-    padding:
-        clamp(12px, 1.8vh, 18px);
-
-    font-size:
-        11px;
+        20px;
 }
 
 /* ---------------- MOBILE ---------------- */
@@ -2067,7 +2052,7 @@ function documentHTML(
 
 </head>
 
-<body class="${String(title).toLowerCase() === "home" ? "home-body" : ""}">
+<body>
 
 <nav>
 
