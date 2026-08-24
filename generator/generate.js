@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.26
+    Version Alpha 0.0.27
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2130,7 +2130,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.26"
+        href="${prefix}style.css?v=0.0.27"
     >
 
     <link
@@ -2160,7 +2160,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.26"
+        src="${prefix}auth.js?v=0.0.27"
     ></script>
 
 </head>
@@ -2939,7 +2939,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.26
+                    Version Alpha 0.0.27
                 </div>
 
             </section>
@@ -3044,7 +3044,7 @@ function updateHomeScale() {
        small visual margin. Keep sensible lower/upper bounds.
     */
     const heightScale =
-        (availableHeight * 0.99) /
+        (availableHeight * 0.98) /
         Math.max(
             1,
             contentHeight
@@ -3057,15 +3057,33 @@ function updateHomeScale() {
             contentWidth
         );
 
-    const scale =
+    /*
+       Height is the primary driver. Width is only used as a
+       safety limit when the scaled composition would actually
+       overflow horizontally.
+    */
+    let scale =
         Math.max(
             0.90,
             Math.min(
                 1.40,
-                heightScale,
-                widthScale
+                heightScale
             )
         );
+
+    if (
+        scale * contentWidth >
+        availableWidth
+    ) {
+        scale =
+            Math.max(
+                0.90,
+                Math.min(
+                    1.40,
+                    widthScale
+                )
+            );
+    }
 
     scalable.style.setProperty(
         "--home-scale",
