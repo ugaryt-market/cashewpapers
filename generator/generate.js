@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.19
+    Version Alpha 0.0.20
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1757,7 +1757,7 @@ footer {
 }
 
 
-/* ---------------- HOME PAGE DESKTOP LAYOUT ---------------- */
+/* ---------------- HOME PAGE BALANCED DESKTOP LAYOUT ---------------- */
 
 .home-page {
     padding-top: 8px;
@@ -1769,11 +1769,7 @@ footer {
 
 .home-page .hero h1 {
     font-size:
-        clamp(
-            42px,
-            4.5vw,
-            54px
-        );
+        clamp(38px, 4.5vw, 54px);
 
     letter-spacing:
         -2px;
@@ -1783,6 +1779,35 @@ footer {
 
     line-height:
         1.12;
+
+    min-height:
+        1.12em;
+}
+
+.home-page .typing-cursor {
+    color:
+        var(--text);
+
+    display:
+        inline-block;
+
+    margin-left:
+        2px;
+
+    animation:
+        typingCursor 0.8s steps(1, end) infinite;
+}
+
+@keyframes typingCursor {
+    0%,
+    49% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0;
+    }
 }
 
 .home-page .hero p {
@@ -1806,10 +1831,7 @@ footer {
 
 .home-page .subject-grid {
     width:
-        min(
-            100%,
-            1080px
-        );
+        min(100%, 1080px);
 
     margin:
         0 auto;
@@ -1880,22 +1902,6 @@ footer {
 
     font-size:
         12px;
-}
-
-/* Keep the homepage within the desktop viewport. */
-body:has(.home-page) {
-    overflow:
-        hidden;
-}
-
-body:has(.home-page) footer {
-    display:
-        none;
-}
-
-body:has(.home-page) main {
-    padding-bottom:
-        20px;
 }
 
 /* ---------------- MOBILE ---------------- */
@@ -2017,7 +2023,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.19"
+        href="${prefix}style.css?v=0.0.20"
     >
 
     <link
@@ -2047,7 +2053,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.19"
+        src="${prefix}auth.js?v=0.0.20"
     ></script>
 
 </head>
@@ -2810,9 +2816,8 @@ function generateHome(
 
             <section class="hero">
 
-                <h1>
-                    by students, 
-                    <span>for students.</span>
+                <h1 aria-label="by students, for students.">
+                    <span id="heroTyping"></span><span class="typing-cursor" aria-hidden="true">|</span>
                 </h1>
 
                 <p>
@@ -2824,7 +2829,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.19
+                    Version Alpha 0.0.20
                 </div>
 
             </section>
@@ -2840,6 +2845,39 @@ function generateHome(
 
 
             <script>
+
+const heroTyping =
+    document.getElementById("heroTyping");
+
+const heroCursor =
+    document.querySelector(".typing-cursor");
+
+const heroText =
+    "by students, for students.";
+
+if (heroTyping) {
+
+    let heroIndex = 0;
+
+    function typeHeroText() {
+
+        heroTyping.textContent =
+            heroText.slice(0, heroIndex);
+
+        heroIndex += 1;
+
+        if (heroIndex <= heroText.length) {
+            window.setTimeout(typeHeroText, 55);
+        } else if (heroCursor) {
+            window.setTimeout(() => {
+                heroCursor.style.display = "none";
+            }, 650);
+        }
+
+    }
+
+    typeHeroText();
+}
 
 async function applySubjectFilter() {
 
