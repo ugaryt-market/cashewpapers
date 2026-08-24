@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.22
+    Version Alpha 0.0.23
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1874,16 +1874,18 @@ footer {
         repeat(
             2,
             clamp(
-                105px,
-                calc(
-                    (100dvh - 430px) / 2
-                ),
+                120px,
+                15vh,
                 145px
             )
         );
 
     gap:
-        16px;
+        clamp(
+            12px,
+            1.8vh,
+            16px
+        );
 }
 
 .home-page .subject-card {
@@ -1995,7 +1997,8 @@ body:has(.home-page) footer {
         var(--bg);
 
     border-top:
-        1px solid var(--border);
+        1px solid
+        var(--border);
 
     z-index:
         10;
@@ -2120,7 +2123,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.22"
+        href="${prefix}style.css?v=0.0.23"
     >
 
     <link
@@ -2150,7 +2153,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.22"
+        src="${prefix}auth.js?v=0.0.23"
     ></script>
 
 </head>
@@ -2926,7 +2929,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.22
+                    Version Alpha 0.0.23
                 </div>
 
             </section>
