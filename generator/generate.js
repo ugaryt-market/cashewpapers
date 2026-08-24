@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.23
+    Version Alpha 0.0.24
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1760,36 +1760,21 @@ footer {
 /* ---------------- HOME PAGE DESKTOP LAYOUT ---------------- */
 
 .home-page {
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    min-height:
-        calc(
-            100dvh - 118px
-        );
-
     padding-top:
         8px;
+
+    --home-scale:
+        1;
 }
 
 .home-page .hero {
-    flex-shrink:
-        0;
-
     margin-bottom:
         30px;
 }
 
 .home-page .hero h1 {
     font-size:
-        clamp(
-            38px,
-            4.5vw,
-            54px
-        );
+        54px;
 
     letter-spacing:
         -2px;
@@ -1851,18 +1836,38 @@ footer {
         11px;
 }
 
+/*
+   The main homepage composition scales as one unit.
+   The JavaScript below sets --home-scale from viewport height.
+*/
+.home-page .hero,
 .home-page .subject-grid {
     width:
-        min(
-            100%,
-            1080px
+        calc(
+            100% / var(--home-scale)
         );
 
-    margin:
-        0 auto;
+    margin-left:
+        auto;
 
-    flex:
-        0 0 auto;
+    margin-right:
+        auto;
+}
+
+.home-page .hero,
+.home-page .subject-grid {
+    transform:
+        scale(
+            var(--home-scale)
+        );
+
+    transform-origin:
+        top center;
+}
+
+.home-page .subject-grid {
+    display:
+        grid;
 
     grid-template-columns:
         repeat(
@@ -1870,36 +1875,25 @@ footer {
             1fr
         );
 
-    grid-template-rows:
-        repeat(
-            2,
-            clamp(
-                120px,
-                15vh,
-                145px
-            )
-        );
-
     gap:
-        clamp(
-            12px,
-            1.8vh,
-            16px
-        );
+        16px;
+
+    max-width:
+        1080px;
 }
 
 .home-page .subject-card {
+    min-height:
+        145px;
+
+    height:
+        145px;
+
     border-radius:
         14px;
 
     padding:
         18px;
-
-    min-height:
-        0;
-
-    height:
-        100%;
 
     display:
         flex;
@@ -1959,7 +1953,7 @@ body:has(.home-page) {
 }
 
 body:has(.home-page) main {
-    height:
+    min-height:
         calc(
             100dvh - 118px
         );
@@ -2123,7 +2117,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.23"
+        href="${prefix}style.css?v=0.0.24"
     >
 
     <link
@@ -2153,7 +2147,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.23"
+        src="${prefix}auth.js?v=0.0.24"
     ></script>
 
 </head>
@@ -2929,7 +2923,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.23
+                    Version Alpha 0.0.24
                 </div>
 
             </section>
@@ -3049,6 +3043,57 @@ async function applySubjectFilter() {
         );
 
 }
+
+/* -------------------------------------------------------------
+   HOMEPAGE PROPORTIONAL SCALING
+   Keeps the design proportions consistent across screen heights.
+   Reference height: 900px.
+   Range: 0.88x to 1.12x.
+   ------------------------------------------------------------- */
+
+function updateHomeScale() {
+
+    const page =
+        document.querySelector(".home-page");
+
+    if (!page) {
+        return;
+    }
+
+    const referenceHeight = 900;
+
+    const minScale = 0.88;
+    const maxScale = 1.12;
+
+    const viewportHeight =
+        window.innerHeight;
+
+    const scale =
+        Math.max(
+            minScale,
+            Math.min(
+                maxScale,
+                viewportHeight / referenceHeight
+            )
+        );
+
+    page.style.setProperty(
+        "--home-scale",
+        scale.toFixed(4)
+    );
+}
+
+updateHomeScale();
+
+window.addEventListener(
+    "resize",
+    updateHomeScale
+);
+
+window.addEventListener(
+    "orientationchange",
+    updateHomeScale
+);
 
 
 applySubjectFilter();
