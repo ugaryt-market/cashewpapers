@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.16
+    Version Alpha 0.0.17
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1757,6 +1757,106 @@ footer {
 }
 
 
+/* ---------------- HOME PAGE COMPACT LAYOUT ---------------- */
+
+.home-page {
+    padding-top: 4px;
+}
+
+.home-page .hero {
+    margin-bottom: 22px;
+}
+
+.home-page .hero h1 {
+    font-size:
+        clamp(32px, 4.2vw, 48px);
+
+    letter-spacing:
+        -2px;
+
+    margin-bottom:
+        7px;
+
+    line-height:
+        1.1;
+}
+
+.home-page .hero p {
+    font-size:
+        12px;
+
+    line-height:
+        1.3;
+
+    margin-top:
+        2px;
+}
+
+.home-page .version {
+    margin-top:
+        5px;
+
+    font-size:
+        10px;
+}
+
+.home-page .subject-grid {
+    grid-template-columns:
+        repeat(
+            4,
+            1fr
+        );
+
+    gap:
+        12px;
+}
+
+.home-page .subject-card {
+    border-radius:
+        12px;
+
+    padding:
+        14px;
+}
+
+.home-page .subject-card h2 {
+    margin-top:
+        9px;
+
+    font-size:
+        18px;
+}
+
+.home-page .card-icon {
+    width:
+        42px;
+
+    height:
+        42px;
+
+    border-radius:
+        11px;
+
+    font-size:
+        19px;
+}
+
+.home-page .card-icon-image {
+    width:
+        28px;
+
+    height:
+        28px;
+}
+
+.home-page .subject-card .muted {
+    margin-top:
+        4px;
+
+    font-size:
+        11px;
+}
+
 /* ---------------- MOBILE ---------------- */
 
 @media (max-width: 700px) {
@@ -1876,7 +1976,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.16"
+        href="${prefix}style.css?v=0.0.17"
     >
 
     <link
@@ -1906,7 +2006,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.16"
+        src="${prefix}auth.js?v=0.0.17"
     ></script>
 
 </head>
@@ -2652,9 +2752,6 @@ function generateHome(
                         Cambridge ${subject.code}
                     </div>
 
-                    <div class="card-description">
-                        ${subject.description}
-                    </div>
 
                 </a>
 
@@ -2667,6 +2764,8 @@ function generateHome(
         "Home",
 
         `
+
+            <div class="home-page">
 
             <section class="hero">
 
@@ -2684,7 +2783,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.14
+                    Version Alpha 0.0.17
                 </div>
 
             </section>
@@ -2693,6 +2792,8 @@ function generateHome(
             <div class="subject-grid">
 
                 ${cards}
+
+            </div>
 
             </div>
 
