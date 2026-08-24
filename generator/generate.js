@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.25
+    Version Alpha 0.0.26
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2130,7 +2130,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.25"
+        href="${prefix}style.css?v=0.0.26"
     >
 
     <link
@@ -2160,7 +2160,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.25"
+        src="${prefix}auth.js?v=0.0.26"
     ></script>
 
 </head>
@@ -2939,7 +2939,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.25
+                    Version Alpha 0.0.26
                 </div>
 
             </section>
@@ -3044,7 +3044,7 @@ function updateHomeScale() {
        small visual margin. Keep sensible lower/upper bounds.
     */
     const heightScale =
-        (availableHeight * 0.94) /
+        (availableHeight * 0.99) /
         Math.max(
             1,
             contentHeight
@@ -3059,9 +3059,9 @@ function updateHomeScale() {
 
     const scale =
         Math.max(
-            0.85,
+            0.90,
             Math.min(
-                1.25,
+                1.40,
                 heightScale,
                 widthScale
             )
