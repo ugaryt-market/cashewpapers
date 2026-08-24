@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.18
+    Version Alpha 0.0.19
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1757,25 +1757,29 @@ footer {
 }
 
 
-/* ---------------- HOME PAGE BALANCED DESKTOP LAYOUT ---------------- */
+/* ---------------- HOME PAGE RESPONSIVE DESKTOP LAYOUT ---------------- */
 
 .home-page {
-    padding-top: 8px;
+    padding-top: 0;
+    min-height: calc(100dvh - 140px);
+    display: flex;
+    flex-direction: column;
 }
 
 .home-page .hero {
-    margin-bottom: 30px;
+    margin-bottom: clamp(16px, 3vh, 30px);
+    flex-shrink: 0;
 }
 
 .home-page .hero h1 {
     font-size:
-        clamp(38px, 4.5vw, 54px);
+        clamp(34px, 5.5vh, 54px);
 
     letter-spacing:
         -2px;
 
     margin-bottom:
-        10px;
+        clamp(6px, 1vh, 10px);
 
     line-height:
         1.12;
@@ -1783,21 +1787,21 @@ footer {
 
 .home-page .hero p {
     font-size:
-        13px;
+        clamp(12px, 1.8vh, 14px);
 
     line-height:
-        1.35;
+        1.3;
 
     margin-top:
-        3px;
+        clamp(2px, 0.5vh, 4px);
 }
 
 .home-page .version {
     margin-top:
-        7px;
+        clamp(5px, 0.8vh, 8px);
 
     font-size:
-        11px;
+        clamp(10px, 1.4vh, 11px);
 }
 
 .home-page .subject-grid {
@@ -1807,14 +1811,29 @@ footer {
     margin:
         0 auto;
 
+    flex: 1;
+    min-height: 0;
+
     grid-template-columns:
         repeat(
             4,
             1fr
         );
 
+    grid-template-rows:
+        repeat(
+            2,
+            minmax(
+                96px,
+                13vh
+            )
+        );
+
+    align-content:
+        start;
+
     gap:
-        16px;
+        clamp(10px, 1.8vh, 16px);
 }
 
 .home-page .subject-card {
@@ -1822,10 +1841,13 @@ footer {
         14px;
 
     padding:
-        18px;
+        clamp(12px, 2vh, 18px);
 
     min-height:
-        145px;
+        0;
+
+    height:
+        100%;
 
     display:
         flex;
@@ -1839,40 +1861,56 @@ footer {
 
 .home-page .subject-card h2 {
     margin-top:
-        11px;
+        clamp(8px, 1.2vh, 11px);
 
     font-size:
-        20px;
+        clamp(17px, 2.4vh, 20px);
 }
 
 .home-page .card-icon {
     width:
-        46px;
+        clamp(42px, 5.5vh, 46px);
 
     height:
-        46px;
+        clamp(42px, 5.5vh, 46px);
 
     border-radius:
         12px;
 
     font-size:
-        20px;
+        clamp(18px, 2.5vh, 20px);
 }
 
 .home-page .card-icon-image {
     width:
-        31px;
+        clamp(28px, 4vh, 31px);
 
     height:
-        31px;
+        clamp(28px, 4vh, 31px);
 }
 
 .home-page .subject-card .muted {
     margin-top:
-        4px;
+        clamp(2px, 0.5vh, 4px);
 
     font-size:
-        12px;
+        clamp(10px, 1.5vh, 12px);
+}
+
+.home-body main {
+    padding-top:
+        clamp(22px, 3vh, 40px);
+
+    padding-bottom:
+        clamp(18px, 2vh, 28px);
+}
+
+.home-body footer {
+    padding:
+        clamp(12px, 1.8vh, 18px);
+
+    font-size:
+        11px;
 }
 
 /* ---------------- MOBILE ---------------- */
@@ -1994,7 +2032,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.17"
+        href="${prefix}style.css?v=0.0.19"
     >
 
     <link
@@ -2024,12 +2062,12 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.17"
+        src="${prefix}auth.js?v=0.0.19"
     ></script>
 
 </head>
 
-<body>
+<body class="${String(title).toLowerCase() === "home" ? "home-body" : ""}">
 
 <nav>
 
@@ -2801,7 +2839,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.18
+                    Version Alpha 0.0.19
                 </div>
 
             </section>
