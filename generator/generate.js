@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.36
+    Version Alpha 0.0.37
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1656,16 +1656,48 @@ main {
         wrap;
 
     gap:
-        7px;
+        9px;
 
     margin-bottom:
-        18px;
+        22px;
 
     font-size:
-        14px;
+        16px;
 
     line-height:
         1.4;
+
+    width:
+        100vw;
+
+    margin-left:
+        calc(
+            50% - 50vw
+        );
+
+    padding:
+        9px max(
+            24px,
+            calc(
+                (100vw - 1200px) / 2 + 24px
+            )
+        );
+
+    border-top:
+        1px solid
+        var(--border);
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    background:
+        rgba(
+            44,
+            46,
+            49,
+            0.72
+        );
 }
 
 .breadcrumb-item {
@@ -1696,7 +1728,7 @@ main {
         var(--muted);
 
     font-size:
-        14px;
+        16px;
 
     user-select:
         none;
@@ -3021,7 +3053,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.36"
+        href="${prefix}style.css?v=0.0.37"
     >
 
     <link
@@ -3051,11 +3083,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.36"
+        src="${prefix}auth.js?v=0.0.37"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.36"
+        src="${prefix}search.js?v=0.0.37"
     ></script>
 
 </head>
@@ -3863,7 +3895,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.36
+                    Version Alpha 0.0.37
                 </div>
 
             </section>
@@ -4411,6 +4443,12 @@ function generateCategoryPage(
                     [
                         {
                             label:
+                                "subjects",
+                            href:
+                                "../../"
+                        },
+                        {
+                            label:
                                 "math",
                             href:
                                 "../"
@@ -4554,6 +4592,12 @@ function generateYearPage(
                             [
                                 {
                                     label:
+                                        "subjects",
+                                    href:
+                                        "../../../"
+                                },
+                                {
+                                    label:
                                         "math",
                                     href:
                                         "../../"
@@ -4577,6 +4621,12 @@ function generateYearPage(
                         )
                         : breadcrumbHTML(
                             [
+                                {
+                                    label:
+                                        "subjects",
+                                    href:
+                                        "../../"
+                                },
                                 {
                                     label:
                                         subject.name.toLowerCase(),
@@ -4850,6 +4900,12 @@ function generateSessionPage(
                             [
                                 {
                                     label:
+                                        "subjects",
+                                    href:
+                                        "../../../../"
+                                },
+                                {
+                                    label:
                                         "math",
                                     href:
                                         "../../../"
@@ -4881,6 +4937,12 @@ function generateSessionPage(
                         )
                         : breadcrumbHTML(
                             [
+                                {
+                                    label:
+                                        "subjects",
+                                    href:
+                                        "../../../"
+                                },
                                 {
                                     label:
                                         subject.name.toLowerCase(),
