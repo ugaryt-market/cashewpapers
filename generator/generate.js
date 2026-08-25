@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.34
+    Version Alpha 0.0.35
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -798,7 +798,7 @@ function highlightPaper(
                 "search-highlight"
             );
         },
-        1000
+        1200
     );
 
     return true;
@@ -883,7 +883,15 @@ function runPaperSearch(
     }
 
     window.location.assign(
-        targetPath
+        targetPath +
+        "?search=" +
+        encodeURIComponent(
+            result.code
+        ) +
+        "#paper-" +
+        encodeURIComponent(
+            result.code
+        )
     );
 
 }
@@ -969,29 +977,67 @@ document.addEventListener(
     initializePaperSearch
 );
 
-if (
-    window.location.hash.indexOf(
-        "#paper-"
-    ) === 0
-) {
+function highlightSearchTargetAfterLoad() {
 
-    window.addEventListener(
-        "load",
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const queryCode =
+        params.get(
+            "search"
+        );
+
+    const hash =
+        window.location.hash;
+
+    const hashCode =
+        hash.indexOf(
+            "#paper-"
+        ) === 0
+            ? decodeURIComponent(
+                hash.slice(
+                    "#paper-".length
+                )
+            )
+            : "";
+
+    const code =
+        queryCode ||
+        hashCode;
+
+    if (!code) {
+        return;
+    }
+
+    /*
+       Wait until the browser has laid out the paper cards.
+       Two animation frames makes this reliable on GitHub Pages
+       after navigation.
+    */
+    window.requestAnimationFrame(
         () => {
 
-            const code =
-                window.location.hash.slice(
-                    "#paper-".length
-                );
+            window.requestAnimationFrame(
+                () => {
 
-            highlightPaper(
-                code
+                    highlightPaper(
+                        code
+                    );
+
+                }
             );
 
         }
     );
 
 }
+
+window.addEventListener(
+    "load",
+    highlightSearchTargetAfterLoad
+);
 
 `;
 
@@ -2893,7 +2939,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.34"
+        href="${prefix}style.css?v=0.0.35"
     >
 
     <link
@@ -2923,11 +2969,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.34"
+        src="${prefix}auth.js?v=0.0.35"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.34"
+        src="${prefix}search.js?v=0.0.35"
     ></script>
 
 </head>
@@ -3735,7 +3781,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.34
+                    Version Alpha 0.0.35
                 </div>
 
             </section>
