@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.31
+    Version Alpha 0.0.33
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -560,7 +560,9 @@ function buildDatabase(subjects) {
 
 let PAPER_SEARCH_INDEX = {};
 
-function buildPaperSearchIndex(database) {
+function buildPaperSearchIndex(
+    database
+) {
 
     const index = {};
 
@@ -610,7 +612,9 @@ function buildPaperSearchIndex(database) {
                     )
                 ) {
 
-                    if (!paper.code) {
+                    if (
+                        !paper.code
+                    ) {
                         continue;
                     }
 
@@ -623,7 +627,6 @@ function buildPaperSearchIndex(database) {
 
                         code:
                             paper.code
-
                     };
 
                 }
@@ -635,6 +638,27 @@ function buildPaperSearchIndex(database) {
     }
 
     return index;
+}
+
+
+
+/* ============================================================
+   MATHEMATICS PAPER SEARCH INDEX
+   ============================================================ */
+
+
+function writePaperSearchIndex() {
+
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "search-index.json"
+        ),
+        JSON.stringify(
+            PAPER_SEARCH_INDEX
+        )
+    );
+
 }
 
 function addMathematicsSearchIndex() {
@@ -678,6 +702,9 @@ function addMathematicsSearchIndex() {
             const year =
                 parts[0];
 
+            const sessionFolder =
+                parts[1];
+
             const filename =
                 parts[2];
 
@@ -688,7 +715,8 @@ function addMathematicsSearchIndex() {
 
             if (
                 !parsed ||
-                parsed.type !== "qp"
+                parsed.type !==
+                    "qp"
             ) {
                 continue;
             }
@@ -718,20 +746,6 @@ function addMathematicsSearchIndex() {
         }
 
     }
-
-}
-
-function writePaperSearchIndex() {
-
-    writeFile(
-        path.join(
-            DIST_DIR,
-            "search-index.json"
-        ),
-        JSON.stringify(
-            PAPER_SEARCH_INDEX
-        )
-    );
 
 }
 
@@ -2624,7 +2638,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.31"
+        href="${prefix}style.css?v=0.0.33"
     >
 
     <link
@@ -2654,7 +2668,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.31"
+        src="${prefix}auth.js?v=0.0.33"
     ></script>
 
 </head>
@@ -2754,7 +2768,7 @@ async function loadPaperSearchIndex() {
 
         const response =
             await fetch(
-                "${prefix}search-index.json",
+                "${prefix}search-index.json?v=0.0.33",
                 {
                     cache:
                         "no-store"
@@ -2762,10 +2776,12 @@ async function loadPaperSearchIndex() {
             );
 
         if (!response.ok) {
+
             throw new Error(
                 "HTTP " +
                 response.status
             );
+
         }
 
         paperSearchIndex =
@@ -2875,7 +2891,9 @@ async function runPaperSearch(
     }
 
     if (!paperSearchReady) {
+
         await loadPaperSearchIndex();
+
     }
 
     const result =
@@ -2912,6 +2930,7 @@ async function runPaperSearch(
         );
 
         return;
+
     }
 
     const targetPath =
@@ -2930,7 +2949,9 @@ async function runPaperSearch(
                 result.code
             )
         ) {
+
             return;
+
         }
 
     }
@@ -2963,7 +2984,9 @@ function updatePaperSearchButton() {
         !paperSearchForm ||
         !paperSearchInput
     ) {
+
         return;
+
     }
 
     paperSearchForm.classList.toggle(
@@ -2987,7 +3010,8 @@ if (paperSearchInput) {
         event => {
 
             if (
-                event.key === "Enter"
+                event.key ===
+                "Enter"
             ) {
 
                 event.preventDefault();
@@ -3777,7 +3801,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.31
+                    Version Alpha 0.0.33
                 </div>
 
             </section>
@@ -4738,10 +4762,6 @@ function generate() {
 
     addMathematicsSearchIndex();
 
-    writePaperSearchIndex();
-
-    addMathematicsSearchIndex();
-
 
     if (
         fs.existsSync(
@@ -4766,6 +4786,11 @@ function generate() {
     ensureDir(
         DIST_DIR
     );
+
+
+    /* Search index */
+
+    writePaperSearchIndex();
 
 
     /* Image assets */
