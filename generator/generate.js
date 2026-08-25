@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.37
+    Version Alpha 0.0.38
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1658,46 +1658,17 @@ main {
     gap:
         9px;
 
+    width:
+        100%;
+
     margin-bottom:
-        22px;
+        20px;
 
     font-size:
         16px;
 
     line-height:
         1.4;
-
-    width:
-        100vw;
-
-    margin-left:
-        calc(
-            50% - 50vw
-        );
-
-    padding:
-        9px max(
-            24px,
-            calc(
-                (100vw - 1200px) / 2 + 24px
-            )
-        );
-
-    border-top:
-        1px solid
-        var(--border);
-
-    border-bottom:
-        1px solid
-        var(--border);
-
-    background:
-        rgba(
-            44,
-            46,
-            49,
-            0.72
-        );
 }
 
 .breadcrumb-item {
@@ -3053,7 +3024,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.37"
+        href="${prefix}style.css?v=0.0.38"
     >
 
     <link
@@ -3083,11 +3054,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.37"
+        src="${prefix}auth.js?v=0.0.38"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.37"
+        src="${prefix}search.js?v=0.0.38"
     ></script>
 
 </head>
@@ -3895,7 +3866,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.37
+                    Version Alpha 0.0.38
                 </div>
 
             </section>
