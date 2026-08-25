@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.28
+    Version Alpha 0.0.27
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -756,6 +756,20 @@ input {
 nav .nav-inner {
     position:
         relative;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr
+        minmax(
+            280px,
+            460px
+        )
+        1fr;
+
+    align-items:
+        center;
 }
 
 .paper-search {
@@ -765,19 +779,14 @@ nav .nav-inner {
     justify-self:
         center;
 
-    position:
-        relative;
-
     display:
-        block;
-}
+        flex;
 
-.paper-search-field {
-    position:
-        relative;
+    align-items:
+        center;
 
-    width:
-        100%;
+    gap:
+        8px;
 }
 
 .paper-search input {
@@ -788,7 +797,7 @@ nav .nav-inner {
         38px;
 
     padding:
-        0 40px 0 14px;
+        0 14px;
 
     border:
         1px solid
@@ -830,66 +839,61 @@ nav .nav-inner {
 }
 
 .paper-search button {
-    position:
-        absolute;
-
-    top:
-        50%;
-
-    right:
-        5px;
-
     width:
-        28px;
+        38px;
 
     height:
-        28px;
+        38px;
 
-    transform:
-        translateY(-50%);
+    flex-shrink:
+        0;
 
     border:
-        none;
+        1px solid
+        var(--border);
 
     border-radius:
         50%;
 
     background:
-        var(--primary);
+        #3a3c3f;
 
     color:
-        #333438;
+        var(--text);
 
     cursor:
         pointer;
 
     font-size:
-        15px;
+        17px;
 
     line-height:
         1;
 
     display:
-        none;
+        flex;
 
     align-items:
         center;
 
     justify-content:
         center;
-
-    padding:
-        0;
 }
-
 .paper-search.has-text button {
     display:
         flex;
 }
 
+
 .paper-search button:hover {
     background:
-        #ffa86c;
+        var(--subdued);
+
+    border-color:
+        var(--subdued);
+
+    color:
+        white;
 }
 
 .paper-search-error {
@@ -941,28 +945,12 @@ nav .nav-inner {
 
 @media (max-width: 900px) {
 
-    .nav-inner {
+    nav .nav-inner {
         grid-template-columns:
             1fr;
 
         gap:
             10px;
-    }
-
-    .nav-inner .paper-search {
-        grid-column:
-            1;
-
-        grid-row:
-            2;
-    }
-
-    .nav-inner .nav-actions {
-        grid-column:
-            1;
-
-        grid-row:
-            3;
     }
 
     .paper-search {
@@ -1000,21 +988,13 @@ nav {
         18px 24px;
 
     display:
-        grid;
+        flex;
 
-    grid-template-columns:
-        1fr
-        minmax(
-            280px,
-            460px
-        )
-        1fr;
+    justify-content:
+        space-between;
 
     align-items:
         center;
-
-    gap:
-        18px;
 }
 
 .nav-actions {
@@ -1026,25 +1006,6 @@ nav {
 
     gap:
         18px;
-}
-
-
-.nav-inner .logo {
-    justify-self:
-        start;
-}
-
-.nav-inner .paper-search {
-    grid-column:
-        2;
-}
-
-.nav-inner .nav-actions {
-    justify-self:
-        end;
-
-    grid-column:
-        3;
 }
 
 .nav-account {
@@ -2522,7 +2483,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.28"
+        href="${prefix}style.css?v=0.0.27"
     >
 
     <link
@@ -2552,7 +2513,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.28"
+        src="${prefix}auth.js?v=0.0.27"
     ></script>
 
 </head>
@@ -2581,27 +2542,23 @@ function documentHTML(
             role="search"
         >
 
-            <div class="paper-search-field">
+            <input
+                id="paperSearchInput"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="search paper code..."
+                aria-label="search paper code"
+            >
 
-                <input
-                    id="paperSearchInput"
-                    type="text"
-                    inputmode="text"
-                    autocomplete="off"
-                    spellcheck="false"
-                    placeholder="search paper code..."
-                    aria-label="search paper code"
-                >
-
-                <button
-                    type="submit"
-                    aria-label="search"
-                    title="search"
-                >
-                    →
-                </button>
-
-            </div>
+            <button
+                type="submit"
+                aria-label="search"
+                title="search"
+            >
+                →
+            </button>
 
         </form>
 
@@ -2786,35 +2743,6 @@ const paperSearchForm =
         "paperSearchForm"
     );
 
-const paperSearchInput =
-    document.getElementById(
-        "paperSearchInput"
-    );
-
-function updatePaperSearchButton() {
-
-    if (!paperSearchForm || !paperSearchInput) {
-        return;
-    }
-
-    paperSearchForm.classList.toggle(
-        "has-text",
-        paperSearchInput.value.trim().length > 0
-    );
-}
-
-if (paperSearchInput) {
-
-    paperSearchInput.addEventListener(
-        "input",
-        updatePaperSearchButton
-    );
-
-    updatePaperSearchButton();
-
-}
-
-
 if (paperSearchForm) {
 
     paperSearchForm.addEventListener(
@@ -2823,9 +2751,14 @@ if (paperSearchForm) {
 
             event.preventDefault();
 
+            const input =
+                document.getElementById(
+                    "paperSearchInput"
+                );
+
             runPaperSearch(
-                paperSearchInput
-                    ? paperSearchInput.value
+                input
+                    ? input.value
                     : ""
             );
 
@@ -3579,7 +3512,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.28
+                    Version Alpha 0.0.27
                 </div>
 
             </section>
