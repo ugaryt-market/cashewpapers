@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.30
+    Version Alpha 0.0.31
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -638,6 +638,100 @@ function buildPaperSearchIndex(
     }
 
     return index;
+}
+
+
+
+/* ============================================================
+   MATHEMATICS PAPER SEARCH INDEX
+   ============================================================ */
+
+function addMathematicsSearchIndex() {
+
+    for (
+        const categoryKey
+        of [
+            "pure",
+            "statsmech"
+        ]
+    ) {
+
+        const categoryPath =
+            path.join(
+                PAPERS_DIR,
+                "mathematics",
+                categoryKey
+            );
+
+        for (
+            const file
+            of scanFiles(
+                categoryPath
+            )
+        ) {
+
+            const parts =
+                file.relative.split(
+                    path.sep
+                );
+
+            if (
+                parts.length < 3 ||
+                !file.relative
+                    .toLowerCase()
+                    .endsWith(".pdf")
+            ) {
+                continue;
+            }
+
+            const year =
+                parts[0];
+
+            const sessionFolder =
+                parts[1];
+
+            const filename =
+                parts[2];
+
+            const parsed =
+                parsePaperFilename(
+                    filename
+                );
+
+            if (
+                !parsed ||
+                parsed.type !==
+                    "qp"
+            ) {
+                continue;
+            }
+
+            const slug =
+                sessionSlug(
+                    parsed.sessionCode
+                );
+
+            const code =
+                filename.replace(
+                    /\.pdf$/i,
+                    ""
+                );
+
+            PAPER_SEARCH_INDEX[
+                code.toLowerCase()
+            ] = {
+
+                path:
+                    `mathematics/${categoryKey}/${year}/${slug}/#paper-${code}`,
+
+                code
+
+            };
+
+        }
+
+    }
+
 }
 
 
@@ -2529,7 +2623,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.30"
+        href="${prefix}style.css?v=0.0.31"
     >
 
     <link
@@ -2559,7 +2653,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.30"
+        src="${prefix}auth.js?v=0.0.31"
     ></script>
 
 </head>
@@ -2582,7 +2676,7 @@ function documentHTML(
             >
         </a>
 
-        <form
+        <div
             class="paper-search"
             id="paperSearchForm"
             role="search"
@@ -2601,7 +2695,8 @@ function documentHTML(
                 >
 
                 <button
-                    type="submit"
+                    type="button"
+                    id="paperSearchButton"
                     aria-label="search"
                     title="search"
                 >
@@ -2610,7 +2705,7 @@ function documentHTML(
 
             </div>
 
-        </form>
+        </div>
 
         <div class="nav-actions">
 
@@ -2798,6 +2893,11 @@ const paperSearchInput =
         "paperSearchInput"
     );
 
+const paperSearchButton =
+    document.getElementById(
+        "paperSearchButton"
+    );
+
 function updatePaperSearchButton() {
 
     if (!paperSearchForm || !paperSearchInput) {
@@ -2820,6 +2920,48 @@ if (paperSearchInput) {
     updatePaperSearchButton();
 
 }
+
+if (paperSearchButton) {
+
+    paperSearchButton.addEventListener(
+        "click",
+        () => {
+
+            runPaperSearch(
+                paperSearchInput
+                    ? paperSearchInput.value
+                    : ""
+            );
+
+        }
+    );
+
+}
+
+if (paperSearchInput) {
+
+    paperSearchInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                runPaperSearch(
+                    paperSearchInput.value
+                );
+
+            }
+
+        }
+    );
+
+}
+
 
 
 if (paperSearchForm) {
@@ -3586,7 +3728,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.30
+                    Version Alpha 0.0.31
                 </div>
 
             </section>
@@ -4544,6 +4686,8 @@ function generate() {
         buildPaperSearchIndex(
             database
         );
+
+    addMathematicsSearchIndex();
 
 
     if (
