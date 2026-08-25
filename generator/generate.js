@@ -1661,14 +1661,20 @@ main {
     width:
         100%;
 
-    margin-bottom:
-        20px;
+    margin:
+        0 0 20px;
 
     font-size:
-        16px;
+        17px;
 
     line-height:
         1.4;
+
+    background:
+        transparent;
+
+    border:
+        none;
 }
 
 .breadcrumb-item {
@@ -1699,7 +1705,7 @@ main {
         var(--muted);
 
     font-size:
-        16px;
+        17px;
 
     user-select:
         none;
