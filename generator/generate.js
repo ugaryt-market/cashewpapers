@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.35
+    Version Alpha 0.0.36
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -137,6 +137,29 @@ function sessionName(code, year) {
     return code.toUpperCase();
 }
 
+
+function shortSessionName(
+    code
+) {
+
+    const type =
+        code[0].toLowerCase();
+
+    if (type === "m") {
+        return "feb/march";
+    }
+
+    if (type === "w") {
+        return "oct/nov";
+    }
+
+    if (type === "s") {
+        return "may/june";
+    }
+
+    return code.toLowerCase();
+
+}
 
 function sessionSlug(code) {
 
@@ -1622,6 +1645,65 @@ main {
         18px;
 }
 
+.breadcrumbs {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+
+    margin-bottom:
+        18px;
+
+    font-size:
+        14px;
+
+    line-height:
+        1.4;
+}
+
+.breadcrumb-item {
+    color:
+        var(--muted);
+
+    transition:
+        color
+        0.15s
+        ease;
+}
+
+.breadcrumb-item:hover {
+    color:
+        var(--text);
+}
+
+.breadcrumb-item.current {
+    color:
+        var(--text);
+
+    cursor:
+        default;
+}
+
+.breadcrumb-arrow {
+    color:
+        var(--muted);
+
+    font-size:
+        14px;
+
+    user-select:
+        none;
+}
+
+
+
 .page-header h1 {
     font-size:
         36px;
@@ -2939,7 +3021,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.35"
+        href="${prefix}style.css?v=0.0.36"
     >
 
     <link
@@ -2969,11 +3051,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.35"
+        src="${prefix}auth.js?v=0.0.36"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.35"
+        src="${prefix}search.js?v=0.0.36"
     ></script>
 
 </head>
@@ -3781,7 +3863,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.35
+                    Version Alpha 0.0.36
                 </div>
 
             </section>
@@ -4216,6 +4298,66 @@ function generateSubjectPage(
 
 
 /* ============================================================
+   BREADCRUMBS
+   ============================================================ */
+
+function breadcrumbHTML(
+    items
+) {
+
+    return `
+        <nav
+            class="breadcrumbs"
+            aria-label="breadcrumb"
+        >
+            ${
+                items
+                    .map(
+                        (
+                            item,
+                            index
+                        ) => `
+                            ${
+                                index > 0
+                                    ? `
+                                        <span
+                                            class="breadcrumb-arrow"
+                                            aria-hidden="true"
+                                        >
+                                            →
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                            ${
+                                item.current
+                                    ? `
+                                        <span
+                                            class="breadcrumb-item current"
+                                            aria-current="page"
+                                        >
+                                            ${item.label}
+                                        </span>
+                                    `
+                                    : `
+                                        <a
+                                            class="breadcrumb-item"
+                                            href="${item.href}"
+                                        >
+                                            ${item.label}
+                                        </a>
+                                    `
+                            }
+                        `
+                    )
+                    .join("")
+            }
+        </nav>
+    `;
+}
+
+/* ============================================================
    CATEGORY PAGE
    ============================================================ */
 
@@ -4265,12 +4407,25 @@ function generateCategoryPage(
 
             <div class="page-header">
 
-                <a
-                    class="back"
-                    href="../"
-                >
-                    ← Back to Mathematics
-                </a>
+                ${breadcrumbHTML(
+                    [
+                        {
+                            label:
+                                "math",
+                            href:
+                                "../"
+                        },
+                        {
+                            label:
+                                categoryName ===
+                                    "Statistics / Mechanics"
+                                    ? "stats/mech"
+                                    : "pure",
+                            current:
+                                true
+                        }
+                    ]
+                )}
 
                 <h1>
                     ${categoryName}
@@ -4385,28 +4540,6 @@ function generateYearPage(
         .join("");
 
 
-    let backPath =
-        "../";
-
-
-    let backText =
-        "Back";
-
-
-    if (
-        subject.name ===
-        "Mathematics"
-    ) {
-
-        backPath =
-            "../";
-
-        backText =
-            "Back to category";
-
-    }
-
-
     return documentHTML(
         `${subject.name} ${year}`,
 
@@ -4414,12 +4547,51 @@ function generateYearPage(
 
             <div class="page-header">
 
-                <a
-                    class="back"
-                    href="${backPath}"
-                >
-                    ← ${backText}
-                </a>
+                ${
+                    subject.name ===
+                        "Mathematics"
+                        ? breadcrumbHTML(
+                            [
+                                {
+                                    label:
+                                        "math",
+                                    href:
+                                        "../../"
+                                },
+                                {
+                                    label:
+                                        categoryKey ===
+                                            "statsmech"
+                                            ? "stats/mech"
+                                            : "pure",
+                                    href:
+                                        "../"
+                                },
+                                {
+                                    label:
+                                        String(year),
+                                    current:
+                                        true
+                                }
+                            ]
+                        )
+                        : breadcrumbHTML(
+                            [
+                                {
+                                    label:
+                                        subject.name.toLowerCase(),
+                                    href:
+                                        "../"
+                                },
+                                {
+                                    label:
+                                        String(year),
+                                    current:
+                                        true
+                                }
+                            ]
+                        )
+                }
 
                 <h1>
                     ${subject.name}
@@ -4671,12 +4843,67 @@ function generateSessionPage(
                 class="page-header"
             >
 
-                <a
-                    class="back"
-                    href="../"
-                >
-                    ← Back to ${year}
-                </a>
+                ${
+                    subject.name ===
+                        "Mathematics"
+                        ? breadcrumbHTML(
+                            [
+                                {
+                                    label:
+                                        "math",
+                                    href:
+                                        "../../../"
+                                },
+                                {
+                                    label:
+                                        categoryKey ===
+                                            "statsmech"
+                                            ? "stats/mech"
+                                            : "pure",
+                                    href:
+                                        "../../"
+                                },
+                                {
+                                    label:
+                                        String(year),
+                                    href:
+                                        "../"
+                                },
+                                {
+                                    label:
+                                        shortSessionName(
+                                            session.sessionCode
+                                        ),
+                                    current:
+                                        true
+                                }
+                            ]
+                        )
+                        : breadcrumbHTML(
+                            [
+                                {
+                                    label:
+                                        subject.name.toLowerCase(),
+                                    href:
+                                        "../../"
+                                },
+                                {
+                                    label:
+                                        String(year),
+                                    href:
+                                        "../"
+                                },
+                                {
+                                    label:
+                                        shortSessionName(
+                                            session.sessionCode
+                                        ),
+                                    current:
+                                        true
+                                }
+                            ]
+                        )
+                }
 
                 <h1>
                     ${title}
