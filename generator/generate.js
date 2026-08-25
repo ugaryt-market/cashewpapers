@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.33
+    Version Alpha 0.0.34
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -560,9 +560,7 @@ function buildDatabase(subjects) {
 
 let PAPER_SEARCH_INDEX = {};
 
-function buildPaperSearchIndex(
-    database
-) {
+function buildPaperSearchIndex(database) {
 
     const index = {};
 
@@ -575,13 +573,6 @@ function buildPaperSearchIndex(
             database
         )
     ) {
-
-        if (
-            subjectKey ===
-            "mathematics"
-        ) {
-            continue;
-        }
 
         for (
             const [
@@ -612,8 +603,17 @@ function buildPaperSearchIndex(
                     )
                 ) {
 
+                    if (!paper.code) {
+                        continue;
+                    }
+
+                    /*
+                       Mathematics is handled below because its
+                       repository contains an extra category level.
+                    */
                     if (
-                        !paper.code
+                        subjectKey ===
+                        "mathematics"
                     ) {
                         continue;
                     }
@@ -627,6 +627,7 @@ function buildPaperSearchIndex(
 
                         code:
                             paper.code
+
                     };
 
                 }
@@ -639,12 +640,6 @@ function buildPaperSearchIndex(
 
     return index;
 }
-
-
-
-/* ============================================================
-   MATHEMATICS PAPER SEARCH INDEX
-   ============================================================ */
 
 function addMathematicsSearchIndex() {
 
@@ -670,13 +665,7 @@ function addMathematicsSearchIndex() {
             )
         ) {
 
-            const parts =
-                file.relative.split(
-                    path.sep
-                );
-
             if (
-                parts.length < 3 ||
                 !file.relative
                     .toLowerCase()
                     .endsWith(".pdf")
@@ -684,11 +673,19 @@ function addMathematicsSearchIndex() {
                 continue;
             }
 
+            const parts =
+                file.relative.split(
+                    path.sep
+                );
+
+            if (
+                parts.length < 3
+            ) {
+                continue;
+            }
+
             const year =
                 parts[0];
-
-            const sessionFolder =
-                parts[1];
 
             const filename =
                 parts[2];
@@ -706,11 +703,6 @@ function addMathematicsSearchIndex() {
                 continue;
             }
 
-            const slug =
-                sessionSlug(
-                    parsed.sessionCode
-                );
-
             const code =
                 filename.replace(
                     /\.pdf$/i,
@@ -722,7 +714,7 @@ function addMathematicsSearchIndex() {
             ] = {
 
                 path:
-                    `mathematics/${categoryKey}/${year}/${slug}/#paper-${code}`,
+                    `mathematics/${categoryKey}/${year}/${sessionSlug(parsed.sessionCode)}/#paper-${code}`,
 
                 code
 
@@ -734,21 +726,281 @@ function addMathematicsSearchIndex() {
 
 }
 
+/*
+   Every generated HTML page loads one external search script.
+   This avoids embedding the search system into the page's
+   executable inline JavaScript.
+*/
+function writeSearchScript() {
 
-/* ============================================================
-   SEARCH INDEX OUTPUT
-   ============================================================ */
+    const searchScript = `
 
-function writePaperSearchIndex() {
+let cashewPaperSearchIndex =
+    ${JSON.stringify(PAPER_SEARCH_INDEX)};
+
+function normalizePaperSearchCode(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+    .trim()
+    .toLowerCase()
+    .replace(
+        /\\\\s+/g,
+        ""
+    );
+
+}
+
+function highlightPaper(
+    code
+) {
+
+    const normalized =
+        normalizePaperSearchCode(
+            code
+        );
+
+    const target =
+        document.querySelector(
+            "[data-paper-code=\\"" +
+            normalized +
+            "\\"]"
+        );
+
+    if (!target) {
+        return false;
+    }
+
+    target.scrollIntoView({
+        behavior:
+            "smooth",
+
+        block:
+            "center"
+    });
+
+    target.classList.remove(
+        "search-highlight"
+    );
+
+    void target.offsetWidth;
+
+    target.classList.add(
+        "search-highlight"
+    );
+
+    window.setTimeout(
+        () => {
+            target.classList.remove(
+                "search-highlight"
+            );
+        },
+        1000
+    );
+
+    return true;
+
+}
+
+function runPaperSearch(
+    value
+) {
+
+    const normalized =
+        normalizePaperSearchCode(
+            value
+        );
+
+    if (!normalized) {
+        return;
+    }
+
+    const result =
+        cashewPaperSearchIndex[
+            normalized
+        ];
+
+    if (!result) {
+
+        const input =
+            document.getElementById(
+                "paperSearchInput"
+            );
+
+        if (input) {
+
+            input.classList.remove(
+                "paper-search-error"
+            );
+
+            void input.offsetWidth;
+
+            input.classList.add(
+                "paper-search-error"
+            );
+
+            input.focus();
+
+        }
+
+        console.warn(
+            "cashewpapers: paper not found:",
+            normalized
+        );
+
+        return;
+
+    }
+
+    const prefix =
+        document.body.dataset.searchPrefix ||
+        "";
+
+    const currentPath =
+        window.location.pathname;
+
+    const targetPath =
+        prefix +
+        result.path.split("#")[0];
+
+    if (
+        currentPath.endsWith(
+            result.path.split("#")[0]
+        )
+    ) {
+
+        if (
+            highlightPaper(
+                result.code
+            )
+        ) {
+            return;
+        }
+
+    }
+
+    window.location.assign(
+        targetPath
+    );
+
+}
+
+function initializePaperSearch() {
+
+    const form =
+        document.getElementById(
+            "paperSearchForm"
+        );
+
+    const input =
+        document.getElementById(
+            "paperSearchInput"
+        );
+
+    const button =
+        document.getElementById(
+            "paperSearchButton"
+        );
+
+    if (!form || !input || !button) {
+        return;
+    }
+
+    function updateArrow() {
+
+        form.classList.toggle(
+            "has-text",
+            input.value.trim().length > 0
+        );
+
+    }
+
+    input.addEventListener(
+        "input",
+        updateArrow
+    );
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                runPaperSearch(
+                    input.value
+                );
+
+            }
+
+        }
+    );
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            runPaperSearch(
+                input.value
+            );
+
+        }
+    );
+
+    updateArrow();
+
+}
+
+window.runPaperSearch =
+    runPaperSearch;
+
+window.cashewPaperSearchIndex =
+    cashewPaperSearchIndex;
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initializePaperSearch
+);
+
+if (
+    window.location.hash.indexOf(
+        "#paper-"
+    ) === 0
+) {
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            const code =
+                window.location.hash.slice(
+                    "#paper-".length
+                );
+
+            highlightPaper(
+                code
+            );
+
+        }
+    );
+
+}
+
+`;
 
     writeFile(
         path.join(
             DIST_DIR,
-            "search-index.json"
+            "search.js"
         ),
-        JSON.stringify(
-            PAPER_SEARCH_INDEX
-        )
+        searchScript
     );
 
 }
@@ -2641,7 +2893,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.33"
+        href="${prefix}style.css?v=0.0.34"
     >
 
     <link
@@ -2671,12 +2923,16 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.33"
+        src="${prefix}auth.js?v=0.0.34"
+    ></script>
+
+    <script
+        src="${prefix}search.js?v=0.0.34"
     ></script>
 
 </head>
 
-<body>
+<body data-search-prefix="${prefix}">
 
 <nav>
 
@@ -2755,318 +3011,6 @@ ${body}
 
 
 <script>
-
-const paperSearchPrefix =
-    "${prefix}";
-
-let paperSearchIndex =
-    {};
-
-let paperSearchReady =
-    false;
-
-async function loadPaperSearchIndex() {
-
-    try {
-
-        const response =
-            await fetch(
-                "${prefix}search-index.json?v=0.0.33",
-                {
-                    cache:
-                        "no-store"
-                }
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
-
-        }
-
-        paperSearchIndex =
-            await response.json();
-
-        paperSearchReady =
-            true;
-
-        window.paperSearchIndex =
-            paperSearchIndex;
-
-    } catch (error) {
-
-        console.error(
-            "cashewpapers: unable to load search index.",
-            error
-        );
-
-    }
-
-}
-
-function normalizePaperSearchCode(
-    value
-) {
-
-    return String(
-        value || ""
-    )
-    .trim()
-    .toLowerCase()
-    .replace(
-        /\s+/g,
-        ""
-    );
-
-}
-
-function applyPaperSearchHighlight(
-    code
-) {
-
-    const normalized =
-        normalizePaperSearchCode(
-            code
-        );
-
-    if (!normalized) {
-        return false;
-    }
-
-    const target =
-        document.querySelector(
-            "[data-paper-code=\"" +
-            normalized +
-            "\"]"
-        );
-
-    if (!target) {
-        return false;
-    }
-
-    target.scrollIntoView({
-        behavior:
-            "smooth",
-
-        block:
-            "center"
-    });
-
-    target.classList.remove(
-        "search-highlight"
-    );
-
-    void target.offsetWidth;
-
-    target.classList.add(
-        "search-highlight"
-    );
-
-    window.setTimeout(
-        () => {
-            target.classList.remove(
-                "search-highlight"
-            );
-        },
-        1000
-    );
-
-    return true;
-}
-
-async function runPaperSearch(
-    value
-) {
-
-    const normalized =
-        normalizePaperSearchCode(
-            value
-        );
-
-    if (!normalized) {
-        return;
-    }
-
-    if (!paperSearchReady) {
-        await loadPaperSearchIndex();
-    }
-
-    const result =
-        paperSearchIndex[
-            normalized
-        ];
-
-    if (!result) {
-
-        const input =
-            document.getElementById(
-                "paperSearchInput"
-            );
-
-        if (input) {
-
-            input.classList.remove(
-                "paper-search-error"
-            );
-
-            void input.offsetWidth;
-
-            input.classList.add(
-                "paper-search-error"
-            );
-
-            input.focus();
-
-        }
-
-        console.warn(
-            "cashewpapers: no paper found for",
-            normalized
-        );
-
-        return;
-    }
-
-    const targetPath =
-        result.path.split(
-            "#"
-        )[0];
-
-    if (
-        window.location.pathname.endsWith(
-            targetPath
-        )
-    ) {
-
-        if (
-            applyPaperSearchHighlight(
-                result.code
-            )
-        ) {
-            return;
-        }
-
-    }
-
-    window.location.assign(
-        paperSearchPrefix +
-        result.path
-    );
-
-}
-
-const paperSearchForm =
-    document.getElementById(
-        "paperSearchForm"
-    );
-
-const paperSearchInput =
-    document.getElementById(
-        "paperSearchInput"
-    );
-
-const paperSearchButton =
-    document.getElementById(
-        "paperSearchButton"
-    );
-
-function updatePaperSearchButton() {
-
-    if (
-        !paperSearchForm ||
-        !paperSearchInput
-    ) {
-        return;
-    }
-
-    paperSearchForm.classList.toggle(
-        "has-text",
-        paperSearchInput.value
-            .trim()
-            .length > 0
-    );
-}
-
-if (paperSearchInput) {
-
-    paperSearchInput.addEventListener(
-        "input",
-        updatePaperSearchButton
-    );
-
-    paperSearchInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Enter"
-            ) {
-
-                event.preventDefault();
-
-                runPaperSearch(
-                    paperSearchInput.value
-                );
-
-            }
-
-        }
-    );
-
-    updatePaperSearchButton();
-
-}
-
-if (paperSearchButton) {
-
-    paperSearchButton.addEventListener(
-        "click",
-        () => {
-
-            runPaperSearch(
-                paperSearchInput
-                    ? paperSearchInput.value
-                    : ""
-            );
-
-        }
-    );
-
-}
-
-window.runPaperSearch =
-    runPaperSearch;
-
-window.paperSearchIndex =
-    paperSearchIndex;
-
-loadPaperSearchIndex();
-
-if (
-    window.location.hash.indexOf(
-        "#paper-"
-    ) === 0
-) {
-
-    const code =
-        window.location.hash.slice(
-            "#paper-".length
-        );
-
-    window.setTimeout(
-        () => {
-            applyPaperSearchHighlight(
-                code
-            );
-        },
-        120
-    );
-
-}
 
 async function updateAuthNavigation() {
 
@@ -3791,7 +3735,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.33
+                    Version Alpha 0.0.34
                 </div>
 
             </section>
@@ -4778,9 +4722,9 @@ function generate() {
     );
 
 
-    /* Search index */
+    /* Search script */
 
-    writePaperSearchIndex();
+    writeSearchScript();
 
 
     /* Image assets */
