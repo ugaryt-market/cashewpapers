@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.31
+    Version Alpha 0.0.32
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2623,7 +2623,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.31"
+        href="${prefix}style.css?v=0.0.32"
     >
 
     <link
@@ -2653,7 +2653,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.31"
+        src="${prefix}auth.js?v=0.0.32"
     ></script>
 
 </head>
@@ -2736,10 +2736,41 @@ ${body}
 </footer>
 
 
+<script type="application/json" id="paperSearchData">
+    ${JSON.stringify(PAPER_SEARCH_INDEX)}
+</script>
+
 <script>
 
-const paperSearchIndex =
-    ${JSON.stringify(PAPER_SEARCH_INDEX)};
+const paperSearchDataElement =
+    document.getElementById(
+        "paperSearchData"
+    );
+
+let paperSearchIndex = {};
+
+if (
+    paperSearchDataElement
+) {
+
+    try {
+
+        paperSearchIndex =
+            JSON.parse(
+                paperSearchDataElement.textContent ||
+                "{}"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "cashewpapers search data could not be loaded.",
+            error
+        );
+
+    }
+
+}
 
 const paperSearchPrefix =
     "${prefix}";
@@ -2854,6 +2885,11 @@ function runPaperSearch(
 
         }
 
+        console.warn(
+            "cashewpapers: no paper found for",
+            normalized
+        );
+
         return;
     }
 
@@ -2878,9 +2914,13 @@ function runPaperSearch(
 
     }
 
-    window.location.href =
+    const destination =
         paperSearchPrefix +
         result.path;
+
+    window.location.assign(
+        destination
+    );
 }
 
 const paperSearchForm =
@@ -2982,6 +3022,13 @@ if (paperSearchForm) {
     );
 
 }
+
+window.runPaperSearch =
+    runPaperSearch;
+
+window.paperSearchIndex =
+    paperSearchIndex;
+
 
 if (
     window.location.hash.indexOf(
@@ -3728,7 +3775,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.31
+                    Version Alpha 0.0.32
                 </div>
 
             </section>
