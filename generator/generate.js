@@ -578,6 +578,53 @@ const CSS = `
         rgba(0, 0, 0, 0.18);
 }
 
+
+/* ---------------- CUSTOM SCROLLBAR ---------------- */
+
+html {
+    scrollbar-width:
+        thin;
+
+    scrollbar-color:
+        #646669
+        #2c2e31;
+}
+
+::-webkit-scrollbar {
+    width:
+        9px;
+
+    height:
+        9px;
+}
+
+::-webkit-scrollbar-track {
+    background:
+        #2c2e31;
+}
+
+::-webkit-scrollbar-thumb {
+    background:
+        #646669;
+
+    border:
+        2px solid
+        #2c2e31;
+
+    border-radius:
+        999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        #737578;
+}
+
+::-webkit-scrollbar-corner {
+    background:
+        #2c2e31;
+}
+
 body {
     font-family:
         "Questrial",
