@@ -646,21 +646,6 @@ function buildPaperSearchIndex(
    MATHEMATICS PAPER SEARCH INDEX
    ============================================================ */
 
-
-function writePaperSearchIndex() {
-
-    writeFile(
-        path.join(
-            DIST_DIR,
-            "search-index.json"
-        ),
-        JSON.stringify(
-            PAPER_SEARCH_INDEX
-        )
-    );
-
-}
-
 function addMathematicsSearchIndex() {
 
     for (
@@ -749,6 +734,24 @@ function addMathematicsSearchIndex() {
 
 }
 
+
+/* ============================================================
+   SEARCH INDEX OUTPUT
+   ============================================================ */
+
+function writePaperSearchIndex() {
+
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "search-index.json"
+        ),
+        JSON.stringify(
+            PAPER_SEARCH_INDEX
+        )
+    );
+
+}
 
 /* ============================================================
    CSS
@@ -2864,17 +2867,14 @@ function applyPaperSearchHighlight(
 
     window.setTimeout(
         () => {
-
             target.classList.remove(
                 "search-highlight"
             );
-
         },
         1000
     );
 
     return true;
-
 }
 
 async function runPaperSearch(
@@ -2891,9 +2891,7 @@ async function runPaperSearch(
     }
 
     if (!paperSearchReady) {
-
         await loadPaperSearchIndex();
-
     }
 
     const result =
@@ -2930,7 +2928,6 @@ async function runPaperSearch(
         );
 
         return;
-
     }
 
     const targetPath =
@@ -2949,9 +2946,7 @@ async function runPaperSearch(
                 result.code
             )
         ) {
-
             return;
-
         }
 
     }
@@ -2984,9 +2979,7 @@ function updatePaperSearchButton() {
         !paperSearchForm ||
         !paperSearchInput
     ) {
-
         return;
-
     }
 
     paperSearchForm.classList.toggle(
@@ -2995,7 +2988,6 @@ function updatePaperSearchButton() {
             .trim()
             .length > 0
     );
-
 }
 
 if (paperSearchInput) {
@@ -3067,11 +3059,9 @@ if (
 
     window.setTimeout(
         () => {
-
             applyPaperSearchHighlight(
                 code
             );
-
         },
         120
     );
