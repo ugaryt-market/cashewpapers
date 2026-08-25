@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.32
+    Version Alpha 0.0.31
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -560,9 +560,7 @@ function buildDatabase(subjects) {
 
 let PAPER_SEARCH_INDEX = {};
 
-function buildPaperSearchIndex(
-    database
-) {
+function buildPaperSearchIndex(database) {
 
     const index = {};
 
@@ -612,9 +610,7 @@ function buildPaperSearchIndex(
                     )
                 ) {
 
-                    if (
-                        !paper.code
-                    ) {
+                    if (!paper.code) {
                         continue;
                     }
 
@@ -627,6 +623,7 @@ function buildPaperSearchIndex(
 
                         code:
                             paper.code
+
                     };
 
                 }
@@ -639,12 +636,6 @@ function buildPaperSearchIndex(
 
     return index;
 }
-
-
-
-/* ============================================================
-   MATHEMATICS PAPER SEARCH INDEX
-   ============================================================ */
 
 function addMathematicsSearchIndex() {
 
@@ -687,9 +678,6 @@ function addMathematicsSearchIndex() {
             const year =
                 parts[0];
 
-            const sessionFolder =
-                parts[1];
-
             const filename =
                 parts[2];
 
@@ -700,8 +688,7 @@ function addMathematicsSearchIndex() {
 
             if (
                 !parsed ||
-                parsed.type !==
-                    "qp"
+                parsed.type !== "qp"
             ) {
                 continue;
             }
@@ -731,6 +718,20 @@ function addMathematicsSearchIndex() {
         }
 
     }
+
+}
+
+function writePaperSearchIndex() {
+
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "search-index.json"
+        ),
+        JSON.stringify(
+            PAPER_SEARCH_INDEX
+        )
+    );
 
 }
 
@@ -2623,7 +2624,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.32"
+        href="${prefix}style.css?v=0.0.31"
     >
 
     <link
@@ -2653,7 +2654,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.32"
+        src="${prefix}auth.js?v=0.0.31"
     ></script>
 
 </head>
@@ -2736,44 +2737,56 @@ ${body}
 </footer>
 
 
-<script type="application/json" id="paperSearchData">
-    ${JSON.stringify(PAPER_SEARCH_INDEX)}
-</script>
-
 <script>
 
-const paperSearchDataElement =
-    document.getElementById(
-        "paperSearchData"
-    );
+const paperSearchPrefix =
+    "${prefix}";
 
-let paperSearchIndex = {};
+let paperSearchIndex =
+    {};
 
-if (
-    paperSearchDataElement
-) {
+let paperSearchReady =
+    false;
+
+async function loadPaperSearchIndex() {
 
     try {
 
-        paperSearchIndex =
-            JSON.parse(
-                paperSearchDataElement.textContent ||
-                "{}"
+        const response =
+            await fetch(
+                "${prefix}search-index.json",
+                {
+                    cache:
+                        "no-store"
+                }
             );
+
+        if (!response.ok) {
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+        }
+
+        paperSearchIndex =
+            await response.json();
+
+        paperSearchReady =
+            true;
+
+        window.paperSearchIndex =
+            paperSearchIndex;
 
     } catch (error) {
 
         console.error(
-            "cashewpapers search data could not be loaded.",
+            "cashewpapers: unable to load search index.",
             error
         );
 
     }
 
 }
-
-const paperSearchPrefix =
-    "${prefix}";
 
 function normalizePaperSearchCode(
     value
@@ -2788,6 +2801,7 @@ function normalizePaperSearchCode(
         /\s+/g,
         ""
     );
+
 }
 
 function applyPaperSearchHighlight(
@@ -2834,17 +2848,20 @@ function applyPaperSearchHighlight(
 
     window.setTimeout(
         () => {
+
             target.classList.remove(
                 "search-highlight"
             );
+
         },
         1000
     );
 
     return true;
+
 }
 
-function runPaperSearch(
+async function runPaperSearch(
     value
 ) {
 
@@ -2855,6 +2872,10 @@ function runPaperSearch(
 
     if (!normalized) {
         return;
+    }
+
+    if (!paperSearchReady) {
+        await loadPaperSearchIndex();
     }
 
     const result =
@@ -2914,13 +2935,11 @@ function runPaperSearch(
 
     }
 
-    const destination =
-        paperSearchPrefix +
-        result.path;
-
     window.location.assign(
-        destination
+        paperSearchPrefix +
+        result.path
     );
+
 }
 
 const paperSearchForm =
@@ -2940,14 +2959,20 @@ const paperSearchButton =
 
 function updatePaperSearchButton() {
 
-    if (!paperSearchForm || !paperSearchInput) {
+    if (
+        !paperSearchForm ||
+        !paperSearchInput
+    ) {
         return;
     }
 
     paperSearchForm.classList.toggle(
         "has-text",
-        paperSearchInput.value.trim().length > 0
+        paperSearchInput.value
+            .trim()
+            .length > 0
     );
+
 }
 
 if (paperSearchInput) {
@@ -2955,6 +2980,25 @@ if (paperSearchInput) {
     paperSearchInput.addEventListener(
         "input",
         updatePaperSearchButton
+    );
+
+    paperSearchInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                runPaperSearch(
+                    paperSearchInput.value
+                );
+
+            }
+
+        }
     );
 
     updatePaperSearchButton();
@@ -2978,57 +3022,13 @@ if (paperSearchButton) {
 
 }
 
-if (paperSearchInput) {
-
-    paperSearchInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Enter"
-            ) {
-
-                event.preventDefault();
-
-                runPaperSearch(
-                    paperSearchInput.value
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-
-if (paperSearchForm) {
-
-    paperSearchForm.addEventListener(
-        "submit",
-        event => {
-
-            event.preventDefault();
-
-            runPaperSearch(
-                paperSearchInput
-                    ? paperSearchInput.value
-                    : ""
-            );
-
-        }
-    );
-
-}
-
 window.runPaperSearch =
     runPaperSearch;
 
 window.paperSearchIndex =
     paperSearchIndex;
 
+loadPaperSearchIndex();
 
 if (
     window.location.hash.indexOf(
@@ -3043,11 +3043,13 @@ if (
 
     window.setTimeout(
         () => {
+
             applyPaperSearchHighlight(
                 code
             );
+
         },
-        80
+        120
     );
 
 }
@@ -3775,7 +3777,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.32
+                    Version Alpha 0.0.31
                 </div>
 
             </section>
@@ -4733,6 +4735,10 @@ function generate() {
         buildPaperSearchIndex(
             database
         );
+
+    addMathematicsSearchIndex();
+
+    writePaperSearchIndex();
 
     addMathematicsSearchIndex();
 
