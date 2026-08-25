@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.29
+    Version Alpha 0.0.30
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -883,6 +883,13 @@ nav .nav-inner {
 }
 
 .paper-search.has-text button {
+    display:
+        flex;
+}
+
+.paper-search:has(
+    input:not(:placeholder-shown)
+) button {
     display:
         flex;
 }
@@ -2522,7 +2529,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.29"
+        href="${prefix}style.css?v=0.0.30"
     >
 
     <link
@@ -2552,7 +2559,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.29"
+        src="${prefix}auth.js?v=0.0.30"
     ></script>
 
 </head>
@@ -3579,7 +3586,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.29
+                    Version Alpha 0.0.30
                 </div>
 
             </section>
