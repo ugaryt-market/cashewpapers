@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.26
+    Version Alpha 0.0.27
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -553,6 +553,94 @@ function buildDatabase(subjects) {
 }
 
 
+
+/* ============================================================
+   PAPER SEARCH INDEX
+   ============================================================ */
+
+let PAPER_SEARCH_INDEX = {};
+
+function buildPaperSearchIndex(
+    database
+) {
+
+    const index = {};
+
+    for (
+        const [
+            subjectKey,
+            data
+        ]
+        of Object.entries(
+            database
+        )
+    ) {
+
+        if (
+            subjectKey ===
+            "mathematics"
+        ) {
+            continue;
+        }
+
+        for (
+            const [
+                year,
+                sessions
+            ]
+            of Object.entries(
+                data.years || {}
+            )
+        ) {
+
+            for (
+                const session
+                of Object.values(
+                    sessions || {}
+                )
+            ) {
+
+                const slug =
+                    sessionSlug(
+                        session.sessionCode
+                    );
+
+                for (
+                    const paper
+                    of Object.values(
+                        session.papers || {}
+                    )
+                ) {
+
+                    if (
+                        !paper.code
+                    ) {
+                        continue;
+                    }
+
+                    index[
+                        paper.code.toLowerCase()
+                    ] = {
+
+                        path:
+                            `${subjectKey}/${year}/${slug}/#paper-${paper.code}`,
+
+                        code:
+                            paper.code
+                    };
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return index;
+}
+
+
 /* ============================================================
    CSS
    ============================================================ */
@@ -660,6 +748,219 @@ button,
 input {
     font: inherit;
     text-transform: lowercase;
+}
+
+
+/* ---------------- PAPER SEARCH ---------------- */
+
+nav .nav-inner {
+    position:
+        relative;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr
+        minmax(
+            280px,
+            460px
+        )
+        1fr;
+
+    align-items:
+        center;
+}
+
+.paper-search {
+    width:
+        100%;
+
+    justify-self:
+        center;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+}
+
+.paper-search input {
+    width:
+        100%;
+
+    height:
+        38px;
+
+    padding:
+        0 14px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        999px;
+
+    background:
+        #3a3c3f;
+
+    color:
+        var(--text);
+
+    outline:
+        none;
+
+    font-size:
+        13px;
+}
+
+.paper-search input::placeholder {
+    color:
+        var(--muted);
+}
+
+.paper-search input:focus {
+    border-color:
+        var(--subdued);
+
+    box-shadow:
+        0 0 0 2px
+        rgba(
+            147,
+            107,
+            60,
+            0.16
+        );
+}
+
+.paper-search button {
+    width:
+        38px;
+
+    height:
+        38px;
+
+    flex-shrink:
+        0;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        50%;
+
+    background:
+        #3a3c3f;
+
+    color:
+        var(--text);
+
+    cursor:
+        pointer;
+
+    font-size:
+        17px;
+
+    line-height:
+        1;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+}
+
+.paper-search button:hover {
+    background:
+        var(--subdued);
+
+    border-color:
+        var(--subdued);
+
+    color:
+        white;
+}
+
+.paper-search-error {
+    animation:
+        paperSearchError
+        0.28s
+        ease;
+}
+
+@keyframes paperSearchError {
+
+    0%,
+    100% {
+        transform:
+            translateX(0);
+    }
+
+    25% {
+        transform:
+            translateX(-4px);
+    }
+
+    75% {
+        transform:
+            translateX(4px);
+    }
+}
+
+.paper-card.search-highlight {
+    border-color:
+        var(--primary);
+
+    box-shadow:
+        0 0 0 2px
+        rgba(
+            255,
+            150,
+            79,
+            0.24
+        ),
+        0 12px 30px
+        rgba(
+            255,
+            150,
+            79,
+            0.12
+        );
+}
+
+@media (max-width: 900px) {
+
+    nav .nav-inner {
+        grid-template-columns:
+            1fr;
+
+        gap:
+            10px;
+    }
+
+    .paper-search {
+        width:
+            min(
+                100%,
+                460px
+            );
+    }
+
+    .nav-actions {
+        justify-self:
+            end;
+    }
+
 }
 
 nav {
@@ -2177,7 +2478,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.26"
+        href="${prefix}style.css?v=0.0.27"
     >
 
     <link
@@ -2207,7 +2508,7 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.26"
+        src="${prefix}auth.js?v=0.0.27"
     ></script>
 
 </head>
@@ -2230,19 +2531,43 @@ function documentHTML(
             >
         </a>
 
+        <form
+            class="paper-search"
+            id="paperSearchForm"
+            role="search"
+        >
+
+            <input
+                id="paperSearchInput"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="search paper code..."
+                aria-label="search paper code"
+            >
+
+            <button
+                type="submit"
+                aria-label="search"
+                title="search"
+            >
+                →
+            </button>
+
+        </form>
+
         <div class="nav-actions">
 
             <a
                 id="authNav"
-                 href="${prefix}login/"
+                href="${prefix}login/"
                 class="nav-account"
             >
                 Login / Signup
             </a>
 
-</div>
-
-</div>
+        </div>
 
     </div>
 
@@ -2262,6 +2587,202 @@ ${body}
 
 
 <script>
+
+const paperSearchIndex =
+    ${JSON.stringify(PAPER_SEARCH_INDEX)};
+
+const paperSearchPrefix =
+    "${prefix}";
+
+function normalizePaperSearchCode(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+    .trim()
+    .toLowerCase()
+    .replace(
+        /\s+/g,
+        ""
+    );
+}
+
+function applyPaperSearchHighlight(
+    code
+) {
+
+    const normalized =
+        normalizePaperSearchCode(
+            code
+        );
+
+    if (!normalized) {
+        return false;
+    }
+
+    const target =
+        document.querySelector(
+            "[data-paper-code=\"" +
+            normalized +
+            "\"]"
+        );
+
+    if (!target) {
+        return false;
+    }
+
+    target.scrollIntoView({
+        behavior:
+            "smooth",
+
+        block:
+            "center"
+    });
+
+    target.classList.remove(
+        "search-highlight"
+    );
+
+    void target.offsetWidth;
+
+    target.classList.add(
+        "search-highlight"
+    );
+
+    window.setTimeout(
+        () => {
+            target.classList.remove(
+                "search-highlight"
+            );
+        },
+        1000
+    );
+
+    return true;
+}
+
+function runPaperSearch(
+    value
+) {
+
+    const normalized =
+        normalizePaperSearchCode(
+            value
+        );
+
+    if (!normalized) {
+        return;
+    }
+
+    const result =
+        paperSearchIndex[
+            normalized
+        ];
+
+    if (!result) {
+
+        const input =
+            document.getElementById(
+                "paperSearchInput"
+            );
+
+        if (input) {
+
+            input.classList.remove(
+                "paper-search-error"
+            );
+
+            void input.offsetWidth;
+
+            input.classList.add(
+                "paper-search-error"
+            );
+
+            input.focus();
+
+        }
+
+        return;
+    }
+
+    const targetPath =
+        result.path.split(
+            "#"
+        )[0];
+
+    if (
+        window.location.pathname.endsWith(
+            targetPath
+        )
+    ) {
+
+        if (
+            applyPaperSearchHighlight(
+                result.code
+            )
+        ) {
+            return;
+        }
+
+    }
+
+    window.location.href =
+        paperSearchPrefix +
+        result.path;
+}
+
+const paperSearchForm =
+    document.getElementById(
+        "paperSearchForm"
+    );
+
+if (paperSearchForm) {
+
+    paperSearchForm.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            const input =
+                document.getElementById(
+                    "paperSearchInput"
+                );
+
+            runPaperSearch(
+                input
+                    ? input.value
+                    : ""
+            );
+
+        }
+    );
+
+}
+
+if (
+    window.location.hash.indexOf(
+        "#paper-"
+    ) === 0
+) {
+
+    const code =
+        window.location.hash.slice(
+            "#paper-".length
+        );
+
+    window.setTimeout(
+        () => {
+            applyPaperSearchHighlight(
+                code
+            );
+        },
+        80
+    );
+
+}
 
 async function updateAuthNavigation() {
 
@@ -2986,7 +3507,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.26
+                    Version Alpha 0.0.27
                 </div>
 
             </section>
@@ -3743,6 +4264,11 @@ function generateSessionPage(
                                         : ""
                                 }
                             "
+                            id="paper-${paper.code}"
+                            data-paper-code="${String(
+                                paper.code ||
+                                ""
+                            ).toLowerCase()}"
                         >
 
                             <div>
@@ -3933,6 +4459,11 @@ function generate() {
     const database =
         buildDatabase(
             subjects
+        );
+
+    PAPER_SEARCH_INDEX =
+        buildPaperSearchIndex(
+            database
         );
 
 
@@ -4339,6 +4870,60 @@ function generate() {
 
                 }
 
+
+
+                for (
+                    const [
+                        year,
+                        sessions
+                    ]
+                    of Object.entries(
+                        categoryYears
+                    )
+                ) {
+
+                    for (
+                        const session
+                        of Object.values(
+                            sessions
+                        )
+                    ) {
+
+                        const slug =
+                            sessionSlug(
+                                session.sessionCode
+                            );
+
+                        for (
+                            const paper
+                            of Object.values(
+                                session.papers
+                            )
+                        ) {
+
+                            if (
+                                !paper.code
+                            ) {
+                                continue;
+                            }
+
+                            PAPER_SEARCH_INDEX[
+                                paper.code.toLowerCase()
+                            ] = {
+
+                                path:
+                                    `mathematics/${categoryKey}/${year}/${slug}/#paper-${paper.code}`,
+
+                                code:
+                                    paper.code
+
+                            };
+
+                        }
+
+                    }
+
+                }
 
                 const categoryDir =
                     path.join(
