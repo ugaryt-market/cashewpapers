@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.39
+    Version Alpha 0.0.40
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -3030,7 +3030,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.39"
+        href="${prefix}style.css?v=0.0.40"
     >
 
     <link
@@ -3060,11 +3060,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.39"
+        src="${prefix}auth.js?v=0.0.40"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.39"
+        src="${prefix}search.js?v=0.0.40"
     ></script>
 
 </head>
@@ -3872,7 +3872,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.39
+                    Version Alpha 0.0.40
                 </div>
 
             </section>
@@ -4203,12 +4203,22 @@ function generateSubjectPage(
 
                 <div class="page-header">
 
-                    <a
-                        class="back"
-                        href="../"
-                    >
-                        ← Back to subjects
-                    </a>
+                    ${breadcrumbHTML(
+                        [
+                            {
+                                label:
+                                    "subjects",
+                                href:
+                                    "../"
+                            },
+                            {
+                                label:
+                                    "math",
+                                current:
+                                    true
+                            }
+                        ]
+                    )}
 
                     <h1>
                         ${subject.name}
