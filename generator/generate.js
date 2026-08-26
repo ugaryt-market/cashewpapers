@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.54
+    Version Alpha 0.0.55
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2618,7 +2618,10 @@ main {
 /* ---------------- NATIVE PDF VIEWER ---------------- */
 
 body:has(.native-pdf-page) {
-    overflow:
+    overflow-y:
+        auto;
+
+    overflow-x:
         hidden;
 }
 
@@ -2649,7 +2652,7 @@ body:has(.native-pdf-page) main {
         8px 24px;
 
     overflow:
-        hidden;
+        visible;
 }
 
 .native-pdf-page {
@@ -2662,11 +2665,10 @@ body:has(.native-pdf-page) main {
             100%
         );
 
-    height:
-        100%;
-
     min-height:
-        0;
+        calc(
+            100dvh - 118px
+        );
 
     display:
         flex;
@@ -3183,7 +3185,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.54"
+        href="${prefix}style.css?v=0.0.55"
     >
 
     <link
@@ -3213,11 +3215,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.54"
+        src="${prefix}auth.js?v=0.0.55"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.54"
+        src="${prefix}search.js?v=0.0.55"
     ></script>
 
 </head>
@@ -4025,7 +4027,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.54
+                    Version Alpha 0.0.55
                 </div>
 
             </section>
