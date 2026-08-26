@@ -2774,23 +2774,28 @@ body:has(.native-pdf-page) main {
 /* ---------------- PDF VIEWER CONTROLS ---------------- */
 
 .native-pdf-controls {
-    display:
-        flex;
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 34px;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
 
-    justify-content:
-        flex-end;
+.native-pdf-preview {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
 
-    align-items:
-        center;
+    color: var(--text);
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 400;
 
-    min-height:
-        34px;
-
-    flex-shrink:
-        0;
-
-    margin-bottom:
-        8px;
+    pointer-events: none;
+    white-space: nowrap;
 }
 
 .native-pdf-fullscreen {
@@ -5254,18 +5259,25 @@ function generatePdfReaderPage() {
             >
 
                 <div
-                    class="native-pdf-controls"
-                >
+    class="native-pdf-controls"
+>
 
-                    <a
-                        class="native-pdf-fullscreen"
-                        id="nativePdfFullscreen"
-                        href="#"
-                    >
-                        go to fullscreen →
-                    </a>
+    <div
+        class="native-pdf-preview"
+        aria-hidden="true"
+    >
+        preview
+    </div>
 
-                </div>
+    <a
+        class="native-pdf-fullscreen"
+        id="nativePdfFullscreen"
+        href="#"
+    >
+        go to fullscreen →
+    </a>
+
+</div>
 
 
                 <div
