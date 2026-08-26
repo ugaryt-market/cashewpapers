@@ -2789,7 +2789,7 @@ body:has(.native-pdf-page) main {
     top: 50%;
     transform: translateY(-50%);
 
-    color: var(--text);
+    color: color: #86867e;
     font-size: 31px;
     line-height: 1;
     font-weight: 400;
