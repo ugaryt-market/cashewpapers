@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.57
+    Version Alpha 0.0.58
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2781,22 +2781,6 @@ body:has(.native-pdf-page) main {
     flex-shrink: 0;
     margin-bottom: 8px;
 }
-
-.native-pdf-preview {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-
-    color: color: #86867e;
-    font-size: 31px;
-    line-height: 1;
-    font-weight: 400;
-
-    pointer-events: none;
-    white-space: nowrap;
-}
-
 .native-pdf-fullscreen {
     display:
         inline-flex;
@@ -3266,7 +3250,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.57"
+        href="${prefix}style.css?v=0.0.58"
     >
 
     <link
@@ -3296,11 +3280,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.57"
+        src="${prefix}auth.js?v=0.0.58"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.57"
+        src="${prefix}search.js?v=0.0.58"
     ></script>
 
 </head>
@@ -4108,7 +4092,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.57
+                    Version Alpha 0.0.58
                 </div>
 
             </section>
@@ -5260,15 +5244,7 @@ function generatePdfReaderPage() {
                 <div
     class="native-pdf-controls"
 >
-
-    <div
-        class="native-pdf-preview"
-        aria-hidden="true"
-    >
-        preview
-    </div>
-
-    <a
+<a
         class="native-pdf-fullscreen"
         id="nativePdfFullscreen"
         href="#"
