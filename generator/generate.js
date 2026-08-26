@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.44
+    Version Alpha 0.0.45
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2612,6 +2612,310 @@ main {
 }
 
 
+
+/* ---------------- PDF READER ---------------- */
+
+.pdf-reader-page {
+    min-height:
+        calc(
+            100dvh - 118px
+        );
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        18px;
+}
+
+.pdf-reader-header {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    flex-wrap:
+        wrap;
+
+    padding:
+        14px 16px;
+
+    background:
+        var(--card);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        var(--shadow);
+}
+
+.pdf-reader-title {
+    min-width:
+        0;
+
+    color:
+        var(--text);
+
+    font-size:
+        16px;
+
+    font-weight:
+        400;
+
+    overflow-wrap:
+        anywhere;
+}
+
+.pdf-reader-status {
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+}
+
+.pdf-reader-toolbar {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    padding:
+        10px 12px;
+
+    background:
+        var(--card);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        var(--shadow);
+}
+
+.pdf-reader-toolbar button {
+    min-width:
+        38px;
+
+    height:
+        38px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        9px;
+
+    background:
+        #3a3c3f;
+
+    color:
+        var(--text);
+
+    cursor:
+        pointer;
+}
+
+.pdf-reader-toolbar button:hover {
+    border-color:
+        var(--subdued);
+
+    background:
+        #414346;
+}
+
+.pdf-reader-toolbar button:disabled {
+    opacity:
+        0.45;
+
+    cursor:
+        default;
+}
+
+.pdf-reader-page-count {
+    min-width:
+        90px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+}
+
+.pdf-reader-zoom {
+    min-width:
+        64px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+}
+
+.pdf-reader-frame {
+    flex:
+        1;
+
+    min-height:
+        620px;
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        center;
+
+    padding:
+        18px;
+
+    overflow:
+        auto;
+
+    background:
+        #242528;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        var(--shadow);
+}
+
+.pdf-reader-canvas-wrap {
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        center;
+
+    min-width:
+        max-content;
+
+    min-height:
+        max-content;
+}
+
+#pdfReaderCanvas {
+    display:
+        block;
+
+    background:
+        white;
+
+    box-shadow:
+        0 12px 35px
+        rgba(
+            0,
+            0,
+            0,
+            0.28
+        );
+}
+
+.pdf-reader-error {
+    width:
+        min(
+            680px,
+            100%
+        );
+
+    margin:
+        auto;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.6;
+}
+
+.pdf-reader-error strong {
+    display:
+        block;
+
+    margin-bottom:
+        8px;
+
+    color:
+        var(--text);
+
+    font-weight:
+        400;
+}
+
+@media (max-width: 700px) {
+
+    .pdf-reader-frame {
+        min-height:
+            480px;
+
+        padding:
+            10px;
+    }
+
+    .pdf-reader-header,
+    .pdf-reader-toolbar {
+        padding:
+            12px;
+    }
+
+}
+
+
 /* ---------------- EMPTY ---------------- */
 
 .empty {
@@ -3030,7 +3334,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.44"
+        href="${prefix}style.css?v=0.0.45"
     >
 
     <link
@@ -3060,11 +3364,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.44"
+        src="${prefix}auth.js?v=0.0.45"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.44"
+        src="${prefix}search.js?v=0.0.45"
     ></script>
 
 </head>
@@ -3872,7 +4176,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.44
+                    Version Alpha 0.0.45
                 </div>
 
             </section>
@@ -4819,7 +5123,9 @@ function generateSessionPage(
                                                     paper-button
                                                     primary
                                                 "
-                                                href="../../../../${paper.question}"
+                                                href="../../../../viewer/?file=${encodeURIComponent(
+                                                    paper.question
+                                                )}"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
@@ -5005,6 +5311,537 @@ function generateSessionPage(
 
 
 /* ============================================================
+   PDF READER PAGE
+   ============================================================ */
+
+function generatePdfReaderPage() {
+
+    return documentHTML(
+        "PDF Reader",
+
+        `
+
+            <div
+                class="pdf-reader-page"
+            >
+
+                <div
+                    class="pdf-reader-header"
+                >
+
+                    <div
+                        class="pdf-reader-title"
+                        id="pdfReaderTitle"
+                    >
+                        loading paper...
+                    </div>
+
+                    <div
+                        class="pdf-reader-status"
+                        id="pdfReaderStatus"
+                    >
+                        loading PDF
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="pdf-reader-toolbar"
+                >
+
+                    <button
+                        type="button"
+                        id="pdfReaderPrev"
+                        aria-label="previous page"
+                        title="previous page"
+                    >
+                        ←
+                    </button>
+
+                    <div
+                        class="pdf-reader-page-count"
+                        id="pdfReaderPageCount"
+                    >
+                        1 / 1
+                    </div>
+
+                    <button
+                        type="button"
+                        id="pdfReaderNext"
+                        aria-label="next page"
+                        title="next page"
+                    >
+                        →
+                    </button>
+
+                    <button
+                        type="button"
+                        id="pdfReaderZoomOut"
+                        aria-label="zoom out"
+                        title="zoom out"
+                    >
+                        −
+                    </button>
+
+                    <div
+                        class="pdf-reader-zoom"
+                        id="pdfReaderZoom"
+                    >
+                        100%
+                    </div>
+
+                    <button
+                        type="button"
+                        id="pdfReaderZoomIn"
+                        aria-label="zoom in"
+                        title="zoom in"
+                    >
+                        +
+                    </button>
+
+                    <button
+                        type="button"
+                        id="pdfReaderOriginal"
+                        aria-label="open original PDF"
+                        title="open original PDF"
+                    >
+                        ↗
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="pdf-reader-frame"
+                    id="pdfReaderFrame"
+                >
+
+                    <div
+                        class="pdf-reader-canvas-wrap"
+                        id="pdfReaderCanvasWrap"
+                    >
+
+                        <canvas
+                            id="pdfReaderCanvas"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <script
+                src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+            ></script>
+
+            <script>
+
+(function () {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const fileParam =
+        params.get("file");
+
+    const title =
+        document.getElementById(
+            "pdfReaderTitle"
+        );
+
+    const status =
+        document.getElementById(
+            "pdfReaderStatus"
+        );
+
+    const pageCount =
+        document.getElementById(
+            "pdfReaderPageCount"
+        );
+
+    const zoomLabel =
+        document.getElementById(
+            "pdfReaderZoom"
+        );
+
+    const previousButton =
+        document.getElementById(
+            "pdfReaderPrev"
+        );
+
+    const nextButton =
+        document.getElementById(
+            "pdfReaderNext"
+        );
+
+    const zoomOutButton =
+        document.getElementById(
+            "pdfReaderZoomOut"
+        );
+
+    const zoomInButton =
+        document.getElementById(
+            "pdfReaderZoomIn"
+        );
+
+    const originalButton =
+        document.getElementById(
+            "pdfReaderOriginal"
+        );
+
+    const canvas =
+        document.getElementById(
+            "pdfReaderCanvas"
+        );
+
+    const context =
+        canvas
+            ? canvas.getContext(
+                "2d"
+            )
+            : null;
+
+    let pdfDocument =
+        null;
+
+    let currentPage =
+        1;
+
+    let scale =
+        1.15;
+
+    let pdfUrl =
+        "";
+
+    function fail(message) {
+
+        status.textContent =
+            "unable to load";
+
+        const frame =
+            document.getElementById(
+                "pdfReaderFrame"
+            );
+
+        if (!frame) {
+            return;
+        }
+
+        frame.innerHTML =
+            '<div class="pdf-reader-error">' +
+            '<strong>' +
+            message +
+            '</strong>' +
+            '<span>The PDF could not be loaded.</span>' +
+            '</div>';
+
+    }
+
+    function updateControls() {
+
+        if (!pdfDocument) {
+            return;
+        }
+
+        pageCount.textContent =
+            currentPage +
+            " / " +
+            pdfDocument.numPages;
+
+        zoomLabel.textContent =
+            Math.round(
+                scale * 100
+            ) +
+            "%";
+
+        previousButton.disabled =
+            currentPage <= 1;
+
+        nextButton.disabled =
+            currentPage >=
+            pdfDocument.numPages;
+
+    }
+
+    async function renderPage() {
+
+        if (!pdfDocument) {
+            return;
+        }
+
+        try {
+
+            const page =
+                await pdfDocument.getPage(
+                    currentPage
+                );
+
+            const viewport =
+                page.getViewport({
+                    scale
+                });
+
+            const outputScale =
+                window.devicePixelRatio ||
+                1;
+
+            canvas.width =
+                Math.floor(
+                    viewport.width *
+                    outputScale
+                );
+
+            canvas.height =
+                Math.floor(
+                    viewport.height *
+                    outputScale
+                );
+
+            canvas.style.width =
+                viewport.width +
+                "px";
+
+            canvas.style.height =
+                viewport.height +
+                "px";
+
+            context.setTransform(
+                outputScale,
+                0,
+                0,
+                outputScale,
+                0,
+                0
+            );
+
+            await page.render({
+                canvasContext:
+                    context,
+
+                viewport
+            }).promise;
+
+            updateControls();
+
+        } catch (error) {
+
+            console.error(
+                "cashewpapers PDF render error:",
+                error
+            );
+
+            fail(
+                "This page could not be rendered."
+            );
+
+        }
+
+    }
+
+    previousButton.addEventListener(
+        "click",
+        () => {
+
+            if (
+                currentPage <= 1
+            ) {
+                return;
+            }
+
+            currentPage -= 1;
+
+            renderPage();
+
+        }
+    );
+
+    nextButton.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !pdfDocument ||
+                currentPage >=
+                    pdfDocument.numPages
+            ) {
+                return;
+            }
+
+            currentPage += 1;
+
+            renderPage();
+
+        }
+    );
+
+    zoomOutButton.addEventListener(
+        "click",
+        () => {
+
+            scale =
+                Math.max(
+                    0.6,
+                    scale - 0.1
+                );
+
+            renderPage();
+
+        }
+    );
+
+    zoomInButton.addEventListener(
+        "click",
+        () => {
+
+            scale =
+                Math.min(
+                    2.5,
+                    scale + 0.1
+                );
+
+            renderPage();
+
+        }
+    );
+
+    originalButton.addEventListener(
+        "click",
+        () => {
+
+            if (pdfUrl) {
+
+                window.open(
+                    pdfUrl,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
+
+            }
+
+        }
+    );
+
+    if (!fileParam) {
+
+        fail(
+            "No PDF was supplied."
+        );
+
+        return;
+
+    }
+
+    try {
+
+        const decodedFile =
+            decodeURIComponent(
+                fileParam
+            );
+
+        const rootPrefix =
+            "${prefix}";
+
+        pdfUrl =
+            new URL(
+                rootPrefix +
+                decodedFile,
+                window.location.href
+            ).href;
+
+        const rawName =
+            decodedFile
+                .split("/")
+                .pop() ||
+                "PDF";
+
+        title.textContent =
+            rawName.replace(
+                /\.pdf$/i,
+                ""
+            );
+
+    } catch (error) {
+
+        console.error(
+            "cashewpapers PDF URL error:",
+            error
+        );
+
+        fail(
+            "The PDF address is invalid."
+        );
+
+        return;
+
+    }
+
+    if (
+        typeof pdfjsLib ===
+        "undefined"
+    ) {
+
+        fail(
+            "The PDF reader could not initialize."
+        );
+
+        return;
+
+    }
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    pdfjsLib
+        .getDocument(
+            pdfUrl
+        )
+        .promise
+        .then(
+            pdf => {
+
+                pdfDocument =
+                    pdf;
+
+                status.textContent =
+                    "ready";
+
+                renderPage();
+
+            }
+        )
+        .catch(
+            error => {
+
+                console.error(
+                    "cashewpapers PDF load error:",
+                    error
+                );
+
+                fail(
+                    "The PDF could not be opened."
+                );
+
+            }
+        );
+
+})();
+
+            </script>
+
+        `,
+
+        1
+    );
+
+}
+
+
+/* ============================================================
    GENERATE EVERYTHING
    ============================================================ */
 
@@ -5154,6 +5991,18 @@ function generate() {
             "index.html"
         ),
         generateEmailConfirmedPage()
+    );
+
+
+    /* PDF Reader */
+
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "viewer",
+            "index.html"
+        ),
+        generatePdfReaderPage()
     );
 
 
