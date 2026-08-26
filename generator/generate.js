@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.46
+    Version Alpha 0.0.47
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2628,65 +2628,7 @@ main {
         column;
 
     gap:
-        18px;
-}
-
-.pdf-reader-header {
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        16px;
-
-    flex-wrap:
-        wrap;
-
-    padding:
-        14px 16px;
-
-    background:
-        var(--card);
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        14px;
-
-    box-shadow:
-        var(--shadow);
-}
-
-.pdf-reader-title {
-    min-width:
-        0;
-
-    color:
-        var(--text);
-
-    font-size:
-        16px;
-
-    font-weight:
-        400;
-
-    overflow-wrap:
-        anywhere;
-}
-
-.pdf-reader-status {
-    color:
-        var(--muted);
-
-    font-size:
-        13px;
+        12px;
 }
 
 .pdf-reader-toolbar {
@@ -2716,10 +2658,13 @@ main {
         var(--border);
 
     border-radius:
-        14px;
+        12px;
 
     box-shadow:
         var(--shadow);
+
+    flex-shrink:
+        0;
 }
 
 .pdf-reader-toolbar button {
@@ -2727,7 +2672,7 @@ main {
         38px;
 
     height:
-        38px;
+        36px;
 
     padding:
         0 12px;
@@ -2737,7 +2682,7 @@ main {
         var(--border);
 
     border-radius:
-        9px;
+        8px;
 
     background:
         #3a3c3f;
@@ -2747,6 +2692,12 @@ main {
 
     cursor:
         pointer;
+
+    font-size:
+        15px;
+
+    line-height:
+        1;
 }
 
 .pdf-reader-toolbar button:hover {
@@ -2757,17 +2708,9 @@ main {
         #414346;
 }
 
-.pdf-reader-toolbar button:disabled {
-    opacity:
-        0.45;
-
-    cursor:
-        default;
-}
-
 .pdf-reader-page-count {
     min-width:
-        90px;
+        72px;
 
     text-align:
         center;
@@ -2781,7 +2724,7 @@ main {
 
 .pdf-reader-zoom {
     min-width:
-        64px;
+        58px;
 
     text-align:
         center;
@@ -2793,27 +2736,76 @@ main {
         13px;
 }
 
+.pdf-reader-download {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-width:
+        38px;
+
+    height:
+        36px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    background:
+        #3a3c3f;
+
+    color:
+        var(--text);
+
+    cursor:
+        pointer;
+
+    text-decoration:
+        none;
+
+    font-size:
+        15px;
+
+    line-height:
+        1;
+}
+
+.pdf-reader-download:hover {
+    border-color:
+        var(--subdued);
+
+    background:
+        #414346;
+}
+
 .pdf-reader-frame {
     flex:
         1;
 
     min-height:
-        620px;
+        0;
 
-    display:
-        flex;
-
-    align-items:
-        flex-start;
-
-    justify-content:
-        center;
-
-    padding:
-        18px;
+    height:
+        calc(
+            100dvh - 230px
+        );
 
     overflow:
         auto;
+
+    padding:
+        20px;
 
     background:
         #242528;
@@ -2823,32 +2815,41 @@ main {
         var(--border);
 
     border-radius:
-        16px;
+        14px;
 
     box-shadow:
         var(--shadow);
+
+    scroll-behavior:
+        smooth;
 }
 
-.pdf-reader-canvas-wrap {
+.pdf-reader-pages {
+    width:
+        max-content;
+
+    min-width:
+        100%;
+
     display:
         flex;
 
-    align-items:
-        flex-start;
+    flex-direction:
+        column;
 
-    justify-content:
+    align-items:
         center;
 
-    min-width:
-        max-content;
-
-    min-height:
-        max-content;
+    gap:
+        18px;
 }
 
-#pdfReaderCanvas {
-    display:
-        block;
+.pdf-reader-page-wrap {
+    position:
+        relative;
+
+    flex:
+        0 0 auto;
 
     background:
         white;
@@ -2861,6 +2862,14 @@ main {
             0,
             0.28
         );
+}
+
+.pdf-reader-page-wrap canvas {
+    display:
+        block;
+
+    background:
+        white;
 }
 
 .pdf-reader-error {
@@ -2900,17 +2909,18 @@ main {
 @media (max-width: 700px) {
 
     .pdf-reader-frame {
-        min-height:
-            480px;
+        height:
+            calc(
+                100dvh - 240px
+            );
 
         padding:
             10px;
     }
 
-    .pdf-reader-header,
     .pdf-reader-toolbar {
         padding:
-            12px;
+            9px;
     }
 
 }
@@ -3334,7 +3344,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.46"
+        href="${prefix}style.css?v=0.0.47"
     >
 
     <link
@@ -3364,11 +3374,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.46"
+        src="${prefix}auth.js?v=0.0.47"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.46"
+        src="${prefix}search.js?v=0.0.47"
     ></script>
 
 </head>
@@ -4176,7 +4186,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.46
+                    Version Alpha 0.0.47
                 </div>
 
             </section>
@@ -5326,54 +5336,15 @@ function generatePdfReaderPage() {
             >
 
                 <div
-                    class="pdf-reader-header"
-                >
-
-                    <div
-                        class="pdf-reader-title"
-                        id="pdfReaderTitle"
-                    >
-                        loading paper...
-                    </div>
-
-                    <div
-                        class="pdf-reader-status"
-                        id="pdfReaderStatus"
-                    >
-                        loading PDF
-                    </div>
-
-                </div>
-
-
-                <div
                     class="pdf-reader-toolbar"
                 >
-
-                    <button
-                        type="button"
-                        id="pdfReaderPrev"
-                        aria-label="previous page"
-                        title="previous page"
-                    >
-                        ←
-                    </button>
 
                     <div
                         class="pdf-reader-page-count"
                         id="pdfReaderPageCount"
                     >
-                        1 / 1
+                        loading...
                     </div>
-
-                    <button
-                        type="button"
-                        id="pdfReaderNext"
-                        aria-label="next page"
-                        title="next page"
-                    >
-                        →
-                    </button>
 
                     <button
                         type="button"
@@ -5400,14 +5371,16 @@ function generatePdfReaderPage() {
                         +
                     </button>
 
-                    <button
-                        type="button"
-                        id="pdfReaderOriginal"
-                        aria-label="open original PDF"
-                        title="open original PDF"
+                    <a
+                        class="pdf-reader-download"
+                        id="pdfReaderDownload"
+                        href="#"
+                        download
+                        aria-label="download PDF"
+                        title="download PDF"
                     >
-                        ↗
-                    </button>
+                        ↓
+                    </a>
 
                 </div>
 
@@ -5418,15 +5391,9 @@ function generatePdfReaderPage() {
                 >
 
                     <div
-                        class="pdf-reader-canvas-wrap"
-                        id="pdfReaderCanvasWrap"
-                    >
-
-                        <canvas
-                            id="pdfReaderCanvas"
-                        ></canvas>
-
-                    </div>
+                        class="pdf-reader-pages"
+                        id="pdfReaderPages"
+                    ></div>
 
                 </div>
 
@@ -5449,14 +5416,14 @@ function generatePdfReaderPage() {
     const fileParam =
         params.get("file");
 
-    const title =
+    const frame =
         document.getElementById(
-            "pdfReaderTitle"
+            "pdfReaderFrame"
         );
 
-    const status =
+    const pagesContainer =
         document.getElementById(
-            "pdfReaderStatus"
+            "pdfReaderPages"
         );
 
     const pageCount =
@@ -5469,16 +5436,6 @@ function generatePdfReaderPage() {
             "pdfReaderZoom"
         );
 
-    const previousButton =
-        document.getElementById(
-            "pdfReaderPrev"
-        );
-
-    const nextButton =
-        document.getElementById(
-            "pdfReaderNext"
-        );
-
     const zoomOutButton =
         document.getElementById(
             "pdfReaderZoomOut"
@@ -5489,48 +5446,21 @@ function generatePdfReaderPage() {
             "pdfReaderZoomIn"
         );
 
-    const originalButton =
+    const downloadLink =
         document.getElementById(
-            "pdfReaderOriginal"
+            "pdfReaderDownload"
         );
-
-    const canvas =
-        document.getElementById(
-            "pdfReaderCanvas"
-        );
-
-    const context =
-        canvas
-            ? canvas.getContext(
-                "2d"
-            )
-            : null;
 
     let pdfDocument =
         null;
 
-    let currentPage =
-        1;
-
     let scale =
-        1.15;
+        1.0;
 
     let pdfUrl =
         "";
 
     function fail(message) {
-
-        status.textContent =
-            "unable to load";
-
-        const frame =
-            document.getElementById(
-                "pdfReaderFrame"
-            );
-
-        if (!frame) {
-            return;
-        }
 
         frame.innerHTML =
             '<div class="pdf-reader-error">' +
@@ -5540,18 +5470,12 @@ function generatePdfReaderPage() {
             '<span>The PDF could not be loaded.</span>' +
             '</div>';
 
+        pageCount.textContent =
+            "error";
+
     }
 
-    function updateControls() {
-
-        if (!pdfDocument) {
-            return;
-        }
-
-        pageCount.textContent =
-            currentPage +
-            " / " +
-            pdfDocument.numPages;
+    function updateZoomLabel() {
 
         zoomLabel.textContent =
             Math.round(
@@ -5559,125 +5483,157 @@ function generatePdfReaderPage() {
             ) +
             "%";
 
-        previousButton.disabled =
-            currentPage <= 1;
-
-        nextButton.disabled =
-            currentPage >=
-            pdfDocument.numPages;
-
     }
 
-    async function renderPage() {
+    async function renderAllPages() {
 
         if (!pdfDocument) {
             return;
         }
 
-        try {
+        /*
+            Preserve the user's approximate vertical position when
+            the zoom level changes.
+        */
+        const oldScrollRatio =
+            frame.scrollHeight >
+            frame.clientHeight
+                ? frame.scrollTop /
+                    (
+                        frame.scrollHeight -
+                        frame.clientHeight
+                    )
+                : 0;
 
-            const page =
-                await pdfDocument.getPage(
-                    currentPage
+        pagesContainer.innerHTML =
+            "";
+
+        pageCount.textContent =
+            "loading...";
+
+        for (
+            let pageNumber = 1;
+            pageNumber <=
+                pdfDocument.numPages;
+            pageNumber++
+        ) {
+
+            try {
+
+                const page =
+                    await pdfDocument.getPage(
+                        pageNumber
+                    );
+
+                const viewport =
+                    page.getViewport({
+                        scale
+                    });
+
+                const outputScale =
+                    window.devicePixelRatio ||
+                    1;
+
+                const wrapper =
+                    document.createElement(
+                        "div"
+                    );
+
+                wrapper.className =
+                    "pdf-reader-page-wrap";
+
+                const canvas =
+                    document.createElement(
+                        "canvas"
+                    );
+
+                const context =
+                    canvas.getContext(
+                        "2d"
+                    );
+
+                canvas.width =
+                    Math.floor(
+                        viewport.width *
+                        outputScale
+                    );
+
+                canvas.height =
+                    Math.floor(
+                        viewport.height *
+                        outputScale
+                    );
+
+                canvas.style.width =
+                    viewport.width +
+                    "px";
+
+                canvas.style.height =
+                    viewport.height +
+                    "px";
+
+                context.setTransform(
+                    outputScale,
+                    0,
+                    0,
+                    outputScale,
+                    0,
+                    0
                 );
 
-            const viewport =
-                page.getViewport({
-                    scale
-                });
-
-            const outputScale =
-                window.devicePixelRatio ||
-                1;
-
-            canvas.width =
-                Math.floor(
-                    viewport.width *
-                    outputScale
+                wrapper.appendChild(
+                    canvas
                 );
 
-            canvas.height =
-                Math.floor(
-                    viewport.height *
-                    outputScale
+                pagesContainer.appendChild(
+                    wrapper
                 );
 
-            canvas.style.width =
-                viewport.width +
-                "px";
+                await page.render({
+                    canvasContext:
+                        context,
 
-            canvas.style.height =
-                viewport.height +
-                "px";
+                    viewport
+                }).promise;
 
-            context.setTransform(
-                outputScale,
-                0,
-                0,
-                outputScale,
-                0,
-                0
-            );
+            } catch (error) {
 
-            await page.render({
-                canvasContext:
-                    context,
+                console.error(
+                    "cashewpapers PDF page render error:",
+                    error
+                );
 
-                viewport
-            }).promise;
-
-            updateControls();
-
-        } catch (error) {
-
-            console.error(
-                "cashewpapers PDF render error:",
-                error
-            );
-
-            fail(
-                "This page could not be rendered."
-            );
+            }
 
         }
+
+        pageCount.textContent =
+            pdfDocument.numPages +
+            " pages";
+
+        updateZoomLabel();
+
+        window.requestAnimationFrame(
+            () => {
+
+                if (
+                    frame.scrollHeight >
+                    frame.clientHeight
+                ) {
+
+                    frame.scrollTop =
+                        (
+                            frame.scrollHeight -
+                            frame.clientHeight
+                        ) *
+                        oldScrollRatio;
+
+                }
+
+            }
+        );
 
     }
-
-    previousButton.addEventListener(
-        "click",
-        () => {
-
-            if (
-                currentPage <= 1
-            ) {
-                return;
-            }
-
-            currentPage -= 1;
-
-            renderPage();
-
-        }
-    );
-
-    nextButton.addEventListener(
-        "click",
-        () => {
-
-            if (
-                !pdfDocument ||
-                currentPage >=
-                    pdfDocument.numPages
-            ) {
-                return;
-            }
-
-            currentPage += 1;
-
-            renderPage();
-
-        }
-    );
 
     zoomOutButton.addEventListener(
         "click",
@@ -5689,7 +5645,7 @@ function generatePdfReaderPage() {
                     scale - 0.1
                 );
 
-            renderPage();
+            renderAllPages();
 
         }
     );
@@ -5704,24 +5660,7 @@ function generatePdfReaderPage() {
                     scale + 0.1
                 );
 
-            renderPage();
-
-        }
-    );
-
-    originalButton.addEventListener(
-        "click",
-        () => {
-
-            if (pdfUrl) {
-
-                window.open(
-                    pdfUrl,
-                    "_blank",
-                    "noopener,noreferrer"
-                );
-
-            }
+            renderAllPages();
 
         }
     );
@@ -5753,17 +5692,19 @@ function generatePdfReaderPage() {
                 window.location.href
             ).href;
 
+        downloadLink.href =
+            pdfUrl;
+
         const rawName =
             decodedFile
                 .split("/")
                 .pop() ||
-                "PDF";
+                "paper.pdf";
 
-        title.textContent =
-            rawName.replace(
-                /\.pdf$/i,
-                ""
-            );
+        downloadLink.setAttribute(
+            "download",
+            rawName
+        );
 
     } catch (error) {
 
@@ -5807,10 +5748,7 @@ function generatePdfReaderPage() {
                 pdfDocument =
                     pdf;
 
-                status.textContent =
-                    "ready";
-
-                renderPage();
+                renderAllPages();
 
             }
         )
