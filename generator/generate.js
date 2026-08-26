@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.61
+    Version Alpha 0.0.62
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -3250,7 +3250,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.61"
+        href="${prefix}style.css?v=0.0.62"
     >
 
     <link
@@ -3280,11 +3280,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.61"
+        src="${prefix}auth.js?v=0.0.62"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.61"
+        src="${prefix}search.js?v=0.0.62"
     ></script>
 
 </head>
@@ -4092,7 +4092,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.61
+                    Version Alpha 0.0.62
                 </div>
 
             </section>
@@ -5326,6 +5326,18 @@ function generatePdfReaderPage() {
 
         fullscreen.href =
             pdfUrl;
+
+        fullscreen.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                window.location.href =
+                    pdfUrl;
+
+            }
+        );
 
         fullscreen.target =
             "_blank";
