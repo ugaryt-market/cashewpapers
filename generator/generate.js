@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.53
+    Version Alpha 0.0.54
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2614,7 +2614,18 @@ main {
 
 
 
+
 /* ---------------- NATIVE PDF VIEWER ---------------- */
+
+body:has(.native-pdf-page) {
+    overflow:
+        hidden;
+}
+
+body:has(.native-pdf-page) footer {
+    display:
+        none;
+}
 
 body:has(.native-pdf-page) main {
     height:
@@ -2635,7 +2646,10 @@ body:has(.native-pdf-page) main {
         center;
 
     padding:
-        12px 24px 18px;
+        8px 24px;
+
+    overflow:
+        hidden;
 }
 
 .native-pdf-page {
@@ -2644,12 +2658,12 @@ body:has(.native-pdf-page) main {
 
     width:
         min(
-            980px,
+            1100px,
             100%
         );
 
-    flex:
-        1 1 auto;
+    height:
+        100%;
 
     min-height:
         0;
@@ -2659,9 +2673,6 @@ body:has(.native-pdf-page) main {
 
     flex-direction:
         column;
-
-    gap:
-        8px;
 }
 
 .native-pdf-window {
@@ -2675,6 +2686,9 @@ body:has(.native-pdf-page) main {
         0;
 
     width:
+        100%;
+
+    height:
         100%;
 
     overflow:
@@ -2694,12 +2708,10 @@ body:has(.native-pdf-page) main {
         var(--shadow);
 
     aspect-ratio:
-        0.92 / 1;
+        auto;
 
     max-height:
-        calc(
-            100dvh - 145px
-        );
+        none;
 }
 
 .native-pdf-window iframe {
@@ -2731,27 +2743,6 @@ body:has(.native-pdf-page) main {
         #242528;
 }
 
-@media (min-width: 701px) and (max-height: 800px) {
-
-    .native-pdf-window {
-        aspect-ratio:
-            auto;
-
-        height:
-            calc(
-                100dvh - 145px
-            );
-
-        max-height:
-            none;
-
-        min-height:
-            560px;
-    }
-
-}
-
-
 @media (max-width: 700px) {
 
     body:has(.native-pdf-page) main {
@@ -2761,7 +2752,10 @@ body:has(.native-pdf-page) main {
             );
 
         padding:
-            12px;
+            6px 10px;
+
+        overflow:
+            hidden;
     }
 
     .native-pdf-page {
@@ -2769,16 +2763,7 @@ body:has(.native-pdf-page) main {
             100%;
     }
 
-    .native-pdf-window {
-        aspect-ratio:
-            auto;
-
-        min-height:
-            480px;
-    }
-
 }
-
 
 /* ---------------- EMPTY ---------------- */
 
@@ -3198,7 +3183,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.53"
+        href="${prefix}style.css?v=0.0.54"
     >
 
     <link
@@ -3228,11 +3213,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.53"
+        src="${prefix}auth.js?v=0.0.54"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.53"
+        src="${prefix}search.js?v=0.0.54"
     ></script>
 
 </head>
@@ -4040,7 +4025,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.53
+                    Version Alpha 0.0.54
                 </div>
 
             </section>
