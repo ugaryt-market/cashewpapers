@@ -2667,9 +2667,7 @@ body:has(.native-pdf-page) main {
         );
 
     min-height:
-        calc(
-            550px,
-        );
+            550px;
 
     display:
         flex;
