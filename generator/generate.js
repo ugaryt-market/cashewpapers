@@ -2635,7 +2635,7 @@ body:has(.native-pdf-page) footer {
 
 body:has(.native-pdf-page) main {
     height:
-        630px;
+        670px;
 
     min-height:
         0;
@@ -2662,12 +2662,12 @@ body:has(.native-pdf-page) main {
 
     width:
         min(
-            1100px,
+            900px,
             100%
         );
 
     min-height:
-            550px;
+            670px;
 
     display:
         flex;
