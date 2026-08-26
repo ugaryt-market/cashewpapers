@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.52
+    Version Alpha 0.0.53
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2635,7 +2635,7 @@ body:has(.native-pdf-page) main {
         center;
 
     padding:
-        18px 24px 24px;
+        12px 24px 18px;
 }
 
 .native-pdf-page {
@@ -2644,7 +2644,7 @@ body:has(.native-pdf-page) main {
 
     width:
         min(
-            1100px,
+            980px,
             100%
         );
 
@@ -2659,6 +2659,9 @@ body:has(.native-pdf-page) main {
 
     flex-direction:
         column;
+
+    gap:
+        8px;
 }
 
 .native-pdf-window {
@@ -2690,13 +2693,13 @@ body:has(.native-pdf-page) main {
     box-shadow:
         var(--shadow);
 
-    /*
-        Native Chrome PDF viewers behave more like a normal A4
-        reading window when the containing viewport has a consistent
-        wide-but-not-full-width shape.
-    */
     aspect-ratio:
-        1.48 / 1;
+        0.92 / 1;
+
+    max-height:
+        calc(
+            100dvh - 145px
+        );
 }
 
 .native-pdf-window iframe {
@@ -2734,11 +2737,20 @@ body:has(.native-pdf-page) main {
         aspect-ratio:
             auto;
 
+        height:
+            calc(
+                100dvh - 145px
+            );
+
+        max-height:
+            none;
+
         min-height:
             560px;
     }
 
 }
+
 
 @media (max-width: 700px) {
 
@@ -3186,7 +3198,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.52"
+        href="${prefix}style.css?v=0.0.53"
     >
 
     <link
@@ -3216,11 +3228,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.52"
+        src="${prefix}auth.js?v=0.0.53"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.52"
+        src="${prefix}search.js?v=0.0.53"
     ></script>
 
 </head>
@@ -4028,7 +4040,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.52
+                    Version Alpha 0.0.53
                 </div>
 
             </section>
@@ -5233,7 +5245,8 @@ function generatePdfReaderPage() {
             ).href;
 
         frame.src =
-            pdfUrl;
+            pdfUrl +
+            "#zoom=page-fit&page=1";
 
     } catch (error) {
 
