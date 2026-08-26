@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.55
+    Version Alpha 0.0.57
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2631,13 +2631,10 @@ body:has(.native-pdf-page) footer {
 }
 
 body:has(.native-pdf-page) main {
-    height:
+    min-height:
         calc(
             100dvh - 118px
         );
-
-    min-height:
-        0;
 
     display:
         flex;
@@ -2649,10 +2646,7 @@ body:has(.native-pdf-page) main {
         center;
 
     padding:
-        8px 24px;
-
-    overflow:
-        visible;
+        4px 24px 8px;
 }
 
 .native-pdf-page {
@@ -2661,14 +2655,12 @@ body:has(.native-pdf-page) main {
 
     width:
         min(
-            1100px,
+            920px,
             100%
         );
 
     min-height:
-        calc(
-            100dvh - 118px
-        );
+        0;
 
     display:
         flex;
@@ -2681,17 +2673,16 @@ body:has(.native-pdf-page) main {
     position:
         relative;
 
-    flex:
-        1 1 auto;
-
-    min-height:
-        0;
-
     width:
         100%;
 
     height:
-        100%;
+        calc(
+            100dvh - 136px
+        );
+
+    min-height:
+        760px;
 
     overflow:
         hidden;
@@ -2711,9 +2702,6 @@ body:has(.native-pdf-page) main {
 
     aspect-ratio:
         auto;
-
-    max-height:
-        none;
 }
 
 .native-pdf-window iframe {
@@ -2748,21 +2736,28 @@ body:has(.native-pdf-page) main {
 @media (max-width: 700px) {
 
     body:has(.native-pdf-page) main {
-        height:
+        min-height:
             calc(
                 100dvh - 96px
             );
 
         padding:
-            6px 10px;
-
-        overflow:
-            hidden;
+            6px 10px 12px;
     }
 
     .native-pdf-page {
         width:
             100%;
+    }
+
+    .native-pdf-window {
+        height:
+            calc(
+                100dvh - 104px
+            );
+
+        min-height:
+            0;
     }
 
 }
@@ -3185,7 +3180,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.55"
+        href="${prefix}style.css?v=0.0.57"
     >
 
     <link
@@ -3215,11 +3210,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.55"
+        src="${prefix}auth.js?v=0.0.57"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.55"
+        src="${prefix}search.js?v=0.0.57"
     ></script>
 
 </head>
@@ -4027,7 +4022,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.55
+                    Version Alpha 0.0.57
                 </div>
 
             </section>
