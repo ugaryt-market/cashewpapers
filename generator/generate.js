@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.51
+    Version Alpha 0.0.52
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2631,16 +2631,22 @@ body:has(.native-pdf-page) main {
     flex-direction:
         column;
 
-    padding-top:
-        24px;
+    align-items:
+        center;
 
-    padding-bottom:
-        24px;
+    padding:
+        18px 24px 24px;
 }
 
 .native-pdf-page {
     position:
         relative;
+
+    width:
+        min(
+            1100px,
+            100%
+        );
 
     flex:
         1 1 auto;
@@ -2653,120 +2659,6 @@ body:has(.native-pdf-page) main {
 
     flex-direction:
         column;
-
-    gap:
-        10px;
-}
-
-.native-pdf-header {
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        16px;
-
-    padding:
-        10px 14px;
-
-    background:
-        var(--card);
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        12px;
-
-    box-shadow:
-        var(--shadow);
-
-    flex-shrink:
-        0;
-}
-
-.native-pdf-title {
-    min-width:
-        0;
-
-    color:
-        var(--text);
-
-    font-size:
-        16px;
-
-    line-height:
-        1.4;
-
-    overflow-wrap:
-        anywhere;
-}
-
-.native-pdf-actions {
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        8px;
-
-    flex-shrink:
-        0;
-}
-
-.native-pdf-action {
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    min-height:
-        36px;
-
-    padding:
-        0 12px;
-
-    border:
-        1px solid
-        var(--border);
-
-    border-radius:
-        8px;
-
-    background:
-        #3a3c3f;
-
-    color:
-        var(--text);
-
-    font-size:
-        13px;
-
-    text-decoration:
-        none;
-
-    cursor:
-        pointer;
-}
-
-.native-pdf-action:hover {
-    border-color:
-        var(--subdued);
-
-    background:
-        #414346;
 }
 
 .native-pdf-window {
@@ -2797,6 +2689,14 @@ body:has(.native-pdf-page) main {
 
     box-shadow:
         var(--shadow);
+
+    /*
+        Native Chrome PDF viewers behave more like a normal A4
+        reading window when the containing viewport has a consistent
+        wide-but-not-full-width shape.
+    */
+    aspect-ratio:
+        1.48 / 1;
 }
 
 .native-pdf-window iframe {
@@ -2828,47 +2728,45 @@ body:has(.native-pdf-page) main {
         #242528;
 }
 
+@media (min-width: 701px) and (max-height: 800px) {
+
+    .native-pdf-window {
+        aspect-ratio:
+            auto;
+
+        min-height:
+            560px;
+    }
+
+}
+
 @media (max-width: 700px) {
-
-    .native-pdf-header {
-        align-items:
-            flex-start;
-
-        flex-direction:
-            column;
-    }
-
-    .native-pdf-actions {
-        width:
-            100%;
-    }
-
-    .native-pdf-action {
-        flex:
-            1;
-    }
-
-    body:has(.native-pdf-page) main {
-        padding-top:
-            16px;
-
-        padding-bottom:
-            16px;
-    }
 
     body:has(.native-pdf-page) main {
         height:
             calc(
                 100dvh - 96px
             );
+
+        padding:
+            12px;
+    }
+
+    .native-pdf-page {
+        width:
+            100%;
     }
 
     .native-pdf-window {
-        flex:
-            1 1 auto;
+        aspect-ratio:
+            auto;
+
+        min-height:
+            480px;
     }
 
 }
+
 
 /* ---------------- EMPTY ---------------- */
 
@@ -3288,7 +3186,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.51"
+        href="${prefix}style.css?v=0.0.52"
     >
 
     <link
@@ -3318,11 +3216,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.51"
+        src="${prefix}auth.js?v=0.0.52"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.51"
+        src="${prefix}search.js?v=0.0.52"
     ></script>
 
 </head>
@@ -4130,7 +4028,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.51
+                    Version Alpha 0.0.52
                 </div>
 
             </section>
@@ -5280,35 +5178,6 @@ function generatePdfReaderPage() {
             >
 
                 <div
-                    class="native-pdf-header"
-                >
-
-                    <div
-                        class="native-pdf-title"
-                        id="nativePdfTitle"
-                    >
-                        loading paper...
-                    </div>
-
-                    <div
-                        class="native-pdf-actions"
-                    >
-
-                        <a
-                            class="native-pdf-action"
-                            id="nativePdfDownload"
-                            href="#"
-                            download
-                        >
-                            download
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                <div
                     class="native-pdf-window"
                 >
 
@@ -5335,19 +5204,9 @@ function generatePdfReaderPage() {
     const fileParam =
         params.get("file");
 
-    const title =
-        document.getElementById(
-            "nativePdfTitle"
-        );
-
     const frame =
         document.getElementById(
             "nativePdfFrame"
-        );
-
-    const download =
-        document.getElementById(
-            "nativePdfDownload"
         );
 
     if (!fileParam) {
@@ -5375,35 +5234,6 @@ function generatePdfReaderPage() {
 
         frame.src =
             pdfUrl;
-
-        download.href =
-            pdfUrl;
-
-        const rawName =
-            decodedFile
-                .split("/")
-                .pop() ||
-                "paper.pdf";
-
-        title.textContent =
-            rawName.replace(
-                /\.pdf$/i,
-                ""
-            );
-
-        download.setAttribute(
-            "download",
-            rawName
-        );
-
-        document.title =
-            (
-                rawName.replace(
-                    /\.pdf$/i,
-                    ""
-                ) +
-                " · cashew papers"
-            ).toLowerCase();
 
     } catch (error) {
 
