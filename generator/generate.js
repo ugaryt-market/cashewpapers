@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.57
+    Version Alpha 0.0.58
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2655,7 +2655,7 @@ body:has(.native-pdf-page) main {
 
     width:
         min(
-            920px,
+            1080px,
             100%
         );
 
@@ -3180,7 +3180,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.57"
+        href="${prefix}style.css?v=0.0.58"
     >
 
     <link
@@ -3210,11 +3210,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.57"
+        src="${prefix}auth.js?v=0.0.58"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.57"
+        src="${prefix}search.js?v=0.0.58"
     ></script>
 
 </head>
@@ -4022,7 +4022,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.57
+                    Version Alpha 0.0.58
                 </div>
 
             </section>
