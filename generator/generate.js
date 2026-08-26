@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.55
+    Version Alpha 0.0.56
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2767,6 +2767,77 @@ body:has(.native-pdf-page) main {
 
 }
 
+
+/* ---------------- PDF VIEWER CONTROLS ---------------- */
+
+.native-pdf-controls {
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    align-items:
+        center;
+
+    min-height:
+        34px;
+
+    flex-shrink:
+        0;
+}
+
+.native-pdf-fullscreen {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    height:
+        32px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    background:
+        #3a3c3f;
+
+    color:
+        var(--text);
+
+    font-size:
+        13px;
+
+    line-height:
+        1;
+
+    text-decoration:
+        none;
+
+    cursor:
+        pointer;
+}
+
+.native-pdf-fullscreen:hover {
+    background:
+        #414346;
+
+    border-color:
+        var(--subdued);
+}
+
+
 /* ---------------- EMPTY ---------------- */
 
 .empty {
@@ -3185,7 +3256,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.55"
+        href="${prefix}style.css?v=0.0.56"
     >
 
     <link
@@ -3215,11 +3286,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.55"
+        src="${prefix}auth.js?v=0.0.56"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.55"
+        src="${prefix}search.js?v=0.0.56"
     ></script>
 
 </head>
@@ -4027,7 +4098,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.55
+                    Version Alpha 0.0.56
                 </div>
 
             </section>
@@ -5177,6 +5248,21 @@ function generatePdfReaderPage() {
             >
 
                 <div
+                    class="native-pdf-controls"
+                >
+
+                    <a
+                        class="native-pdf-fullscreen"
+                        id="nativePdfFullscreen"
+                        href="#"
+                    >
+                        fullscreen
+                    </a>
+
+                </div>
+
+
+                <div
                     class="native-pdf-window"
                 >
 
@@ -5208,6 +5294,11 @@ function generatePdfReaderPage() {
             "nativePdfFrame"
         );
 
+    const fullscreen =
+        document.getElementById(
+            "nativePdfFullscreen"
+        );
+
     if (!fileParam) {
 
         title.textContent =
@@ -5234,6 +5325,16 @@ function generatePdfReaderPage() {
         frame.src =
             pdfUrl +
             "#zoom=page-fit&page=1";
+
+        fullscreen.href =
+            pdfUrl;
+
+        fullscreen.target =
+            "_blank";
+
+        fullscreen.rel =
+            "noopener noreferrer";
+
 
     } catch (error) {
 
