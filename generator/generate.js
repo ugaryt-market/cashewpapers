@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.48
+    Version Alpha 0.0.49
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2613,6 +2613,211 @@ main {
 
 
 
+
+/* ---------------- NATIVE PDF VIEWER ---------------- */
+
+.native-pdf-page {
+    min-height:
+        calc(
+            100dvh - 118px
+        );
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        14px;
+}
+
+.native-pdf-header {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    padding:
+        14px 16px;
+
+    background:
+        var(--card);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        var(--shadow);
+
+    flex-shrink:
+        0;
+}
+
+.native-pdf-title {
+    min-width:
+        0;
+
+    color:
+        var(--text);
+
+    font-size:
+        16px;
+
+    line-height:
+        1.4;
+
+    overflow-wrap:
+        anywhere;
+}
+
+.native-pdf-actions {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    flex-shrink:
+        0;
+}
+
+.native-pdf-action {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        36px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    background:
+        #3a3c3f;
+
+    color:
+        var(--text);
+
+    font-size:
+        13px;
+
+    text-decoration:
+        none;
+
+    cursor:
+        pointer;
+}
+
+.native-pdf-action:hover {
+    border-color:
+        var(--subdued);
+
+    background:
+        #414346;
+}
+
+.native-pdf-window {
+    flex:
+        1;
+
+    min-height:
+        0;
+
+    height:
+        calc(
+            100dvh - 220px
+        );
+
+    overflow:
+        hidden;
+
+    background:
+        #242528;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        var(--shadow);
+}
+
+.native-pdf-window iframe {
+    display:
+        block;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    border:
+        0;
+
+    background:
+        #242528;
+}
+
+@media (max-width: 700px) {
+
+    .native-pdf-header {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+    }
+
+    .native-pdf-actions {
+        width:
+            100%;
+    }
+
+    .native-pdf-action {
+        flex:
+            1;
+    }
+
+    .native-pdf-window {
+        height:
+            calc(
+                100dvh - 250px
+            );
+    }
+
+}
+
 /* ---------------- EMPTY ---------------- */
 
 .empty {
@@ -3031,7 +3236,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.48"
+        href="${prefix}style.css?v=0.0.49"
     >
 
     <link
@@ -3061,11 +3266,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.48"
+        src="${prefix}auth.js?v=0.0.49"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.48"
+        src="${prefix}search.js?v=0.0.49"
     ></script>
 
 </head>
@@ -3873,7 +4078,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.48
+                    Version Alpha 0.0.49
                 </div>
 
             </section>
@@ -4820,7 +5025,9 @@ function generateSessionPage(
                                                     paper-button
                                                     primary
                                                 "
-                                                href="../../../../${paper.question}"
+                                                href="../../../../viewer/?file=${encodeURIComponent(
+                                                    paper.question
+                                                )}"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
@@ -5006,6 +5213,171 @@ function generateSessionPage(
 
 
 /* ============================================================
+   NATIVE PDF VIEWER PAGE
+   ============================================================ */
+
+function generatePdfReaderPage() {
+
+    return documentHTML(
+        "PDF Viewer",
+
+        `
+
+            <div
+                class="native-pdf-page"
+            >
+
+                <div
+                    class="native-pdf-header"
+                >
+
+                    <div
+                        class="native-pdf-title"
+                        id="nativePdfTitle"
+                    >
+                        loading paper...
+                    </div>
+
+                    <div
+                        class="native-pdf-actions"
+                    >
+
+                        <a
+                            class="native-pdf-action"
+                            id="nativePdfDownload"
+                            href="#"
+                            download
+                        >
+                            download
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="native-pdf-window"
+                >
+
+                    <iframe
+                        id="nativePdfFrame"
+                        title="PDF viewer"
+                        src="about:blank"
+                    ></iframe>
+
+                </div>
+
+            </div>
+
+
+            <script>
+
+(function () {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const fileParam =
+        params.get("file");
+
+    const title =
+        document.getElementById(
+            "nativePdfTitle"
+        );
+
+    const frame =
+        document.getElementById(
+            "nativePdfFrame"
+        );
+
+    const download =
+        document.getElementById(
+            "nativePdfDownload"
+        );
+
+    if (!fileParam) {
+
+        title.textContent =
+            "no PDF supplied";
+
+        return;
+
+    }
+
+    try {
+
+        const decodedFile =
+            decodeURIComponent(
+                fileParam
+            );
+
+        const pdfUrl =
+            new URL(
+                "../" +
+                decodedFile,
+                window.location.href
+            ).href;
+
+        frame.src =
+            pdfUrl;
+
+        download.href =
+            pdfUrl;
+
+        const rawName =
+            decodedFile
+                .split("/")
+                .pop() ||
+                "paper.pdf";
+
+        title.textContent =
+            rawName.replace(
+                /\.pdf$/i,
+                ""
+            );
+
+        download.setAttribute(
+            "download",
+            rawName
+        );
+
+        document.title =
+            (
+                rawName.replace(
+                    /\.pdf$/i,
+                    ""
+                ) +
+                " · cashew papers"
+            ).toLowerCase();
+
+    } catch (error) {
+
+        console.error(
+            "cashewpapers native PDF viewer error:",
+            error
+        );
+
+        title.textContent =
+            "unable to open PDF";
+
+    }
+
+})();
+
+            </script>
+
+        `,
+
+        1
+    );
+
+}
+
+
+/* ============================================================
    GENERATE EVERYTHING
    ============================================================ */
 
@@ -5155,6 +5527,18 @@ function generate() {
             "index.html"
         ),
         generateEmailConfirmedPage()
+    );
+
+
+    /* Native PDF Viewer */
+
+    writeFile(
+        path.join(
+            DIST_DIR,
+            "viewer",
+            "index.html"
+        ),
+        generatePdfReaderPage()
     );
 
 
