@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.60
+    Version Alpha 0.0.61
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -3250,7 +3250,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.60"
+        href="${prefix}style.css?v=0.0.61"
     >
 
     <link
@@ -3280,11 +3280,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.60"
+        src="${prefix}auth.js?v=0.0.61"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.60"
+        src="${prefix}search.js?v=0.0.61"
     ></script>
 
 </head>
@@ -4092,7 +4092,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.60
+                    Version Alpha 0.0.61
                 </div>
 
             </section>
@@ -5042,7 +5042,10 @@ function generateSessionPage(
                                                 href="../../../../viewer/?file=${encodeURIComponent(
                                                     paper.question
                                                 )}"
->
+
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
                                                 📄 Question Paper
                                             </a>
                                         `
