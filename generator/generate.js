@@ -2790,7 +2790,7 @@ body:has(.native-pdf-page) main {
     transform: translateY(-50%);
 
     color: var(--text);
-    font-size: 34px;
+    font-size: 31px;
     line-height: 1;
     font-weight: 400;
 
