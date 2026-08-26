@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.49
+    Version Alpha 0.0.50
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2616,11 +2616,28 @@ main {
 
 /* ---------------- NATIVE PDF VIEWER ---------------- */
 
-.native-pdf-page {
+body:has(.native-pdf-page) main {
     min-height:
         calc(
             100dvh - 118px
         );
+
+    padding-top:
+        24px;
+
+    padding-bottom:
+        24px;
+
+}
+
+.native-pdf-page {
+    height:
+        calc(
+            100dvh - 118px
+        );
+
+    min-height:
+        0;
 
     display:
         flex;
@@ -2629,7 +2646,7 @@ main {
         column;
 
     gap:
-        14px;
+        10px;
 }
 
 .native-pdf-header {
@@ -2646,7 +2663,7 @@ main {
         16px;
 
     padding:
-        14px 16px;
+        10px 14px;
 
     background:
         var(--card);
@@ -2745,15 +2762,13 @@ main {
 
 .native-pdf-window {
     flex:
-        1;
+        1 1 auto;
 
     min-height:
         0;
 
     height:
-        calc(
-            100dvh - 220px
-        );
+        auto;
 
     overflow:
         hidden;
@@ -2809,11 +2824,27 @@ main {
             1;
     }
 
-    .native-pdf-window {
+    body:has(.native-pdf-page) main {
+        padding-top:
+            16px;
+
+        padding-bottom:
+            16px;
+    }
+
+    .native-pdf-page {
         height:
             calc(
-                100dvh - 250px
+                100dvh - 96px
             );
+    }
+
+    .native-pdf-window {
+        flex:
+            1 1 auto;
+
+        height:
+            auto;
     }
 
 }
@@ -3236,7 +3267,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.49"
+        href="${prefix}style.css?v=0.0.50"
     >
 
     <link
@@ -3266,11 +3297,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.49"
+        src="${prefix}auth.js?v=0.0.50"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.49"
+        src="${prefix}search.js?v=0.0.50"
     ></script>
 
 </head>
@@ -4078,7 +4109,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.49
+                    Version Alpha 0.0.50
                 </div>
 
             </section>
