@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.50
+    Version Alpha 0.0.51
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2617,24 +2617,33 @@ main {
 /* ---------------- NATIVE PDF VIEWER ---------------- */
 
 body:has(.native-pdf-page) main {
-    min-height:
+    height:
         calc(
             100dvh - 118px
         );
+
+    min-height:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
 
     padding-top:
         24px;
 
     padding-bottom:
         24px;
-
 }
 
 .native-pdf-page {
-    height:
-        calc(
-            100dvh - 118px
-        );
+    position:
+        relative;
+
+    flex:
+        1 1 auto;
 
     min-height:
         0;
@@ -2761,14 +2770,17 @@ body:has(.native-pdf-page) main {
 }
 
 .native-pdf-window {
+    position:
+        relative;
+
     flex:
         1 1 auto;
 
     min-height:
         0;
 
-    height:
-        auto;
+    width:
+        100%;
 
     overflow:
         hidden;
@@ -2788,6 +2800,12 @@ body:has(.native-pdf-page) main {
 }
 
 .native-pdf-window iframe {
+    position:
+        absolute;
+
+    inset:
+        0;
+
     display:
         block;
 
@@ -2795,6 +2813,12 @@ body:has(.native-pdf-page) main {
         100%;
 
     height:
+        100%;
+
+    min-width:
+        100%;
+
+    min-height:
         100%;
 
     border:
@@ -2832,7 +2856,7 @@ body:has(.native-pdf-page) main {
             16px;
     }
 
-    .native-pdf-page {
+    body:has(.native-pdf-page) main {
         height:
             calc(
                 100dvh - 96px
@@ -2842,9 +2866,6 @@ body:has(.native-pdf-page) main {
     .native-pdf-window {
         flex:
             1 1 auto;
-
-        height:
-            auto;
     }
 
 }
@@ -3267,7 +3288,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.50"
+        href="${prefix}style.css?v=0.0.51"
     >
 
     <link
@@ -3297,11 +3318,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.50"
+        src="${prefix}auth.js?v=0.0.51"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.50"
+        src="${prefix}search.js?v=0.0.51"
     ></script>
 
 </head>
@@ -4109,7 +4130,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.50
+                    Version Alpha 0.0.51
                 </div>
 
             </section>
