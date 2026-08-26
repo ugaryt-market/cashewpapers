@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.56
+    Version Alpha 0.0.57
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2635,7 +2635,7 @@ body:has(.native-pdf-page) footer {
 
 body:has(.native-pdf-page) main {
     height:
-        670px;
+        820px;
 
     min-height:
         0;
@@ -2667,7 +2667,7 @@ body:has(.native-pdf-page) main {
         );
 
     min-height:
-            670px;
+        820px;
 
     display:
         flex;
@@ -2713,6 +2713,9 @@ body:has(.native-pdf-page) main {
 
     max-height:
         none;
+
+    margin-bottom:
+        48px;
 }
 
 .native-pdf-window iframe {
@@ -3263,7 +3266,7 @@ function documentHTML(
 
     <link
         rel="stylesheet"
-        href="${prefix}style.css?v=0.0.56"
+        href="${prefix}style.css?v=0.0.57"
     >
 
     <link
@@ -3293,11 +3296,11 @@ function documentHTML(
     ></script>
 
     <script
-        src="${prefix}auth.js?v=0.0.56"
+        src="${prefix}auth.js?v=0.0.57"
     ></script>
 
     <script
-        src="${prefix}search.js?v=0.0.56"
+        src="${prefix}search.js?v=0.0.57"
     ></script>
 
 </head>
@@ -4105,7 +4108,7 @@ function generateHome(
                 </p>
 
                 <div class="version">
-                    Version Alpha 0.0.56
+                    Version Alpha 0.0.57
                 </div>
 
             </section>
