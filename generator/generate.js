@@ -2350,6 +2350,9 @@ main {
     flex-direction:
         column;
 
+    gap:
+        0;
+
     align-items:
         flex-start;
 
@@ -2785,6 +2788,9 @@ body:has(.native-pdf-page) main {
 
     flex-shrink:
         0;
+
+    margin-bottom:
+        8px;
 }
 
 .native-pdf-fullscreen {
@@ -5256,7 +5262,7 @@ function generatePdfReaderPage() {
                         id="nativePdfFullscreen"
                         href="#"
                     >
-                        fullscreen
+                        go to fullscreen →
                     </a>
 
                 </div>
