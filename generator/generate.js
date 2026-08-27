@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.68
+    Version Alpha 0.1.69
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1479,8 +1479,8 @@ main {
     right: 0;
     z-index: 300;
 
-    width: 300px;
-    max-width: min(300px, 80vw);
+    width: 320px;
+    max-width: min(320px, 84vw);
     max-height: 260px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -1591,36 +1591,6 @@ main {
     gap: 9px;
 }
 
-.attempt-form-history {
-    max-height: 220px;
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    padding-right: 3px;
-
-    scrollbar-width: thin;
-    scrollbar-color: #646669 #2c2e31;
-}
-
-.attempt-form-history::-webkit-scrollbar {
-    width: 9px;
-    height: 9px;
-}
-
-.attempt-form-history::-webkit-scrollbar-track {
-    background: #2c2e31;
-}
-
-.attempt-form-history::-webkit-scrollbar-thumb {
-    background: #646669;
-    border: 2px solid #2c2e31;
-    border-radius: 999px;
-}
-
-.attempt-form-history::-webkit-scrollbar-thumb:hover {
-    background: #737578;
-}
-
 .attempt-form-title {
     display: flex;
     align-items: center;
@@ -1662,6 +1632,12 @@ main {
     color: var(--text);
     font-size: 14px;
     outline: none;
+    accent-color: var(--primary);
+}
+
+.attempt-input::-webkit-inner-spin-button,
+.attempt-input::-webkit-outer-spin-button {
+    opacity: 0.75;
 }
 
 .attempt-input:focus {
@@ -2048,7 +2024,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.68">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.69">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2063,9 +2039,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.68"></script>
+    <script src="${prefix}auth.js?v=0.1.69"></script>
 
-    <script src="${prefix}search.js?v=0.1.68"></script>
+    <script src="${prefix}search.js?v=0.1.69"></script>
 
 </head>
 
@@ -2314,17 +2290,22 @@ function renderPaperAttempts(progress, key, completed, user) {
     }
 
     /*
-       Keep the card compact once a paper has more than ten attempts.
-       The first nine attempts remain visible in the compact summary;
-       the tenth position becomes a "See more" control.
+       Keep the card preview compact. The first ten scores remain visible;
+       when there are more than ten attempts, "see more" is appended.
+       It opens the history popup only; the Add Attempt GUI remains the
+       same compact score-entry GUI regardless of attempt count.
     */
-    const visibleAttempts =
-        attempts.length > 10
-            ? attempts.slice(0, 9)
-            : attempts;
+    const previewAttempts =
+        attempts.slice(
+            0,
+            Math.min(
+                10,
+                attempts.length
+            )
+        );
 
-    const scoreSummary =
-        visibleAttempts
+    const previewScores =
+        previewAttempts
             .map(
                 attempt =>
                     String(attempt.score)
@@ -2340,28 +2321,50 @@ function renderPaperAttempts(progress, key, completed, user) {
     summaryButton.className =
         "attempt-summary";
 
-    if (attempts.length > 10) {
+    summaryButton.textContent =
+        String(attempts.length) +
+        " " +
+        (
+            attempts.length === 1
+                ? "attempt"
+                : "attempts"
+        ) +
+        (
+            previewScores
+                ? " · " + previewScores
+                : ""
+        ) +
+        (
+            attempts.length > 10
+                ? " · see more"
+                : ""
+        );
 
-        summaryButton.textContent =
-            "See more";
+    summaryButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
 
-    } else {
+    const history =
+        document.createElement("div");
 
-        summaryButton.textContent =
-            String(attempts.length) +
-            " " +
-            (
-                attempts.length === 1
-                    ? "attempt"
-                    : "attempts"
-            ) +
-            (
-                scoreSummary
-                    ? " · " + scoreSummary
-                    : ""
+    history.className =
+        "attempt-history";
+
+    attempts.forEach(
+        (attempt, index) => {
+
+            history.appendChild(
+                createAttemptHistoryRow(
+                    progress,
+                    key,
+                    attempt,
+                    index
+                )
             );
 
-    }
+        }
+    );
 
     summaryButton.addEventListener(
         "click",
@@ -2369,27 +2372,6 @@ function renderPaperAttempts(progress, key, completed, user) {
 
             event.preventDefault();
             event.stopPropagation();
-
-            if (attempts.length > 10) {
-
-                openAttemptForm(
-                    progress,
-                    key,
-                    true
-                );
-
-                return;
-
-            }
-
-            const history =
-                attemptsContainer.querySelector(
-                    ".attempt-history"
-                );
-
-            if (!history) {
-                return;
-            }
 
             const isOpen =
                 history.classList.toggle(
@@ -2406,34 +2388,8 @@ function renderPaperAttempts(progress, key, completed, user) {
         }
     );
 
-    summaryButton.setAttribute(
-        "aria-expanded",
-        "false"
-    );
-
     attemptsContainer.appendChild(
         summaryButton
-    );
-
-    const history =
-        document.createElement("div");
-
-    history.className =
-        "attempt-history";
-
-    visibleAttempts.forEach(
-        (attempt, index) => {
-
-            history.appendChild(
-                createAttemptHistoryRow(
-                    progress,
-                    key,
-                    attempt,
-                    index
-                )
-            );
-
-        }
     );
 
     attemptsContainer.appendChild(
@@ -2442,10 +2398,6 @@ function renderPaperAttempts(progress, key, completed, user) {
 
 }
 
-/*
-   Build one history row. Deleting an attempt re-renders the history but
-   deliberately leaves the Add Attempt form open when it is open.
-*/
 function createAttemptHistoryRow(
     progress,
     key,
@@ -2531,21 +2483,11 @@ function createAttemptHistoryRow(
                 attempts
             );
 
-            const existingForm =
-                progress.querySelector(
-                    ".attempt-form"
+            const historyWasOpen =
+                row.parentElement &&
+                row.parentElement.classList.contains(
+                    "open"
                 );
-
-            if (existingForm) {
-
-                refreshAttemptForm(
-                    progress,
-                    key
-                );
-
-                return;
-
-            }
 
             renderPaperAttempts(
                 progress,
@@ -2554,6 +2496,21 @@ function createAttemptHistoryRow(
                     "completed",
                 currentUser
             );
+
+            if (historyWasOpen) {
+
+                const newHistory =
+                    progress.querySelector(
+                        ".attempt-history"
+                    );
+
+                if (newHistory) {
+                    newHistory.classList.add(
+                        "open"
+                    );
+                }
+
+            }
 
         }
     );
@@ -2570,7 +2527,7 @@ function createAttemptHistoryRow(
 
 }
 
-function openAttemptForm(progress, key, showAllHistory = false) {
+function openAttemptForm(progress, key) {
 
     const attemptsContainer =
         progress.querySelector(
@@ -2667,7 +2624,7 @@ function openAttemptForm(progress, key, showAllHistory = false) {
         "100";
 
     input.inputMode =
-        "decimal";
+        "numeric";
 
     input.placeholder =
         "score";
@@ -2706,21 +2663,12 @@ function openAttemptForm(progress, key, showAllHistory = false) {
 
     cancelButton.addEventListener(
         "click",
-        async event => {
+        event => {
 
             event.preventDefault();
             event.stopPropagation();
 
-            const currentUser =
-                await getCurrentUser();
-
-            renderPaperAttempts(
-                progress,
-                key,
-                getPaperStatus(key) ===
-                    "completed",
-                currentUser
-            );
+            form.remove();
 
         }
     );
@@ -2743,38 +2691,6 @@ function openAttemptForm(progress, key, showAllHistory = false) {
         title
     );
 
-    if (showAllHistory) {
-
-        const fullHistory =
-            document.createElement("div");
-
-        fullHistory.className =
-            "attempt-form-history";
-
-        const currentAttempts =
-            getPaperAttempts(key);
-
-        currentAttempts.forEach(
-            (attempt, index) => {
-
-                fullHistory.appendChild(
-                    createAttemptHistoryRow(
-                        progress,
-                        key,
-                        attempt,
-                        index
-                    )
-                );
-
-            }
-        );
-
-        form.appendChild(
-            fullHistory
-        );
-
-    }
-
     form.appendChild(
         input
     );
@@ -2793,12 +2709,15 @@ function openAttemptForm(progress, key, showAllHistory = false) {
                 await getCurrentUser();
 
             if (!user) {
+
                 showLoginRequired(
                     progress.querySelector(
                         ".paper-status"
                     )
                 );
+
                 return;
+
             }
 
             const score =
@@ -2809,7 +2728,9 @@ function openAttemptForm(progress, key, showAllHistory = false) {
 
             if (
                 !score ||
-                !Number.isFinite(numericScore) ||
+                !Number.isFinite(
+                    numericScore
+                ) ||
                 numericScore < 0 ||
                 numericScore > 100
             ) {
@@ -2856,45 +2777,6 @@ function openAttemptForm(progress, key, showAllHistory = false) {
     );
 
     input.focus();
-
-}
-
-function refreshAttemptForm(progress, key) {
-
-    const form =
-        progress.querySelector(
-            ".attempt-form"
-        );
-
-    if (!form) {
-        return;
-    }
-
-    const fullHistory =
-        form.querySelector(
-            ".attempt-form-history"
-        );
-
-    if (!fullHistory) {
-        return;
-    }
-
-    fullHistory.innerHTML = "";
-
-    getPaperAttempts(key).forEach(
-        (attempt, index) => {
-
-            fullHistory.appendChild(
-                createAttemptHistoryRow(
-                    progress,
-                    key,
-                    attempt,
-                    index
-                )
-            );
-
-        }
-    );
 
 }
 
