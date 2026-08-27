@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.63
+    Version Alpha 0.1.64
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -36,7 +36,9 @@ const SUBJECT_ICON_FILES = {
 
 const CATEGORY_ICON_FILES = {
     pure: "pure.svg",
-    statsmech: "stats.svg"
+    statsmech: "stats.svg",
+    written: "written.svg",
+    practical: "practical.svg"
 };
 
 const IMAGE_ASSETS = [
@@ -52,7 +54,11 @@ const IMAGE_ASSETS = [
     "22.svg",
     "23.svg",
     "pure.svg",
-    "stats.svg"
+    "stats.svg",
+    "written.svg",
+    "practical.svg",
+    "calendar.svg",
+    "stackofbooks.svg"
 ];
 
 /*
@@ -1882,7 +1888,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.0.63">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.64">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1897,9 +1903,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.0.63"></script>
+    <script src="${prefix}auth.js?v=0.1.64"></script>
 
-    <script src="${prefix}search.js?v=0.0.63"></script>
+    <script src="${prefix}search.js?v=0.1.64"></script>
 
 </head>
 
@@ -2394,7 +2400,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.0.63</div>
+                <div class="version">Version Alpha 0.1.64</div>
 
             </section>
 
@@ -2778,7 +2784,15 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                     <div class="year-session-left">
 
-                        <div class="year-session-icon">📅</div>
+                        <div class="year-session-icon">
+
+                            <img
+                                class="card-icon-image"
+                                src="${assetPath("calendar.svg", 3)}"
+                                alt=""
+                            >
+
+                        </div>
 
                         <div>
 
@@ -2839,7 +2853,15 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                     <div class="year-session-left">
 
-                        <div class="year-session-icon">📚</div>
+                        <div class="year-session-icon">
+
+                            <img
+                                class="card-icon-image"
+                                src="${assetPath("stackofbooks.svg", 3)}"
+                                alt=""
+                            >
+
+                        </div>
 
                         <div>
 
