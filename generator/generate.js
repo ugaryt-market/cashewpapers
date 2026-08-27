@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.67
+    Version Alpha 0.1.68
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1481,6 +1481,10 @@ main {
 
     width: 300px;
     max-width: min(300px, 80vw);
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
     padding: 10px 12px;
 
     border: 1px solid var(--border);
@@ -1495,7 +1499,29 @@ main {
     box-shadow:
         0 12px 30px rgba(0, 0, 0, 0.24);
 
+    scrollbar-width: thin;
+    scrollbar-color: #646669 #2c2e31;
+
     display: none;
+}
+
+.attempt-history::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+.attempt-history::-webkit-scrollbar-track {
+    background: #2c2e31;
+}
+
+.attempt-history::-webkit-scrollbar-thumb {
+    background: #646669;
+    border: 2px solid #2c2e31;
+    border-radius: 999px;
+}
+
+.attempt-history::-webkit-scrollbar-thumb:hover {
+    background: #737578;
 }
 
 .attempt-history.open {
@@ -1548,8 +1574,8 @@ main {
     z-index: 1000;
     pointer-events: auto;
 
-    width: 250px;
-    max-width: min(250px, 80vw);
+    width: 320px;
+    max-width: min(320px, 84vw);
     padding: 12px;
 
     border: 1px solid var(--border);
@@ -1563,6 +1589,36 @@ main {
     display: flex;
     flex-direction: column;
     gap: 9px;
+}
+
+.attempt-form-history {
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding-right: 3px;
+
+    scrollbar-width: thin;
+    scrollbar-color: #646669 #2c2e31;
+}
+
+.attempt-form-history::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+.attempt-form-history::-webkit-scrollbar-track {
+    background: #2c2e31;
+}
+
+.attempt-form-history::-webkit-scrollbar-thumb {
+    background: #646669;
+    border: 2px solid #2c2e31;
+    border-radius: 999px;
+}
+
+.attempt-form-history::-webkit-scrollbar-thumb:hover {
+    background: #737578;
 }
 
 .attempt-form-title {
@@ -1992,7 +2048,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.67">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.68">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2007,9 +2063,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.67"></script>
+    <script src="${prefix}auth.js?v=0.1.68"></script>
 
-    <script src="${prefix}search.js?v=0.1.67"></script>
+    <script src="${prefix}search.js?v=0.1.68"></script>
 
 </head>
 
@@ -2257,6 +2313,24 @@ function renderPaperAttempts(progress, key, completed, user) {
         return;
     }
 
+    /*
+       Keep the card compact once a paper has more than ten attempts.
+       The first nine attempts remain visible in the compact summary;
+       the tenth position becomes a "See more" control.
+    */
+    const visibleAttempts =
+        attempts.length > 10
+            ? attempts.slice(0, 9)
+            : attempts;
+
+    const scoreSummary =
+        visibleAttempts
+            .map(
+                attempt =>
+                    String(attempt.score)
+            )
+            .join(" · ");
+
     const summaryButton =
         document.createElement("button");
 
@@ -2266,139 +2340,28 @@ function renderPaperAttempts(progress, key, completed, user) {
     summaryButton.className =
         "attempt-summary";
 
-    const scoreSummary =
-        attempts
-            .map(attempt => attempt.score)
-            .join(" · ");
+    if (attempts.length > 10) {
 
-    summaryButton.textContent =
-        String(attempts.length) +
-        " " +
-        (
-            attempts.length === 1
-                ? "attempt"
-                : "attempts"
-        ) +
-        (
-            scoreSummary
-                ? " · " + scoreSummary
-                : ""
-        );
+        summaryButton.textContent =
+            "See more";
 
-    summaryButton.setAttribute(
-        "aria-expanded",
-        "false"
-    );
+    } else {
 
-    const history =
-        document.createElement("div");
-
-    history.className =
-        "attempt-history";
-
-    attempts.forEach(
-        (attempt, index) => {
-
-            const row =
-                document.createElement("div");
-
-            row.className =
-                "attempt-row";
-
-            const rowText =
-                document.createElement("div");
-
-            rowText.className =
-                "attempt-row-text";
-
-            rowText.textContent =
-                "Attempt " +
-                String(index + 1) +
-                " / " +
-                String(attempt.score) +
-                " / " +
-                formatAttemptDate(
-                    attempt.date
-                );
-
-            const removeButton =
-                document.createElement("button");
-
-            removeButton.type =
-                "button";
-
-            removeButton.className =
-                "attempt-remove";
-
-            removeButton.textContent =
-                "×";
-
-            removeButton.setAttribute(
-                "aria-label",
-                "Remove attempt " +
-                String(index + 1)
+        summaryButton.textContent =
+            String(attempts.length) +
+            " " +
+            (
+                attempts.length === 1
+                    ? "attempt"
+                    : "attempts"
+            ) +
+            (
+                scoreSummary
+                    ? " · " + scoreSummary
+                    : ""
             );
 
-            removeButton.title =
-                "Remove attempt";
-
-            removeButton.addEventListener(
-                "click",
-                async event => {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    const currentUser =
-                        await getCurrentUser();
-
-                    if (!currentUser) {
-                        showLoginRequired(
-                            progress.querySelector(
-                                ".paper-status"
-                            )
-                        );
-                        return;
-                    }
-
-                    const currentAttempts =
-                        getPaperAttempts(key);
-
-                    currentAttempts.splice(
-                        index,
-                        1
-                    );
-
-                    setPaperAttempts(
-                        key,
-                        currentAttempts
-                    );
-
-                    renderPaperAttempts(
-                        progress,
-                        key,
-                        getPaperStatus(key) ===
-                            "completed",
-                        currentUser
-                    );
-
-                }
-            );
-
-            row.appendChild(
-                rowText
-            );
-
-            row.appendChild(
-                removeButton
-            );
-
-            history.appendChild(
-                row
-            );
-
-        }
-    );
+    }
 
     summaryButton.addEventListener(
         "click",
@@ -2406,6 +2369,27 @@ function renderPaperAttempts(progress, key, completed, user) {
 
             event.preventDefault();
             event.stopPropagation();
+
+            if (attempts.length > 10) {
+
+                openAttemptForm(
+                    progress,
+                    key,
+                    true
+                );
+
+                return;
+
+            }
+
+            const history =
+                attemptsContainer.querySelector(
+                    ".attempt-history"
+                );
+
+            if (!history) {
+                return;
+            }
 
             const isOpen =
                 history.classList.toggle(
@@ -2422,8 +2406,34 @@ function renderPaperAttempts(progress, key, completed, user) {
         }
     );
 
+    summaryButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
     attemptsContainer.appendChild(
         summaryButton
+    );
+
+    const history =
+        document.createElement("div");
+
+    history.className =
+        "attempt-history";
+
+    visibleAttempts.forEach(
+        (attempt, index) => {
+
+            history.appendChild(
+                createAttemptHistoryRow(
+                    progress,
+                    key,
+                    attempt,
+                    index
+                )
+            );
+
+        }
     );
 
     attemptsContainer.appendChild(
@@ -2432,7 +2442,135 @@ function renderPaperAttempts(progress, key, completed, user) {
 
 }
 
-function openAttemptForm(progress, key) {
+/*
+   Build one history row. Deleting an attempt re-renders the history but
+   deliberately leaves the Add Attempt form open when it is open.
+*/
+function createAttemptHistoryRow(
+    progress,
+    key,
+    attempt,
+    index
+) {
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "attempt-row";
+
+    const rowText =
+        document.createElement("div");
+
+    rowText.className =
+        "attempt-row-text";
+
+    rowText.textContent =
+        "Attempt " +
+        String(index + 1) +
+        " / " +
+        String(attempt.score) +
+        " marks / " +
+        formatAttemptDate(
+            attempt.date
+        );
+
+    const removeButton =
+        document.createElement("button");
+
+    removeButton.type =
+        "button";
+
+    removeButton.className =
+        "attempt-remove";
+
+    removeButton.textContent =
+        "×";
+
+    removeButton.setAttribute(
+        "aria-label",
+        "Remove attempt " +
+        String(index + 1)
+    );
+
+    removeButton.title =
+        "Remove attempt";
+
+    removeButton.addEventListener(
+        "click",
+        async event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const currentUser =
+                await getCurrentUser();
+
+            if (!currentUser) {
+
+                showLoginRequired(
+                    progress.querySelector(
+                        ".paper-status"
+                    )
+                );
+
+                return;
+
+            }
+
+            const attempts =
+                getPaperAttempts(key);
+
+            attempts.splice(
+                index,
+                1
+            );
+
+            setPaperAttempts(
+                key,
+                attempts
+            );
+
+            const existingForm =
+                progress.querySelector(
+                    ".attempt-form"
+                );
+
+            if (existingForm) {
+
+                refreshAttemptForm(
+                    progress,
+                    key
+                );
+
+                return;
+
+            }
+
+            renderPaperAttempts(
+                progress,
+                key,
+                getPaperStatus(key) ===
+                    "completed",
+                currentUser
+            );
+
+        }
+    );
+
+    row.appendChild(
+        rowText
+    );
+
+    row.appendChild(
+        removeButton
+    );
+
+    return row;
+
+}
+
+function openAttemptForm(progress, key, showAllHistory = false) {
 
     const attemptsContainer =
         progress.querySelector(
@@ -2520,7 +2658,13 @@ function openAttemptForm(progress, key) {
         "number";
 
     input.step =
-        "any";
+        "1";
+
+    input.min =
+        "0";
+
+    input.max =
+        "100";
 
     input.inputMode =
         "decimal";
@@ -2599,6 +2743,38 @@ function openAttemptForm(progress, key) {
         title
     );
 
+    if (showAllHistory) {
+
+        const fullHistory =
+            document.createElement("div");
+
+        fullHistory.className =
+            "attempt-form-history";
+
+        const currentAttempts =
+            getPaperAttempts(key);
+
+        currentAttempts.forEach(
+            (attempt, index) => {
+
+                fullHistory.appendChild(
+                    createAttemptHistoryRow(
+                        progress,
+                        key,
+                        attempt,
+                        index
+                    )
+                );
+
+            }
+        );
+
+        form.appendChild(
+            fullHistory
+        );
+
+    }
+
     form.appendChild(
         input
     );
@@ -2628,10 +2804,28 @@ function openAttemptForm(progress, key) {
             const score =
                 input.value.trim();
 
-            if (!score) {
+            const numericScore =
+                Number(score);
+
+            if (
+                !score ||
+                !Number.isFinite(numericScore) ||
+                numericScore < 0 ||
+                numericScore > 100
+            ) {
+
+                input.setCustomValidity(
+                    "Score must be between 0 and 100."
+                );
+
+                input.reportValidity();
                 input.focus();
+
                 return;
+
             }
+
+            input.setCustomValidity("");
 
             const attempts =
                 getPaperAttempts(key);
@@ -2662,6 +2856,45 @@ function openAttemptForm(progress, key) {
     );
 
     input.focus();
+
+}
+
+function refreshAttemptForm(progress, key) {
+
+    const form =
+        progress.querySelector(
+            ".attempt-form"
+        );
+
+    if (!form) {
+        return;
+    }
+
+    const fullHistory =
+        form.querySelector(
+            ".attempt-form-history"
+        );
+
+    if (!fullHistory) {
+        return;
+    }
+
+    fullHistory.innerHTML = "";
+
+    getPaperAttempts(key).forEach(
+        (attempt, index) => {
+
+            fullHistory.appendChild(
+                createAttemptHistoryRow(
+                    progress,
+                    key,
+                    attempt,
+                    index
+                )
+            );
+
+        }
+    );
 
 }
 
