@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.64
+    Version Alpha 0.1.65
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1380,9 +1380,10 @@ main {
 
 .paper-progress {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: flex-end;
     gap: 8px;
+    flex-wrap: wrap;
     max-width: 100%;
 }
 
@@ -1422,13 +1423,14 @@ main {
 
 .paper-attempts {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
     max-width: 100%;
 }
 
-.attempt-button {
+.attempt-button,
+.attempt-summary {
     height: 42px;
     padding: 0 14px;
     border: 1px solid var(--border);
@@ -1438,23 +1440,37 @@ main {
     font-size: 14px;
     font-weight: 400;
     cursor: pointer;
-    flex-shrink: 0;
+    white-space: nowrap;
 }
 
-.attempt-button:hover {
+.attempt-button:hover,
+.attempt-summary:hover {
     background: #3a3c3f;
 }
 
+.attempt-summary {
+    color: var(--muted);
+}
+
 .attempt-history {
-    min-width: 230px;
-    max-width: 100%;
-    padding: 9px 12px;
-    border: 1px solid #46484b;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 310px;
+    max-width: min(310px, 85vw);
+    padding: 8px 12px;
+    border: 1px solid var(--border);
     border-radius: 12px;
     background: #2c2e31;
     color: var(--text);
     font-size: 12px;
     line-height: 1.35;
+    box-shadow: var(--shadow);
+    z-index: 5;
+}
+
+.attempt-history[hidden] {
+    display: none;
 }
 
 .attempt-row {
@@ -1462,16 +1478,35 @@ main {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 5px 0;
+    padding: 6px 0;
 }
 
 .attempt-row + .attempt-row {
     border-top: 1px solid #46484b;
 }
 
-.attempt-row-text {
+.attempt-row-info {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 10px;
     min-width: 0;
-    overflow-wrap: anywhere;
+}
+
+.attempt-row-label {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.attempt-row-score {
+    color: var(--text);
+}
+
+.attempt-row-date {
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .attempt-remove {
@@ -1499,12 +1534,12 @@ main {
 .attempt-form {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     gap: 7px;
+    margin-left: 8px;
 }
 
 .attempt-input {
-    width: 110px;
+    width: 105px;
     height: 42px;
     padding: 0 12px;
     border: 1px solid var(--border);
@@ -1535,15 +1570,26 @@ main {
     color: var(--text);
 }
 
-.paper-login-notice {
-    margin-top: 1px;
-    font-size: 13px;
-    color: var(--muted);
+/* ---------------- PAPER ACTION LAYOUT ---------------- */
+
+.paper-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    min-width: 0;
 }
 
-.paper-login-notice a {
-    color: var(--primary);
-    font-weight: 400;
+.paper-progress {
+    position: relative;
+}
+
+.paper-document-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 /* ---------------- NATIVE PDF VIEWER ---------------- */
@@ -1828,6 +1874,22 @@ body:has(.home-page) footer {
 
     .paper-actions {
         width: 100%;
+        align-items: flex-start;
+    }
+
+    .paper-progress,
+    .paper-document-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .attempt-history {
+        left: 0;
+        right: auto;
+    }
+
+    .attempt-form {
+        margin-left: 0;
     }
 
     .paper-button {
@@ -1888,7 +1950,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.64">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.65">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1903,9 +1965,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.64"></script>
+    <script src="${prefix}auth.js?v=0.1.65"></script>
 
-    <script src="${prefix}search.js?v=0.1.64"></script>
+    <script src="${prefix}search.js?v=0.1.65"></script>
 
 </head>
 
@@ -2107,7 +2169,6 @@ function renderPaperAttempts(progress, key, completed, user) {
     }
 
     attemptsContainer.innerHTML = "";
-
     clearLoginNotice(progress);
 
     if (!completed || !user) {
@@ -2117,10 +2178,9 @@ function renderPaperAttempts(progress, key, completed, user) {
     const attempts = getPaperAttempts(key);
 
     const addButton = document.createElement("button");
-
     addButton.type = "button";
     addButton.className = "attempt-button";
-    addButton.textContent = "+ Add attempt";
+    addButton.textContent = "+ add attempt";
     addButton.addEventListener("click", () => {
         openAttemptForm(progress, key);
     });
@@ -2131,29 +2191,48 @@ function renderPaperAttempts(progress, key, completed, user) {
         return;
     }
 
-    const history = document.createElement("div");
+    const summaryButton = document.createElement("button");
+    summaryButton.type = "button";
+    summaryButton.className = "attempt-summary";
+    summaryButton.textContent =
+        attempts.length === 1
+            ? "1 attempt"
+            : "\${attempts.length} attempts";
+    summaryButton.setAttribute("aria-expanded", "false");
 
+    const history = document.createElement("div");
     history.className = "attempt-history";
+    history.hidden = true;
 
     attempts.forEach((attempt, index) => {
 
         const row = document.createElement("div");
-
         row.className = "attempt-row";
 
-        const text = document.createElement("div");
+        const info = document.createElement("div");
+        info.className = "attempt-row-info";
 
-        text.className = "attempt-row-text";
+        const label = document.createElement("span");
+        label.className = "attempt-row-label";
+        label.textContent = "attempt " + (index + 1);
 
-        text.textContent =
-            \`Attempt \${index + 1} / \${attempt.score} / \${formatAttemptDate(attempt.date)}\`;
+        const score = document.createElement("span");
+        score.className = "attempt-row-score";
+        score.textContent = attempt.score;
+
+        const date = document.createElement("span");
+        date.className = "attempt-row-date";
+        date.textContent = formatAttemptDate(attempt.date);
+
+        info.appendChild(label);
+        info.appendChild(score);
+        info.appendChild(date);
 
         const removeButton = document.createElement("button");
-
         removeButton.type = "button";
         removeButton.className = "attempt-remove";
         removeButton.textContent = "×";
-        removeButton.setAttribute("aria-label", \`Remove attempt \${index + 1}\`);
+        removeButton.setAttribute("aria-label", "Remove attempt " + (index + 1));
         removeButton.title = "Remove attempt";
 
         removeButton.addEventListener("click", async () => {
@@ -2166,9 +2245,7 @@ function renderPaperAttempts(progress, key, completed, user) {
             }
 
             const currentAttempts = getPaperAttempts(key);
-
             currentAttempts.splice(index, 1);
-
             setPaperAttempts(key, currentAttempts);
 
             renderPaperAttempts(
@@ -2180,111 +2257,27 @@ function renderPaperAttempts(progress, key, completed, user) {
 
         });
 
-        row.appendChild(text);
+        row.appendChild(info);
         row.appendChild(removeButton);
-
         history.appendChild(row);
 
     });
 
+    summaryButton.addEventListener("click", () => {
+
+        const open = !history.hidden;
+        history.hidden = open;
+        summaryButton.setAttribute("aria-expanded", String(!open));
+        summaryButton.textContent = open
+            ? (attempts.length === 1 ? "1 attempt" : "\${attempts.length} attempts")
+            : "hide attempts";
+
+    });
+
+    attemptsContainer.appendChild(summaryButton);
     attemptsContainer.appendChild(history);
 
 }
-
-function openAttemptForm(progress, key) {
-
-    const attemptsContainer = progress.querySelector("[data-paper-attempts]");
-
-    if (!attemptsContainer) {
-        return;
-    }
-
-    const existingForm = attemptsContainer.querySelector(".attempt-form");
-
-    if (existingForm) {
-        return;
-    }
-
-    const form = document.createElement("form");
-
-    form.className = "attempt-form";
-
-    const input = document.createElement("input");
-
-    input.className = "attempt-input";
-    input.type = "number";
-    input.step = "any";
-    input.inputMode = "decimal";
-    input.placeholder = "Score";
-    input.setAttribute("aria-label", "Attempt score");
-    input.required = true;
-
-    const saveButton = document.createElement("button");
-
-    saveButton.type = "submit";
-    saveButton.className = "attempt-save";
-    saveButton.textContent = "Save";
-
-    const cancelButton = document.createElement("button");
-
-    cancelButton.type = "button";
-    cancelButton.className = "attempt-cancel";
-    cancelButton.textContent = "Cancel";
-
-    cancelButton.addEventListener("click", async () => {
-
-        const user = await getCurrentUser();
-
-        renderPaperAttempts(
-            progress,
-            key,
-            getPaperStatus(key) === "completed",
-            user
-        );
-
-    });
-
-    form.appendChild(input);
-    form.appendChild(saveButton);
-    form.appendChild(cancelButton);
-
-    form.addEventListener("submit", async event => {
-
-        event.preventDefault();
-
-        const user = await getCurrentUser();
-
-        if (!user) {
-            showLoginRequired(progress.querySelector(".paper-status"));
-            return;
-        }
-
-        const score = input.value.trim();
-
-        if (!score) {
-            input.focus();
-            return;
-        }
-
-        const attempts = getPaperAttempts(key);
-
-        attempts.push({
-            score,
-            date: new Date().toISOString()
-        });
-
-        setPaperAttempts(key, attempts);
-
-        renderPaperAttempts(progress, key, true, user);
-
-    });
-
-    attemptsContainer.appendChild(form);
-
-    input.focus();
-
-}
-
 async function refreshPaperProgress(progress) {
 
     const button = progress.querySelector(".paper-status");
@@ -2400,7 +2393,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.64</div>
+                <div class="version">Version Alpha 0.1.65</div>
 
             </section>
 
@@ -3004,6 +2997,8 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
 
                                         </div>
 
+                                        <div class="paper-document-actions">
+
                                         ${
                                             paper.question
                                                 ? `
@@ -3066,7 +3061,10 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
 
                                     </div>
 
-                                </div>
+                                
+                                        </div>
+
+</div>
                             `;
 
                         })
@@ -3210,6 +3208,8 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                         </div>
 
+                        <div class="paper-document-actions">
+
                         ${
                             paper.question
                                 ? `
@@ -3269,7 +3269,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                     </div>
 
-                </div>
+                
+                        </div>
+
+</div>
 
             `;
 
@@ -3738,4 +3741,94 @@ function generate() {
    RUN
    ============================================================ */
 
-generate();
+generate();function openAttemptForm(progress, key) {
+
+    const attemptsContainer = progress.querySelector("[data-paper-attempts]");
+
+    if (!attemptsContainer) {
+        return;
+    }
+
+    const existingForm = attemptsContainer.querySelector(".attempt-form");
+
+    if (existingForm) {
+        const input = existingForm.querySelector(".attempt-input");
+        if (input) {
+            input.focus();
+        }
+        return;
+    }
+
+    const form = document.createElement("form");
+    form.className = "attempt-form";
+
+    const input = document.createElement("input");
+    input.className = "attempt-input";
+    input.type = "number";
+    input.step = "any";
+    input.inputMode = "decimal";
+    input.placeholder = "score";
+    input.setAttribute("aria-label", "Attempt score");
+    input.required = true;
+
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.className = "attempt-save";
+    saveButton.textContent = "save";
+
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "attempt-cancel";
+    cancelButton.textContent = "cancel";
+
+    cancelButton.addEventListener("click", async () => {
+
+        const user = await getCurrentUser();
+
+        renderPaperAttempts(
+            progress,
+            key,
+            getPaperStatus(key) === "completed",
+            user
+        );
+
+    });
+
+    form.appendChild(input);
+    form.appendChild(saveButton);
+    form.appendChild(cancelButton);
+
+    form.addEventListener("submit", async event => {
+
+        event.preventDefault();
+
+        const user = await getCurrentUser();
+
+        if (!user) {
+            showLoginRequired(progress.querySelector(".paper-status"));
+            return;
+        }
+
+        const score = input.value.trim();
+
+        if (!score) {
+            input.focus();
+            return;
+        }
+
+        const attempts = getPaperAttempts(key);
+
+        attempts.push({
+            score,
+            date: new Date().toISOString()
+        });
+
+        setPaperAttempts(key, attempts);
+        renderPaperAttempts(progress, key, true, user);
+
+    });
+
+    attemptsContainer.appendChild(form);
+    input.focus();
+
+}
