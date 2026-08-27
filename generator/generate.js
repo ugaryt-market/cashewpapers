@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.69
+    Version Alpha 0.1.70
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -768,8 +768,7 @@ const CSS = `
 /* ---------------- CUSTOM SCROLLBAR ---------------- */
 
 html {
-    scrollbar-width: thin;
-    scrollbar-color: #646669 #2c2e31;
+    scrollbar-width: none;
 }
 
 ::-webkit-scrollbar {
@@ -1505,25 +1504,6 @@ main {
     display: none;
 }
 
-.attempt-history::-webkit-scrollbar {
-    width: 9px;
-    height: 9px;
-}
-
-.attempt-history::-webkit-scrollbar-track {
-    background: #2c2e31;
-}
-
-.attempt-history::-webkit-scrollbar-thumb {
-    background: #646669;
-    border: 2px solid #2c2e31;
-    border-radius: 999px;
-}
-
-.attempt-history::-webkit-scrollbar-thumb:hover {
-    background: #737578;
-}
-
 .attempt-history.open {
     display: block;
 }
@@ -2024,7 +2004,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.69">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.70">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2039,9 +2019,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.69"></script>
+    <script src="${prefix}auth.js?v=0.1.70"></script>
 
-    <script src="${prefix}search.js?v=0.1.69"></script>
+    <script src="${prefix}search.js?v=0.1.70"></script>
 
 </head>
 
@@ -2299,7 +2279,7 @@ function renderPaperAttempts(progress, key, completed, user) {
         attempts.slice(
             0,
             Math.min(
-                10,
+                6,
                 attempts.length
             )
         );
@@ -2335,7 +2315,7 @@ function renderPaperAttempts(progress, key, completed, user) {
                 : ""
         ) +
         (
-            attempts.length > 10
+            attempts.length > 6
                 ? " · see more"
                 : ""
         );
