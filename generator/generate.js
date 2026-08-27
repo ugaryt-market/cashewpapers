@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.61
+    Version Alpha 0.0.62
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1849,7 +1849,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.0.61">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.0.62">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1864,9 +1864,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.0.61"></script>
+    <script src="${prefix}auth.js?v=0.0.62"></script>
 
-    <script src="${prefix}search.js?v=0.0.61"></script>
+    <script src="${prefix}search.js?v=0.0.62"></script>
 
 </head>
 
@@ -2361,7 +2361,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.0.61</div>
+                <div class="version">Version Alpha 0.0.62</div>
 
             </section>
 
@@ -2891,7 +2891,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                     <a
                                         class="paper-button primary"
                                         href="../../../../viewer/?file=${encodeURIComponent(paper.question)}"
-                                    >
+                                    
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
                                         📄 Question Paper
                                     </a>
                                 `
@@ -3050,8 +3053,19 @@ function generatePdfReaderPage() {
         frame.src = pdfUrl + "#zoom=page-fit&page=1";
 
         fullscreen.href = pdfUrl;
-        fullscreen.target = "_blank";
-        fullscreen.rel = "noopener noreferrer";
+
+        fullscreen.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                window.location.replace(
+                    pdfUrl
+                );
+
+            }
+        );
 
     } catch (error) {
 
