@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.66
+    Version Alpha 0.1.67
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1343,6 +1343,18 @@ main {
     gap: 20px;
 }
 
+/*
+   Attempt menus must sit above neighbouring paper cards.
+   .paper-card:hover uses transform, which creates a stacking context.
+   Raising the active card itself prevents later cards from painting
+   over its attempt form/history.
+*/
+.paper-card:has(.attempt-form),
+.paper-card:has(.attempt-history.open) {
+    position: relative;
+    z-index: 200;
+}
+
 .paper-card.group-break {
     margin-top: 18px;
 }
@@ -1370,6 +1382,8 @@ main {
     background: #3a3c3f;
     color: var(--text);
     cursor: pointer;
+    position: relative;
+    z-index: 1;
 }
 
 .paper-button.primary {
@@ -1463,7 +1477,7 @@ main {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    z-index: 30;
+    z-index: 300;
 
     width: 300px;
     max-width: min(300px, 80vw);
@@ -1978,7 +1992,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.66">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.67">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1993,9 +2007,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.66"></script>
+    <script src="${prefix}auth.js?v=0.1.67"></script>
 
-    <script src="${prefix}search.js?v=0.1.66"></script>
+    <script src="${prefix}search.js?v=0.1.67"></script>
 
 </head>
 
