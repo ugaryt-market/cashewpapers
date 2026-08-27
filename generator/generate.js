@@ -1360,6 +1360,7 @@ main {
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
+    position: relative;
 }
 
 .paper-button {
@@ -1381,9 +1382,7 @@ main {
 .paper-progress {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
     gap: 8px;
-    flex-wrap: wrap;
     max-width: 100%;
 }
 
@@ -1421,11 +1420,16 @@ main {
     background: #40382e;
 }
 
+/*
+   The attempt controls stay in the same row as the completion button.
+   Expanded content is positioned out of flow, so the paper card keeps
+   the exact same height.
+*/
 .paper-attempts {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
     max-width: 100%;
 }
 
@@ -1440,6 +1444,7 @@ main {
     font-size: 14px;
     font-weight: 400;
     cursor: pointer;
+    flex-shrink: 0;
     white-space: nowrap;
 }
 
@@ -1454,23 +1459,31 @@ main {
 
 .attempt-history {
     position: absolute;
-    right: 0;
     top: calc(100% + 8px);
-    width: 310px;
-    max-width: min(310px, 85vw);
-    padding: 8px 12px;
+    right: 0;
+    z-index: 30;
+
+    width: 300px;
+    max-width: min(300px, 80vw);
+    padding: 10px 12px;
+
     border: 1px solid var(--border);
     border-radius: 12px;
+
     background: #2c2e31;
     color: var(--text);
+
     font-size: 12px;
     line-height: 1.35;
-    box-shadow: var(--shadow);
-    z-index: 5;
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.24);
+
+    display: none;
 }
 
-.attempt-history[hidden] {
-    display: none;
+.attempt-history.open {
+    display: block;
 }
 
 .attempt-row {
@@ -1478,35 +1491,16 @@ main {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 6px 0;
+    padding: 7px 0;
 }
 
 .attempt-row + .attempt-row {
     border-top: 1px solid #46484b;
 }
 
-.attempt-row-info {
-    display: grid;
-    grid-template-columns: auto auto 1fr;
-    align-items: center;
-    gap: 10px;
+.attempt-row-text {
     min-width: 0;
-}
-
-.attempt-row-label {
-    color: var(--muted);
-    white-space: nowrap;
-}
-
-.attempt-row-score {
-    color: var(--text);
-}
-
-.attempt-row-date {
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
 .attempt-remove {
@@ -1532,29 +1526,60 @@ main {
 }
 
 .attempt-form {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 40;
+
+    width: 250px;
+    max-width: min(250px, 80vw);
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: #2c2e31;
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.24);
+
     display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-left: 8px;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.attempt-form-title {
+    color: var(--text);
+    font-size: 13px;
 }
 
 .attempt-input {
-    width: 105px;
-    height: 42px;
+    width: 100%;
+    height: 40px;
     padding: 0 12px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 9px;
     background: var(--card);
     color: var(--text);
     font-size: 14px;
+    outline: none;
+}
+
+.attempt-input:focus {
+    border-color: var(--subdued);
+}
+
+.attempt-form-actions {
+    display: flex;
+    gap: 7px;
 }
 
 .attempt-save,
 .attempt-cancel {
-    height: 42px;
+    height: 36px;
     padding: 0 12px;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 400;
     cursor: pointer;
@@ -1566,31 +1591,21 @@ main {
 }
 
 .attempt-cancel {
-    background: #2c2e31;
+    background: #3a3c3f;
     color: var(--text);
 }
 
-/* ---------------- PAPER ACTION LAYOUT ---------------- */
-
-.paper-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-    min-width: 0;
+.paper-login-notice {
+    margin-top: 1px;
+    font-size: 13px;
+    color: var(--muted);
 }
 
-.paper-progress {
-    position: relative;
+.paper-login-notice a {
+    color: var(--primary);
+    font-weight: 400;
 }
 
-.paper-document-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    flex-wrap: wrap;
-}
 
 /* ---------------- NATIVE PDF VIEWER ---------------- */
 
@@ -1874,22 +1889,6 @@ body:has(.home-page) footer {
 
     .paper-actions {
         width: 100%;
-        align-items: flex-start;
-    }
-
-    .paper-progress,
-    .paper-document-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .attempt-history {
-        left: 0;
-        right: auto;
-    }
-
-    .attempt-form {
-        margin-left: 0;
     }
 
     .paper-button {
@@ -2162,122 +2161,424 @@ function renderPaperStatus(button, status) {
 
 function renderPaperAttempts(progress, key, completed, user) {
 
-    const attemptsContainer = progress.querySelector("[data-paper-attempts]");
+    const attemptsContainer =
+        progress.querySelector("[data-paper-attempts]");
 
     if (!attemptsContainer) {
         return;
     }
 
     attemptsContainer.innerHTML = "";
+
     clearLoginNotice(progress);
 
     if (!completed || !user) {
         return;
     }
 
-    const attempts = getPaperAttempts(key);
+    const attempts =
+        getPaperAttempts(key);
 
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "attempt-button";
-    addButton.textContent = "+ add attempt";
-    addButton.addEventListener("click", () => {
-        openAttemptForm(progress, key);
-    });
+    const addButton =
+        document.createElement("button");
 
-    attemptsContainer.appendChild(addButton);
+    addButton.type =
+        "button";
+
+    addButton.className =
+        "attempt-button";
+
+    addButton.textContent =
+        "+ Add attempt";
+
+    addButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openAttemptForm(
+                progress,
+                key
+            );
+
+        }
+    );
+
+    attemptsContainer.appendChild(
+        addButton
+    );
 
     if (attempts.length === 0) {
         return;
     }
 
-    const summaryButton = document.createElement("button");
-    summaryButton.type = "button";
-    summaryButton.className = "attempt-summary";
+    const summaryButton =
+        document.createElement("button");
+
+    summaryButton.type =
+        "button";
+
+    summaryButton.className =
+        "attempt-summary";
+
+    const scoreSummary =
+        attempts
+            .map(attempt => attempt.score)
+            .join(" · ");
+
     summaryButton.textContent =
-        attempts.length === 1
-            ? "1 attempt"
-            : "\${attempts.length} attempts";
-    summaryButton.setAttribute("aria-expanded", "false");
+        String(attempts.length) +
+        " " +
+        (
+            attempts.length === 1
+                ? "attempt"
+                : "attempts"
+        ) +
+        (
+            scoreSummary
+                ? " · " + scoreSummary
+                : ""
+        );
 
-    const history = document.createElement("div");
-    history.className = "attempt-history";
-    history.hidden = true;
+    summaryButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
 
-    attempts.forEach((attempt, index) => {
+    const history =
+        document.createElement("div");
 
-        const row = document.createElement("div");
-        row.className = "attempt-row";
+    history.className =
+        "attempt-history";
 
-        const info = document.createElement("div");
-        info.className = "attempt-row-info";
+    attempts.forEach(
+        (attempt, index) => {
 
-        const label = document.createElement("span");
-        label.className = "attempt-row-label";
-        label.textContent = "attempt " + (index + 1);
+            const row =
+                document.createElement("div");
 
-        const score = document.createElement("span");
-        score.className = "attempt-row-score";
-        score.textContent = attempt.score;
+            row.className =
+                "attempt-row";
 
-        const date = document.createElement("span");
-        date.className = "attempt-row-date";
-        date.textContent = formatAttemptDate(attempt.date);
+            const rowText =
+                document.createElement("div");
 
-        info.appendChild(label);
-        info.appendChild(score);
-        info.appendChild(date);
+            rowText.className =
+                "attempt-row-text";
 
-        const removeButton = document.createElement("button");
-        removeButton.type = "button";
-        removeButton.className = "attempt-remove";
-        removeButton.textContent = "×";
-        removeButton.setAttribute("aria-label", "Remove attempt " + (index + 1));
-        removeButton.title = "Remove attempt";
+            rowText.textContent =
+                "Attempt " +
+                String(index + 1) +
+                " / " +
+                String(attempt.score) +
+                " / " +
+                formatAttemptDate(
+                    attempt.date
+                );
 
-        removeButton.addEventListener("click", async () => {
+            const removeButton =
+                document.createElement("button");
 
-            const currentUser = await getCurrentUser();
+            removeButton.type =
+                "button";
 
-            if (!currentUser) {
-                showLoginRequired(progress.querySelector(".paper-status"));
-                return;
-            }
+            removeButton.className =
+                "attempt-remove";
 
-            const currentAttempts = getPaperAttempts(key);
-            currentAttempts.splice(index, 1);
-            setPaperAttempts(key, currentAttempts);
+            removeButton.textContent =
+                "×";
+
+            removeButton.setAttribute(
+                "aria-label",
+                "Remove attempt " +
+                String(index + 1)
+            );
+
+            removeButton.title =
+                "Remove attempt";
+
+            removeButton.addEventListener(
+                "click",
+                async event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const currentUser =
+                        await getCurrentUser();
+
+                    if (!currentUser) {
+                        showLoginRequired(
+                            progress.querySelector(
+                                ".paper-status"
+                            )
+                        );
+                        return;
+                    }
+
+                    const currentAttempts =
+                        getPaperAttempts(key);
+
+                    currentAttempts.splice(
+                        index,
+                        1
+                    );
+
+                    setPaperAttempts(
+                        key,
+                        currentAttempts
+                    );
+
+                    renderPaperAttempts(
+                        progress,
+                        key,
+                        getPaperStatus(key) ===
+                            "completed",
+                        currentUser
+                    );
+
+                }
+            );
+
+            row.appendChild(
+                rowText
+            );
+
+            row.appendChild(
+                removeButton
+            );
+
+            history.appendChild(
+                row
+            );
+
+        }
+    );
+
+    summaryButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isOpen =
+                history.classList.toggle(
+                    "open"
+                );
+
+            summaryButton.setAttribute(
+                "aria-expanded",
+                isOpen
+                    ? "true"
+                    : "false"
+            );
+
+        }
+    );
+
+    attemptsContainer.appendChild(
+        summaryButton
+    );
+
+    attemptsContainer.appendChild(
+        history
+    );
+
+}
+
+function openAttemptForm(progress, key) {
+
+    const attemptsContainer =
+        progress.querySelector(
+            "[data-paper-attempts]"
+        );
+
+    if (!attemptsContainer) {
+        return;
+    }
+
+    const existingForm =
+        attemptsContainer.querySelector(
+            ".attempt-form"
+        );
+
+    if (existingForm) {
+        return;
+    }
+
+    const form =
+        document.createElement("form");
+
+    form.className =
+        "attempt-form";
+
+    const title =
+        document.createElement("div");
+
+    title.className =
+        "attempt-form-title";
+
+    title.textContent =
+        "add attempt";
+
+    const input =
+        document.createElement("input");
+
+    input.className =
+        "attempt-input";
+
+    input.type =
+        "number";
+
+    input.step =
+        "any";
+
+    input.inputMode =
+        "decimal";
+
+    input.placeholder =
+        "score";
+
+    input.setAttribute(
+        "aria-label",
+        "Attempt score"
+    );
+
+    input.required =
+        true;
+
+    const saveButton =
+        document.createElement("button");
+
+    saveButton.type =
+        "submit";
+
+    saveButton.className =
+        "attempt-save";
+
+    saveButton.textContent =
+        "save";
+
+    const cancelButton =
+        document.createElement("button");
+
+    cancelButton.type =
+        "button";
+
+    cancelButton.className =
+        "attempt-cancel";
+
+    cancelButton.textContent =
+        "cancel";
+
+    cancelButton.addEventListener(
+        "click",
+        async event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const currentUser =
+                await getCurrentUser();
 
             renderPaperAttempts(
                 progress,
                 key,
-                getPaperStatus(key) === "completed",
+                getPaperStatus(key) ===
+                    "completed",
                 currentUser
             );
 
-        });
+        }
+    );
 
-        row.appendChild(info);
-        row.appendChild(removeButton);
-        history.appendChild(row);
+    const actions =
+        document.createElement("div");
 
-    });
+    actions.className =
+        "attempt-form-actions";
 
-    summaryButton.addEventListener("click", () => {
+    actions.appendChild(
+        saveButton
+    );
 
-        const open = !history.hidden;
-        history.hidden = open;
-        summaryButton.setAttribute("aria-expanded", String(!open));
-        summaryButton.textContent = open
-            ? (attempts.length === 1 ? "1 attempt" : "\${attempts.length} attempts")
-            : "hide attempts";
+    actions.appendChild(
+        cancelButton
+    );
 
-    });
+    form.appendChild(
+        title
+    );
 
-    attemptsContainer.appendChild(summaryButton);
-    attemptsContainer.appendChild(history);
+    form.appendChild(
+        input
+    );
+
+    form.appendChild(
+        actions
+    );
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const user =
+                await getCurrentUser();
+
+            if (!user) {
+                showLoginRequired(
+                    progress.querySelector(
+                        ".paper-status"
+                    )
+                );
+                return;
+            }
+
+            const score =
+                input.value.trim();
+
+            if (!score) {
+                input.focus();
+                return;
+            }
+
+            const attempts =
+                getPaperAttempts(key);
+
+            attempts.push({
+                score,
+                date:
+                    new Date().toISOString()
+            });
+
+            setPaperAttempts(
+                key,
+                attempts
+            );
+
+            renderPaperAttempts(
+                progress,
+                key,
+                true,
+                user
+            );
+
+        }
+    );
+
+    attemptsContainer.appendChild(
+        form
+    );
+
+    input.focus();
 
 }
+
 async function refreshPaperProgress(progress) {
 
     const button = progress.querySelector(".paper-status");
@@ -2393,7 +2694,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.65</div>
+                <div class="version">Version Alpha 0.1.64</div>
 
             </section>
 
@@ -2997,8 +3298,6 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
 
                                         </div>
 
-                                        <div class="paper-document-actions">
-
                                         ${
                                             paper.question
                                                 ? `
@@ -3061,10 +3360,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
 
                                     </div>
 
-                                
-                                        </div>
-
-</div>
+                                </div>
                             `;
 
                         })
@@ -3208,8 +3504,6 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                         </div>
 
-                        <div class="paper-document-actions">
-
                         ${
                             paper.question
                                 ? `
@@ -3269,10 +3563,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                     </div>
 
-                
-                        </div>
-
-</div>
+                </div>
 
             `;
 
@@ -3741,94 +4032,4 @@ function generate() {
    RUN
    ============================================================ */
 
-generate();function openAttemptForm(progress, key) {
-
-    const attemptsContainer = progress.querySelector("[data-paper-attempts]");
-
-    if (!attemptsContainer) {
-        return;
-    }
-
-    const existingForm = attemptsContainer.querySelector(".attempt-form");
-
-    if (existingForm) {
-        const input = existingForm.querySelector(".attempt-input");
-        if (input) {
-            input.focus();
-        }
-        return;
-    }
-
-    const form = document.createElement("form");
-    form.className = "attempt-form";
-
-    const input = document.createElement("input");
-    input.className = "attempt-input";
-    input.type = "number";
-    input.step = "any";
-    input.inputMode = "decimal";
-    input.placeholder = "score";
-    input.setAttribute("aria-label", "Attempt score");
-    input.required = true;
-
-    const saveButton = document.createElement("button");
-    saveButton.type = "submit";
-    saveButton.className = "attempt-save";
-    saveButton.textContent = "save";
-
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.className = "attempt-cancel";
-    cancelButton.textContent = "cancel";
-
-    cancelButton.addEventListener("click", async () => {
-
-        const user = await getCurrentUser();
-
-        renderPaperAttempts(
-            progress,
-            key,
-            getPaperStatus(key) === "completed",
-            user
-        );
-
-    });
-
-    form.appendChild(input);
-    form.appendChild(saveButton);
-    form.appendChild(cancelButton);
-
-    form.addEventListener("submit", async event => {
-
-        event.preventDefault();
-
-        const user = await getCurrentUser();
-
-        if (!user) {
-            showLoginRequired(progress.querySelector(".paper-status"));
-            return;
-        }
-
-        const score = input.value.trim();
-
-        if (!score) {
-            input.focus();
-            return;
-        }
-
-        const attempts = getPaperAttempts(key);
-
-        attempts.push({
-            score,
-            date: new Date().toISOString()
-        });
-
-        setPaperAttempts(key, attempts);
-        renderPaperAttempts(progress, key, true, user);
-
-    });
-
-    attemptsContainer.appendChild(form);
-    input.focus();
-
-}
+generate();
