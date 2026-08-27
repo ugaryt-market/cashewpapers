@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.70
+    Version Alpha 0.1.71
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -768,7 +768,8 @@ const CSS = `
 /* ---------------- CUSTOM SCROLLBAR ---------------- */
 
 html {
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: #646669 #2c2e31;
 }
 
 ::-webkit-scrollbar {
@@ -1617,7 +1618,13 @@ main {
 
 .attempt-input::-webkit-inner-spin-button,
 .attempt-input::-webkit-outer-spin-button {
-    opacity: 0.75;
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.attempt-input {
+    -moz-appearance: textfield;
 }
 
 .attempt-input:focus {
@@ -2004,7 +2011,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.70">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.71">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2019,9 +2026,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.70"></script>
+    <script src="${prefix}auth.js?v=0.1.71"></script>
 
-    <script src="${prefix}search.js?v=0.1.70"></script>
+    <script src="${prefix}search.js?v=0.1.71"></script>
 
 </head>
 
@@ -2875,7 +2882,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.70</div>
+                <div class="version">Version Alpha 0.1.71</div>
 
             </section>
 
