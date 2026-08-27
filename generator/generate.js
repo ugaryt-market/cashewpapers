@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.0.62
+    Version Alpha 0.0.63
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1248,6 +1248,39 @@ main {
     flex-shrink: 0;
 }
 
+/* ---------------- ALL PAPERS PAGE ---------------- */
+
+.all-papers-list {
+    display:
+        grid;
+
+    gap:
+        28px;
+}
+
+.all-papers-session-group {
+    display:
+        grid;
+
+    gap:
+        14px;
+}
+
+.all-papers-session-title {
+    font-size:
+        22px;
+
+    font-weight:
+        400;
+
+    color:
+        var(--text);
+
+    text-transform:
+        lowercase;
+}
+
+
 /* ---------------- SESSION / PAPER LISTS ---------------- */
 
 .session-list,
@@ -1849,7 +1882,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.0.62">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.0.63">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1864,9 +1897,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.0.62"></script>
+    <script src="${prefix}auth.js?v=0.0.63"></script>
 
-    <script src="${prefix}search.js?v=0.0.62"></script>
+    <script src="${prefix}search.js?v=0.0.63"></script>
 
 </head>
 
@@ -2361,7 +2394,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.0.62</div>
+                <div class="version">Version Alpha 0.0.63</div>
 
             </section>
 
@@ -2802,12 +2835,282 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                 ${sessionCards}
 
+                <a class="year-session-card" href="all/">
+
+                    <div class="year-session-left">
+
+                        <div class="year-session-icon">📚</div>
+
+                        <div>
+
+                            <div class="year-session-name">
+                                See all
+                            </div>
+
+                            <div class="year-session-count">
+                                ${Object.values(sessions).reduce(
+                                    (total, session) =>
+                                        total + Object.keys(session.papers).length,
+                                    0
+                                )} papers
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="year-session-arrow">→</div>
+
+                </a>
+
             </div>
 
         `,
 
         3
     );
+}
+
+
+/* ============================================================
+   ALL PAPERS PAGE
+   ============================================================ */
+
+function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions) {
+
+    const categoryInfo =
+        categoryKey
+            ? getCategoryInfo(subjectKey, categoryKey)
+            : null;
+
+    const categoryBreadcrumbLabel =
+        categoryInfo && categoryInfo[3]
+            ? categoryInfo[3]
+            : categoryKey;
+
+    const categoryDisplayName =
+        categoryInfo
+            ? categoryInfo[1]
+            : categoryKey;
+
+    const groups =
+        Object.entries(sessions)
+            .sort((a, b) =>
+                a[1].sessionCode.localeCompare(
+                    b[1].sessionCode
+                )
+            );
+
+    const totalCount =
+        groups.reduce(
+            (total, [, session]) =>
+                total + Object.keys(session.papers).length,
+            0
+        );
+
+    const groupHTML =
+        groups
+            .map(([folder, session]) => {
+
+                const papers =
+                    Object.values(session.papers).sort(
+                        (a, b) =>
+                            a.paper.localeCompare(
+                                b.paper,
+                                undefined,
+                                { numeric: true }
+                            )
+                    );
+
+                const cards =
+                    papers
+                        .map((paper, index) => {
+
+                            const paperStatusKey = [
+                                subject.code,
+                                categoryKey || "",
+                                year,
+                                session.sessionCode,
+                                paper.paper
+                            ].join("-");
+
+                            return `
+                                <div
+                                    class="paper-card"
+                                    id="paper-${paper.code}"
+                                    data-paper-code="${String(
+                                        paper.code || ""
+                                    ).toLowerCase()}"
+                                >
+
+                                    <div>
+
+                                        <h3>
+                                            Paper ${paper.paper}
+                                        </h3>
+
+                                        <div class="paper-code">
+                                            ${paper.code || `Paper ${paper.paper}`}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="paper-actions">
+
+                                        <div
+                                            class="paper-progress"
+                                            data-paper-progress
+                                        >
+
+                                            <button
+                                                type="button"
+                                                class="paper-status"
+                                                data-paper-key="${paperStatusKey}"
+                                                onclick="
+                                                    event.preventDefault();
+                                                    event.stopPropagation();
+                                                    togglePaperStatus(this);
+                                                "
+                                            >
+                                                ☐ Mark as completed
+                                            </button>
+
+                                            <div
+                                                class="paper-attempts"
+                                                data-paper-attempts
+                                            ></div>
+
+                                        </div>
+
+                                        ${
+                                            paper.question
+                                                ? `
+                                                    <a
+                                                        class="paper-button primary"
+                                                        href="../../../../viewer/?file=${encodeURIComponent(
+                                                            paper.question
+                                                        )}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        📄 Question Paper
+                                                    </a>
+                                                `
+                                                : ""
+                                        }
+
+                                        ${
+                                            paper.markScheme
+                                                ? `
+                                                    <a
+                                                        class="paper-button"
+                                                        href="../../../../viewer/?file=${encodeURIComponent(
+                                                            paper.markScheme
+                                                        )}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        ✅ Mark Scheme
+                                                    </a>
+                                                `
+                                                : ""
+                                        }
+
+                                        ${
+                                            paper.examinerReport
+                                                ? `
+                                                    <a
+                                                        class="paper-button"
+                                                        href="../../../../${paper.examinerReport}"
+                                                    >
+                                                        📋 Examiner Report
+                                                    </a>
+                                                `
+                                                : ""
+                                        }
+
+                                        ${
+                                            paper.insert
+                                                ? `
+                                                    <a
+                                                        class="paper-button"
+                                                        href="../../../../${paper.insert}"
+                                                    >
+                                                        📎 Insert
+                                                    </a>
+                                                `
+                                                : ""
+                                        }
+
+                                    </div>
+
+                                </div>
+                            `;
+
+                        })
+                        .join("");
+
+                return `
+
+                    <div class="all-papers-session-group">
+
+                        <h2 class="all-papers-session-title">
+                            ${shortSessionName(session.sessionCode)}
+                        </h2>
+
+                        <div class="paper-list">
+                            ${cards}
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
+
+    return documentHTML(
+        `${subject.name} ${year} · All Papers`,
+
+        `
+            <div class="page-header">
+
+                ${
+                    categoryKey
+                        ? breadcrumbHTML([
+                            { label: "subjects", href: "../../../../" },
+                            { label: subjectShortLabel(subjectKey, subject), href: "../../../" },
+                            { label: categoryBreadcrumbLabel, href: "../../" },
+                            { label: String(year), href: "../" },
+                            { label: "all", current: true }
+                        ])
+                        : breadcrumbHTML([
+                            { label: "subjects", href: "../../../" },
+                            { label: subjectShortLabel(subjectKey, subject), href: "../../" },
+                            { label: String(year), href: "../" },
+                            { label: "all", current: true }
+                        ])
+                }
+
+                <h1>
+                    all papers ${year}
+                </h1>
+
+                <p>
+                    ${subject.name} ${subject.code}${categoryKey ? ` · ${categoryDisplayName}` : ""}
+                    · ${totalCount} papers
+                </p>
+
+            </div>
+
+            <div class="all-papers-list">
+                ${groupHTML}
+            </div>
+        `,
+
+        4
+    );
+
 }
 
 
@@ -3228,6 +3531,17 @@ function writeCategorizedSubjectPages(subjectKey, data) {
                 generateYearPage(subjectKey, data.subject, categoryKey, year, sessions)
             );
 
+            writeFile(
+                path.join(categoryDir, year, "all", "index.html"),
+                generateAllPapersPage(
+                    subjectKey,
+                    data.subject,
+                    categoryKey,
+                    year,
+                    sessions
+                )
+            );
+
             for (const [folder, session] of Object.entries(sessions)) {
 
                 const slug = sessionSlug(session.sessionCode);
@@ -3252,6 +3566,17 @@ function writeUncategorizedSubjectPages(subjectKey, data) {
         writeFile(
             path.join(DIST_DIR, subjectKey, year, "index.html"),
             generateYearPage(subjectKey, data.subject, null, year, sessions)
+        );
+
+        writeFile(
+            path.join(DIST_DIR, subjectKey, year, "all", "index.html"),
+            generateAllPapersPage(
+                subjectKey,
+                data.subject,
+                null,
+                year,
+                sessions
+            )
         );
 
         for (const [folder, session] of Object.entries(sessions)) {
