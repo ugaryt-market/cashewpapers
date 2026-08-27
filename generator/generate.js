@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.65
+    Version Alpha 0.1.66
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1380,6 +1380,8 @@ main {
 /* ---------------- PAPER PROGRESS ---------------- */
 
 .paper-progress {
+    position: relative;
+    z-index: 100;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1525,11 +1527,12 @@ main {
     color: var(--text);
 }
 
-.attempt-form {
+ .attempt-form {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    z-index: 40;
+    z-index: 1000;
+    pointer-events: auto;
 
     width: 250px;
     max-width: min(250px, 80vw);
@@ -1549,8 +1552,34 @@ main {
 }
 
 .attempt-form-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     color: var(--text);
     font-size: 13px;
+}
+
+.attempt-form-close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.attempt-form-close:hover {
+    background: #3a3c3f;
+    color: var(--text);
 }
 
 .attempt-input {
@@ -1949,7 +1978,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.65">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.66">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -1964,9 +1993,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.65"></script>
+    <script src="${prefix}auth.js?v=0.1.66"></script>
 
-    <script src="${prefix}search.js?v=0.1.65"></script>
+    <script src="${prefix}search.js?v=0.1.66"></script>
 
 </head>
 
@@ -2421,8 +2450,51 @@ function openAttemptForm(progress, key) {
     title.className =
         "attempt-form-title";
 
-    title.textContent =
+    const titleText =
+        document.createElement("span");
+
+    titleText.textContent =
         "add attempt";
+
+    const closeButton =
+        document.createElement("button");
+
+    closeButton.type =
+        "button";
+
+    closeButton.className =
+        "attempt-form-close";
+
+    closeButton.textContent =
+        "×";
+
+    closeButton.setAttribute(
+        "aria-label",
+        "Close add attempt"
+    );
+
+    closeButton.title =
+        "Close";
+
+    closeButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            form.remove();
+
+        }
+    );
+
+    title.appendChild(
+        titleText
+    );
+
+    title.appendChild(
+        closeButton
+    );
 
     const input =
         document.createElement("input");
