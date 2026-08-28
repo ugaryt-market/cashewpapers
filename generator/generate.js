@@ -494,7 +494,10 @@ function buildPaperSearchIndex(database) {
 
                     index[paper.code.toLowerCase()] = {
                         path: `${subjectKey}/${year}/${slug}/#paper-${paper.code}`,
-                        code: paper.code
+                        code: paper.code,
+                        subject: data.subject.name,
+                        paper: paper.paper,
+                        questionPath: paper.question || ""
                     };
 
                 }
@@ -515,7 +518,7 @@ function buildPaperSearchIndex(database) {
     algorithm as the original mathematics-only version, just parameterized
     on subjectKey.
 */
-function addCategorizedSearchIndex(subjectKey) {
+function addCategorizedSearchIndex(subjectKey, subjectName) {
 
     const categories = getCategories(subjectKey);
 
@@ -552,7 +555,10 @@ function addCategorizedSearchIndex(subjectKey) {
 
             PAPER_SEARCH_INDEX[code.toLowerCase()] = {
                 path: `${subjectKey}/${categoryKey}/${year}/${sessionSlug(parsed.sessionCode)}/#paper-${code}`,
-                code
+                code,
+                subject: subjectName || subjectKey,
+                paper: parsed.paper,
+                questionPath: ""
             };
 
         }
@@ -1889,6 +1895,19 @@ main {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: "JetBrains Mono", monospace;
+    cursor: pointer;
+}
+
+.calendar-entry-pill:hover {
+    border-color: var(--subdued);
+}
+
+.scheduled-paper-link {
+    color: var(--text);
+}
+
+.scheduled-paper-link:hover {
+    color: var(--primary);
 }
 
 .calendar-day-modal {
@@ -4058,7 +4077,15 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                 "&code=" +
                                 encodeURIComponent(paperDisplayCode) +
                                 "&subject=" +
-                                encodeURIComponent(subject.name);
+                                encodeURIComponent(subject.name) +
+                                "&paper=" +
+                                encodeURIComponent(paper.paper) +
+                                "&path=" +
+                                encodeURIComponent(
+                                    `${subjectKey}/${categoryKey ? categoryKey + "/" : ""}${year}/${slug}/#paper-${paper.code}`
+                                ) +
+                                "&file=" +
+                                encodeURIComponent(paper.question || "");
 
                             return `
                                 <div
@@ -4293,7 +4320,15 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                 "&code=" +
                 encodeURIComponent(paperDisplayCode) +
                 "&subject=" +
-                encodeURIComponent(subject.name);
+                encodeURIComponent(subject.name) +
+                "&paper=" +
+                encodeURIComponent(paper.paper) +
+                "&path=" +
+                encodeURIComponent(
+                    `${subjectKey}/${categoryKey ? categoryKey + "/" : ""}${year}/${slug}/#paper-${paper.code}`
+                ) +
+                "&file=" +
+                encodeURIComponent(paper.question || "");
 
             return `
 
@@ -4713,6 +4748,9 @@ function generateSchedulerPage() {
     const schedulingKey = params.get("key");
     const schedulingCode = params.get("code");
     const schedulingSubject = params.get("subject");
+    const schedulingPaper = params.get("paper");
+    const schedulingPath = params.get("path");
+    const schedulingFile = params.get("file");
 
     let schedulingActive = Boolean(schedulingKey);
 
@@ -4786,10 +4824,73 @@ function generateSchedulerPage() {
 
         banner.textContent =
             "scheduling " +
-            (schedulingCode || "this paper") +
-            (schedulingSubject ? " · " + schedulingSubject : "") +
+            formatScheduledEntryLabel({
+                code: schedulingCode,
+                subject: schedulingSubject,
+                paper: schedulingPaper
+            }) +
             " — click a date to add it.";
 
+    }
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function getScheduledPaperNumber(entry) {
+        if (entry && entry.paper) {
+            return String(entry.paper);
+        }
+
+        const code = String(entry && entry.code || "");
+        const match = code.match(/_(?:qp|ms|er|in)_(\d+)$/i);
+        return match ? match[1] : "";
+    }
+
+    function formatScheduledEntryLabel(entry) {
+        const subject = String(entry && entry.subject || "").trim().toLowerCase();
+        const paper = getScheduledPaperNumber(entry);
+
+        if (subject && paper) {
+            return subject + " p" + paper;
+        }
+
+        return String(entry && (entry.code || entry.label) || "paper");
+    }
+
+    function getScheduledPaperHref(entry) {
+        if (!entry) {
+            return "";
+        }
+
+        if (entry.href) {
+            return entry.href;
+        }
+
+        if (entry.path) {
+            return "../" + entry.path;
+        }
+
+        if (entry.questionPath) {
+            return "../viewer/?file=" + encodeURIComponent(entry.questionPath);
+        }
+
+        return "";
+    }
+
+    function navigateToScheduledPaper(entry) {
+        const href = getScheduledPaperHref(entry);
+
+        if (!href) {
+            return;
+        }
+
+        window.location.assign(href);
     }
 
     function renderGrid() {
@@ -4825,8 +4926,8 @@ function generateSchedulerPage() {
             const pills = entries
                 .slice(0, 3)
                 .map(entry =>
-                    '<div class="calendar-entry-pill">' +
-                    (entry.code || entry.label || "paper") +
+                    '<div class="calendar-entry-pill" data-scheduled-entry="true">' +
+                    escapeHtml(formatScheduledEntryLabel(entry)) +
                     "</div>"
                 )
                 .join("");
@@ -4852,7 +4953,22 @@ function generateSchedulerPage() {
 
         grid.querySelectorAll(".calendar-cell").forEach(cell => {
 
-            cell.addEventListener("click", () => {
+            cell.addEventListener("click", event => {
+                const entryElement = event.target.closest("[data-scheduled-entry]");
+
+                if (entryElement) {
+                    const entries = loadSchedule()[cell.dataset.date] || [];
+                    const entryElements = Array.from(
+                        cell.querySelectorAll("[data-scheduled-entry]")
+                    );
+                    const entryIndex = entryElements.indexOf(entryElement);
+
+                    if (entryIndex >= 0 && entries[entryIndex]) {
+                        navigateToScheduledPaper(entries[entryIndex]);
+                        return;
+                    }
+                }
+
                 openDayModal(cell.dataset.date);
             });
 
@@ -4918,15 +5034,27 @@ function generateSchedulerPage() {
         }
 
         container.innerHTML = entries
-            .map((entry, index) =>
-                '<div class="attempt-row">' +
-                '<div class="attempt-row-text">' +
-                (entry.code || entry.label || "paper") +
-                (entry.subject ? " · " + entry.subject : "") +
-                "</div>" +
-                '<button type="button" class="attempt-remove" data-index="' + index + '" aria-label="remove">×</button>' +
-                "</div>"
-            )
+            .map((entry, index) => {
+                const href = getScheduledPaperHref(entry);
+                const label = formatScheduledEntryLabel(entry);
+                const detail = entry.code || "";
+
+                return (
+                    '<div class="attempt-row">' +
+                    '<div class="attempt-row-text">' +
+                    (href
+                        ? '<a href="' + escapeHtml(href) + '" class="scheduled-paper-link">' +
+                          escapeHtml(label) +
+                          '</a>'
+                        : escapeHtml(label)) +
+                    (detail
+                        ? '<div class="muted">' + escapeHtml(detail) + '</div>'
+                        : '') +
+                    "</div>" +
+                    '<button type="button" class="attempt-remove" data-index="' + index + '" aria-label="remove">×</button>' +
+                    "</div>"
+                );
+            })
             .join("");
 
         container.querySelectorAll(".attempt-remove").forEach(button => {
@@ -4973,7 +5101,10 @@ function generateSchedulerPage() {
 
         addEntryToDate(key, {
             code: schedulingCode || "paper",
-            subject: schedulingSubject || ""
+            subject: schedulingSubject || "",
+            paper: schedulingPaper || "",
+            path: schedulingPath || "",
+            questionPath: schedulingFile || ""
         });
 
         schedulingActive = false;
@@ -5022,7 +5153,10 @@ function generateSchedulerPage() {
 
         addEntryToDate(selectedDateKey, {
             code: match.code,
-            path: match.path
+            subject: match.subject || "",
+            paper: match.paper || "",
+            path: match.path || "",
+            questionPath: match.questionPath || ""
         });
 
         input.value = "";
@@ -5304,7 +5438,7 @@ function generate() {
     PAPER_SEARCH_INDEX = buildPaperSearchIndex(database);
 
     for (const subjectKey of Object.keys(SUBJECT_CATEGORIES)) {
-        addCategorizedSearchIndex(subjectKey);
+        addCategorizedSearchIndex(subjectKey, subjects[subjectKey].name);
     }
 
     if (fs.existsSync(DIST_DIR)) {
