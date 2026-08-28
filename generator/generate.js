@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.74
+    Version Alpha 0.1.75
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -958,7 +958,7 @@ nav {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 12px;
 }
 
 .nav-inner .logo {
@@ -985,6 +985,18 @@ nav {
 
 .nav-account:hover {
     opacity: 0.9;
+}
+
+.nav-calendar-button {
+    background: #3a3c3f;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.nav-calendar-button:hover {
+    background: #414346;
+    opacity: 1;
+    border-color: var(--subdued);
 }
 
 .logo {
@@ -1455,6 +1467,32 @@ main {
     color: white;
 }
 
+/* ---------------- PAPER SCHEDULE BUTTON ---------------- */
+
+.paper-calendar-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: #3a3c3f;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    cursor: pointer;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: 0.15s ease;
+}
+
+.paper-calendar-button:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
 /* ---------------- PAPER PROGRESS ---------------- */
 
 .paper-progress {
@@ -1733,6 +1771,176 @@ main {
 }
 
 
+/* ---------------- SCHEDULER / CALENDAR ---------------- */
+
+.calendar-scheduling-banner {
+    background: #3a3127;
+    border: 1px solid var(--subdued);
+    color: var(--primary);
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.calendar-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+}
+
+.calendar-nav-arrow {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: 0.15s ease;
+}
+
+.calendar-nav-arrow:hover {
+    background: #3a3c3f;
+    color: var(--text);
+    border-color: var(--subdued);
+}
+
+.calendar-card {
+    flex: 1;
+    max-width: 900px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+}
+
+.calendar-month-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-grid + .calendar-grid {
+    margin-top: 8px;
+}
+
+.calendar-day-label {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding-bottom: 6px;
+}
+
+.calendar-cell {
+    min-height: 96px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #2f3134;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: 0.15s ease;
+    overflow: hidden;
+}
+
+.calendar-cell:hover {
+    border-color: var(--subdued);
+    transform: translateY(-1px);
+}
+
+.calendar-cell.outside {
+    opacity: 0.35;
+}
+
+.calendar-cell.today {
+    border-color: var(--primary);
+}
+
+.calendar-date-num {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.calendar-entry-pill {
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    background: #3a3c3f;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: "JetBrains Mono", monospace;
+}
+
+.calendar-day-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+}
+
+.calendar-day-modal.open {
+    display: flex;
+}
+
+.calendar-day-modal-content {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    width: min(420px, 100%);
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+}
+
+.calendar-modal-entries {
+    display: grid;
+    gap: 4px;
+    margin: 14px 0;
+}
+
+.calendar-add-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.calendar-add-form .attempt-input {
+    flex: 1;
+}
+
+.calendar-modal-error {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--primary);
+    min-height: 14px;
+}
+
+
 /* ---------------- NATIVE PDF VIEWER ---------------- */
 
 body:has(.native-pdf-page) {
@@ -1809,11 +2017,34 @@ body:has(.native-pdf-page) main {
 .native-pdf-controls {
     position: relative;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     min-height: 34px;
     flex-shrink: 0;
     margin-bottom: 8px;
+    gap: 10px;
+}
+
+.native-pdf-return {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.native-pdf-return:hover {
+    background: #3a3c3f;
+    color: var(--text);
+    border-color: var(--subdued);
 }
 
 .native-pdf-fullscreen {
@@ -2033,6 +2264,10 @@ body:has(.home-page) footer {
         flex: 1;
     }
 
+    .paper-calendar-button {
+        margin-left: auto;
+    }
+
     .paper-progress {
         width: auto;
         max-width: 100%;
@@ -2054,6 +2289,25 @@ body:has(.home-page) footer {
 
     .nav-account {
         font-size: 12px;
+    }
+
+    .calendar-shell {
+        flex-direction: column;
+    }
+
+    .calendar-nav-arrow {
+        width: 44px;
+        height: 44px;
+    }
+
+    .calendar-card {
+        padding: 18px;
+        width: 100%;
+    }
+
+    .calendar-cell {
+        min-height: 72px;
+        padding: 6px;
     }
 
 }
@@ -2087,7 +2341,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.74">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.75">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2102,9 +2356,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.74"></script>
+    <script src="${prefix}auth.js?v=0.1.75"></script>
 
-    <script src="${prefix}search.js?v=0.1.74"></script>
+    <script src="${prefix}search.js?v=0.1.75"></script>
 
 </head>
 
@@ -2150,6 +2404,14 @@ function documentHTML(title, body, depth = 0) {
         </div>
 
         <div class="nav-actions">
+
+            <a
+                href="${prefix}scheduler/"
+                class="nav-account nav-calendar-button"
+                title="scheduler"
+            >
+                calendar
+            </a>
 
             <a id="authNav" href="${prefix}login/" class="nav-account">
                 Login / Signup
@@ -3085,7 +3347,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.74</div>
+                <div class="version">Version Alpha 0.1.75</div>
 
             </section>
 
@@ -3787,6 +4049,17 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                 paper.paper
                             ].join("-");
 
+                            const paperDisplayCode =
+                                paper.code || `Paper ${paper.paper}`;
+
+                            const schedulerHref =
+                                "../../../../scheduler/?key=" +
+                                encodeURIComponent(paperStatusKey) +
+                                "&code=" +
+                                encodeURIComponent(paperDisplayCode) +
+                                "&subject=" +
+                                encodeURIComponent(subject.name);
+
                             return `
                                 <div
                                     class="paper-card"
@@ -3803,7 +4076,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                         </h3>
 
                                         <div class="paper-code">
-                                            ${paper.code || `Paper ${paper.paper}`}
+                                            ${paperDisplayCode}
                                         </div>
 
                                     </div>
@@ -3894,6 +4167,15 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                 `
                                                 : ""
                                         }
+
+                                        <a
+                                            class="paper-calendar-button"
+                                            href="${schedulerHref}"
+                                            title="Schedule this paper"
+                                            aria-label="Schedule this paper"
+                                        >
+                                            📅
+                                        </a>
 
                                     </div>
 
@@ -4002,6 +4284,17 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                 paper.paper
             ].join("-");
 
+            const paperDisplayCode =
+                paper.code || `Paper ${paper.paper}`;
+
+            const schedulerHref =
+                "../../../../scheduler/?key=" +
+                encodeURIComponent(paperStatusKey) +
+                "&code=" +
+                encodeURIComponent(paperDisplayCode) +
+                "&subject=" +
+                encodeURIComponent(subject.name);
+
             return `
 
                 <div
@@ -4015,7 +4308,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                         <h3>Paper ${paper.paper}</h3>
 
                         <div class="paper-code">
-                            ${paper.code || `Paper ${paper.paper}`}
+                            ${paperDisplayCode}
                         </div>
 
                     </div>
@@ -4098,6 +4391,15 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 : ""
                         }
 
+                        <a
+                            class="paper-calendar-button"
+                            href="${schedulerHref}"
+                            title="Schedule this paper"
+                            aria-label="Schedule this paper"
+                        >
+                            📅
+                        </a>
+
                     </div>
 
                 </div>
@@ -4159,6 +4461,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 function generatePdfReaderPage() {
 
     return documentHTML(
+
         "PDF Viewer",
 
         `
@@ -4166,6 +4469,10 @@ function generatePdfReaderPage() {
             <div class="native-pdf-page">
 
                 <div class="native-pdf-controls">
+
+                    <a class="native-pdf-return" id="nativePdfReturn" href="#">
+                        ← return to paper selection
+                    </a>
 
                     <a class="native-pdf-fullscreen" id="nativePdfFullscreen" href="#">
                         go to fullscreen →
@@ -4194,9 +4501,35 @@ function generatePdfReaderPage() {
 
     const frame = document.getElementById("nativePdfFrame");
     const fullscreen = document.getElementById("nativePdfFullscreen");
+    const returnButton = document.getElementById("nativePdfReturn");
+
+    /*
+       The past paper always opens in its own tab (target="_blank"
+       from the paper card links). Returning to paper selection
+       means closing this tab so the original tab regains focus.
+       If, for whatever reason, this page was not opened as a
+       new tab (no window.opener), fall back to browser history.
+    */
+    if (returnButton) {
+
+        returnButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                if (window.opener) {
+                    window.close();
+                } else {
+                    window.history.back();
+                }
+
+            }
+        );
+
+    }
 
     if (!fileParam) {
-        title.textContent = "no PDF supplied";
         return;
     }
 
@@ -4227,8 +4560,6 @@ function generatePdfReaderPage() {
 
         console.error("cashewpapers native PDF viewer error:", error);
 
-        title.textContent = "unable to open PDF";
-
     }
 
 })();
@@ -4238,6 +4569,518 @@ function generatePdfReaderPage() {
         `,
 
         1
+
+    );
+
+}
+
+
+/* ============================================================
+   SCHEDULER / CALENDAR PAGE
+
+   A lightweight, client-side scheduler stored entirely in
+   localStorage (key: "cashew-schedule"), mapping ISO dates
+   ("YYYY-MM-DD") to an array of scheduled paper entries.
+
+   Two ways in:
+     1. General browsing via the nav "calendar" button:
+        click any date to open a popover, search a paper code
+        (using the same search index paper search uses) and
+        add it to that date, or remove existing entries.
+     2. From a specific paper's 📅 button on a session/all-papers
+        page: arrives with ?key=&code=&subject= in the URL.
+        A banner explains the paper being scheduled, and the
+        very next date the person clicks gets that paper added
+        automatically.
+   ============================================================ */
+
+function generateSchedulerPage() {
+
+    return documentHTML(
+
+        "Scheduler",
+
+        `
+
+            <div class="page-header">
+
+                ${breadcrumbHTML([
+                    { label: "subjects", href: "../" },
+                    { label: "scheduler", current: true }
+                ])}
+
+                <h1>scheduler</h1>
+
+                <p>plan out when you'll tackle each past paper.</p>
+
+            </div>
+
+            <div
+                id="schedulingBanner"
+                class="calendar-scheduling-banner"
+                style="display:none;"
+            ></div>
+
+            <div class="calendar-shell">
+
+                <button
+                    type="button"
+                    class="calendar-nav-arrow"
+                    id="calendarPrevMonth"
+                    aria-label="previous month"
+                >
+                    ←
+                </button>
+
+                <div class="calendar-card">
+
+                    <div class="calendar-month-title" id="calendarMonthTitle"></div>
+
+                    <div class="calendar-grid" id="calendarDayLabels"></div>
+
+                    <div class="calendar-grid" id="calendarGrid"></div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="calendar-nav-arrow"
+                    id="calendarNextMonth"
+                    aria-label="next month"
+                >
+                    →
+                </button>
+
+            </div>
+
+            <div class="calendar-day-modal" id="calendarDayModal">
+
+                <div class="calendar-day-modal-content">
+
+                    <div class="attempt-form-title">
+
+                        <span id="calendarModalTitle">schedule</span>
+
+                        <button
+                            type="button"
+                            class="attempt-form-close"
+                            id="calendarModalClose"
+                            aria-label="close"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                    <div id="calendarModalEntries" class="calendar-modal-entries"></div>
+
+                    <form id="calendarAddForm" class="calendar-add-form">
+
+                        <input
+                            id="calendarAddInput"
+                            class="attempt-input"
+                            type="text"
+                            placeholder="enter paper code, e.g. 9709_w25_qp_12"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="submit"
+                            class="attempt-save"
+                        >
+                            add
+                        </button>
+
+                    </form>
+
+                    <div
+                        id="calendarModalError"
+                        class="calendar-modal-error"
+                    ></div>
+
+                </div>
+
+            </div>
+
+            <script>
+
+(function () {
+
+    const STORAGE_KEY = "cashew-schedule";
+
+    const params = new URLSearchParams(window.location.search);
+
+    const schedulingKey = params.get("key");
+    const schedulingCode = params.get("code");
+    const schedulingSubject = params.get("subject");
+
+    let schedulingActive = Boolean(schedulingKey);
+
+    let currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+
+    let selectedDateKey = null;
+
+    function loadSchedule() {
+
+        try {
+
+            const value = localStorage.getItem(STORAGE_KEY);
+
+            return value ? JSON.parse(value) : {};
+
+        } catch (error) {
+
+            return {};
+
+        }
+
+    }
+
+    function saveSchedule(schedule) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+    }
+
+    function dateKey(date) {
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return year + "-" + month + "-" + day;
+
+    }
+
+    function formatMonthTitle(date) {
+
+        return date.toLocaleDateString(
+            "en-US",
+            { month: "long", year: "numeric" }
+        );
+
+    }
+
+    const dayLabels = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+    function renderDayLabels() {
+
+        const container = document.getElementById("calendarDayLabels");
+
+        container.innerHTML = dayLabels
+            .map(label => '<div class="calendar-day-label">' + label + "</div>")
+            .join("");
+
+    }
+
+    function renderBanner() {
+
+        const banner = document.getElementById("schedulingBanner");
+
+        if (!schedulingActive) {
+            banner.style.display = "none";
+            return;
+        }
+
+        banner.style.display = "block";
+
+        banner.textContent =
+            "scheduling " +
+            (schedulingCode || "this paper") +
+            (schedulingSubject ? " · " + schedulingSubject : "") +
+            " — click a date to add it.";
+
+    }
+
+    function renderGrid() {
+
+        const grid = document.getElementById("calendarGrid");
+        const title = document.getElementById("calendarMonthTitle");
+        const schedule = loadSchedule();
+
+        title.textContent = formatMonthTitle(currentMonth);
+
+        const firstOfMonth = new Date(currentMonth);
+        const startOffset = firstOfMonth.getDay();
+
+        const gridStart = new Date(firstOfMonth);
+        gridStart.setDate(gridStart.getDate() - startOffset);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let html = "";
+
+        for (let i = 0; i < 42; i++) {
+
+            const cellDate = new Date(gridStart);
+            cellDate.setDate(cellDate.getDate() + i);
+
+            const key = dateKey(cellDate);
+            const outside = cellDate.getMonth() !== currentMonth.getMonth();
+            const isToday = cellDate.getTime() === today.getTime();
+
+            const entries = schedule[key] || [];
+
+            const pills = entries
+                .slice(0, 3)
+                .map(entry =>
+                    '<div class="calendar-entry-pill">' +
+                    (entry.code || entry.label || "paper") +
+                    "</div>"
+                )
+                .join("");
+
+            const more =
+                entries.length > 3
+                    ? '<div class="calendar-entry-pill">+' + (entries.length - 3) + " more</div>"
+                    : "";
+
+            html +=
+                '<div class="calendar-cell' +
+                (outside ? " outside" : "") +
+                (isToday ? " today" : "") +
+                '" data-date="' + key + '">' +
+                '<div class="calendar-date-num">' + cellDate.getDate() + "</div>" +
+                pills +
+                more +
+                "</div>";
+
+        }
+
+        grid.innerHTML = html;
+
+        grid.querySelectorAll(".calendar-cell").forEach(cell => {
+
+            cell.addEventListener("click", () => {
+                openDayModal(cell.dataset.date);
+            });
+
+        });
+
+    }
+
+    function openDayModal(key) {
+
+        selectedDateKey = key;
+
+        const modal = document.getElementById("calendarDayModal");
+        const modalTitle = document.getElementById("calendarModalTitle");
+        const errorBox = document.getElementById("calendarModalError");
+
+        errorBox.textContent = "";
+
+        const parsed = new Date(key + "T00:00:00");
+
+        modalTitle.textContent = parsed.toLocaleDateString(
+            "en-US",
+            { weekday: "long", month: "long", day: "numeric", year: "numeric" }
+        );
+
+        if (schedulingActive) {
+
+            addSchedulingPaperToDate(key);
+
+        }
+
+        renderModalEntries();
+
+        modal.classList.add("open");
+
+    }
+
+    function closeDayModal() {
+
+        document.getElementById("calendarDayModal").classList.remove("open");
+        document.getElementById("calendarModalError").textContent = "";
+
+        const input = document.getElementById("calendarAddInput");
+
+        if (input) {
+            input.value = "";
+        }
+
+    }
+
+    function renderModalEntries() {
+
+        const schedule = loadSchedule();
+        const entries = schedule[selectedDateKey] || [];
+        const container = document.getElementById("calendarModalEntries");
+
+        if (entries.length === 0) {
+
+            container.innerHTML =
+                '<div class="muted">Nothing scheduled yet.</div>';
+
+            return;
+
+        }
+
+        container.innerHTML = entries
+            .map((entry, index) =>
+                '<div class="attempt-row">' +
+                '<div class="attempt-row-text">' +
+                (entry.code || entry.label || "paper") +
+                (entry.subject ? " · " + entry.subject : "") +
+                "</div>" +
+                '<button type="button" class="attempt-remove" data-index="' + index + '" aria-label="remove">×</button>' +
+                "</div>"
+            )
+            .join("");
+
+        container.querySelectorAll(".attempt-remove").forEach(button => {
+
+            button.addEventListener("click", () => {
+
+                const schedule = loadSchedule();
+                const list = schedule[selectedDateKey] || [];
+
+                list.splice(Number(button.dataset.index), 1);
+
+                if (list.length === 0) {
+                    delete schedule[selectedDateKey];
+                } else {
+                    schedule[selectedDateKey] = list;
+                }
+
+                saveSchedule(schedule);
+
+                renderModalEntries();
+                renderGrid();
+
+            });
+
+        });
+
+    }
+
+    function addEntryToDate(key, entry) {
+
+        const schedule = loadSchedule();
+
+        if (!schedule[key]) {
+            schedule[key] = [];
+        }
+
+        schedule[key].push(entry);
+
+        saveSchedule(schedule);
+
+    }
+
+    function addSchedulingPaperToDate(key) {
+
+        addEntryToDate(key, {
+            code: schedulingCode || "paper",
+            subject: schedulingSubject || ""
+        });
+
+        schedulingActive = false;
+
+        renderBanner();
+        renderGrid();
+
+        const url = new URL(window.location.href);
+
+        url.searchParams.delete("key");
+        url.searchParams.delete("code");
+        url.searchParams.delete("subject");
+
+        window.history.replaceState({}, "", url.toString());
+
+    }
+
+    function handleAddFormSubmit(event) {
+
+        event.preventDefault();
+
+        const input = document.getElementById("calendarAddInput");
+        const errorBox = document.getElementById("calendarModalError");
+
+        const value = input.value.trim().toLowerCase();
+
+        if (!value) {
+            return;
+        }
+
+        const index =
+            typeof cashewPaperSearchIndex !== "undefined"
+                ? cashewPaperSearchIndex
+                : {};
+
+        const match = index[value];
+
+        if (!match) {
+
+            errorBox.textContent =
+                "couldn't find a paper with that code.";
+
+            return;
+
+        }
+
+        addEntryToDate(selectedDateKey, {
+            code: match.code,
+            path: match.path
+        });
+
+        input.value = "";
+        errorBox.textContent = "";
+
+        renderModalEntries();
+        renderGrid();
+
+    }
+
+    document
+        .getElementById("calendarPrevMonth")
+        .addEventListener("click", () => {
+
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            renderGrid();
+
+        });
+
+    document
+        .getElementById("calendarNextMonth")
+        .addEventListener("click", () => {
+
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            renderGrid();
+
+        });
+
+    document
+        .getElementById("calendarModalClose")
+        .addEventListener("click", closeDayModal);
+
+    document
+        .getElementById("calendarDayModal")
+        .addEventListener("click", event => {
+
+            if (event.target.id === "calendarDayModal") {
+                closeDayModal();
+            }
+
+        });
+
+    document
+        .getElementById("calendarAddForm")
+        .addEventListener("submit", handleAddFormSubmit);
+
+    renderDayLabels();
+    renderBanner();
+    renderGrid();
+
+})();
+
+            </script>
+
+        `,
+
+        1
+
     );
 
 }
@@ -4516,6 +5359,10 @@ function generate() {
     /* Native PDF Viewer */
 
     writeFile(path.join(DIST_DIR, "viewer", "index.html"), generatePdfReaderPage());
+
+    /* Scheduler / calendar */
+
+    writeFile(path.join(DIST_DIR, "scheduler", "index.html"), generateSchedulerPage());
 
     /* Copy PDFs */
 
