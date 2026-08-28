@@ -633,66 +633,41 @@ function getPaperSuggestionLabel(item) {
 
 function scorePaperSuggestion(item, query) {
 
-    const q = String(query || "").trim().toLowerCase();
+    const normalized = normalizePaperSearchCode(query);
+    const code = String(item.code || "").toLowerCase();
 
-    if (!q) {
+    if (!normalized || !code) {
         return 0;
     }
 
-    const normalized = normalizePaperSearchCode(q);
-    const code = String(item.code || "").toLowerCase();
-    const label = getPaperSuggestionLabel(item);
-    const subject = String(item.subjectName || item.subjectKey || "").toLowerCase();
-    const category = String(item.categoryKey || "").toLowerCase();
-    const year = String(item.year || "").toLowerCase();
-    const session = String(item.sessionCode || "").toLowerCase();
-    const paper = String(item.paperNumber || "").toLowerCase();
+    /*
+       Suggestions are intentionally code-prefix based.
+       Typing "9" only returns paper codes beginning with 9,
+       typing "97" only returns codes beginning with 97, etc.
+    */
+    if (!code.startsWith(normalized)) {
+        return 0;
+    }
 
+    /* Exact matches remain at the top. */
     if (code === normalized) {
-        return 1000;
+        return 10000;
     }
 
-    const terms = q
-        .split(/\\s+/)
-        .map(term => term.trim())
-        .filter(Boolean);
-
-    let score = 0;
-
-    if (code.startsWith(normalized)) score += 180;
-    if (code.includes(normalized)) score += 120;
-    if (label.startsWith(q)) score += 110;
-    if (subject.startsWith(q)) score += 90;
-    if (subject.includes(q)) score += 60;
-    if (category.includes(q)) score += 25;
-    if (year === q) score += 45;
-    if (session === q) score += 40;
-    if (paper === q || (paper && ("p" + paper.charAt(0)) === q)) score += 60;
-
-    for (const term of terms) {
-        if (code.includes(term)) score += 28;
-        if (label.includes(term)) score += 24;
-        if (subject.includes(term)) score += 20;
-        if (category.includes(term)) score += 10;
-        if (year.includes(term)) score += 12;
-        if (session.includes(term)) score += 12;
-        if (paper.includes(term)) score += 15;
-    }
-
-    return score;
+    return 5000 - Math.min(code.length, 100);
 
 }
 
-function getPaperSuggestions(query, limit = 8) {
+function getPaperSuggestions(query, limit = 50) {
 
-    const q = String(query || "").trim();
+    const normalized = normalizePaperSearchCode(query);
 
-    if (!q) {
+    if (!normalized) {
         return [];
     }
 
     return getPaperSearchItems()
-        .map(item => ({ item, score: scorePaperSuggestion(item, q) }))
+        .map(item => ({ item, score: scorePaperSuggestion(item, normalized) }))
         .filter(result => result.score > 0)
         .sort((a, b) => {
             if (b.score !== a.score) {
@@ -1709,7 +1684,7 @@ main {
     color: white;
 }
 
-/* ---------------- PAPER SCHEDULE BUTTON ---------------- */
+/* ---------------- PAPER PAGE BUTTON ---------------- */
 
 .paper-calendar-button {
     width: 42px;
@@ -2129,7 +2104,11 @@ main {
     right: 0;
     z-index: 1200;
     display: none;
-    overflow: hidden;
+    max-height: 320px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #646669 #2c2e31;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: #2c2e31;
@@ -2138,6 +2117,20 @@ main {
 
 .paper-search-suggestions.open {
     display: block;
+}
+
+.paper-search-suggestions::-webkit-scrollbar {
+    width: 9px;
+}
+
+.paper-search-suggestions::-webkit-scrollbar-track {
+    background: #2c2e31;
+}
+
+.paper-search-suggestions::-webkit-scrollbar-thumb {
+    background: #646669;
+    border: 2px solid #2c2e31;
+    border-radius: 999px;
 }
 
 .calendar-add-suggestions {
@@ -4388,19 +4381,13 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                             const paperDisplayCode =
                                 paper.code || `Paper ${paper.paper}`;
 
-                            const schedulerHref =
-                                "../../../../scheduler/?key=" +
-                                encodeURIComponent(paperStatusKey) +
-                                "&code=" +
+                            const paperPageHref =
+                                "../" +
+                                sessionSlug(session.sessionCode) +
+                                "/?search=" +
                                 encodeURIComponent(paperDisplayCode) +
-                                "&subject=" +
-                                encodeURIComponent(subject.name) +
-                                "&path=" +
-                                encodeURIComponent(
-                                    PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()]
-                                        ? PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()].path
-                                        : ""
-                                );
+                                "#paper-" +
+                                encodeURIComponent(paperDisplayCode);
 
                             return `
                                 <div
@@ -4511,13 +4498,13 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                         }
 
                                         <a
-                                            class="paper-calendar-button"
-                                            href="${schedulerHref}"
-                                            title="Schedule this paper"
-                                            aria-label="Schedule this paper"
-                                        >
-                                            📅
-                                        </a>
+                            class="paper-calendar-button"
+                            href="${paperPageHref}"
+                            title="Open paper page"
+                            aria-label="Open paper page"
+                        >
+                            📄
+                        </a>
 
                                     </div>
 
@@ -4629,19 +4616,11 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
             const paperDisplayCode =
                 paper.code || `Paper ${paper.paper}`;
 
-            const schedulerHref =
-                "../../../../scheduler/?key=" +
-                encodeURIComponent(paperStatusKey) +
-                "&code=" +
+            const paperPageHref =
+                "?search=" +
                 encodeURIComponent(paperDisplayCode) +
-                "&subject=" +
-                encodeURIComponent(subject.name) +
-                "&path=" +
-                encodeURIComponent(
-                    PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()]
-                        ? PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()].path
-                        : ""
-                );
+                "#paper-" +
+                encodeURIComponent(paperDisplayCode);
 
             return `
 
@@ -4741,11 +4720,11 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                         <a
                             class="paper-calendar-button"
-                            href="${schedulerHref}"
-                            title="Schedule this paper"
-                            aria-label="Schedule this paper"
+                            href="${paperPageHref}"
+                            title="Open paper page"
+                            aria-label="Open paper page"
                         >
-                            📅
+                            📄
                         </a>
 
                     </div>
@@ -4930,16 +4909,13 @@ function generatePdfReaderPage() {
    localStorage (key: "cashew-schedule"), mapping ISO dates
    ("YYYY-MM-DD") to an array of scheduled paper entries.
 
-   Two ways in:
-     1. General browsing via the nav "calendar" button:
-        click any date to open a popover, search a paper code
-        (using the same search index paper search uses) and
-        add it to that date, or remove existing entries.
-     2. From a specific paper's 📅 button on a session/all-papers
-        page: arrives with ?key=&code=&subject= in the URL.
-        A banner explains the paper being scheduled, and the
-        very next date the person clicks gets that paper added
-        automatically.
+   General browsing via the nav "calendar" button:
+     click any date to open a popover, search a paper code
+     (using the same search index paper search uses) and add it
+     to that date, or remove existing entries.
+
+   Paper-card icons no longer create a scheduling URL. They open
+   the relevant paper page instead.
    ============================================================ */
 
 function generateSchedulerPage() {
@@ -4961,12 +4937,6 @@ function generateSchedulerPage() {
                 <p>plan out when you'll tackle each past paper.</p>
 
             </div>
-
-            <div
-                id="schedulingBanner"
-                class="calendar-scheduling-banner"
-                style="display:none;"
-            ></div>
 
             <div
                 id="schedulerLoginNotice"
@@ -5071,14 +5041,6 @@ function generateSchedulerPage() {
     const STORAGE_KEY = "cashew-schedule";
     const SUPABASE_TABLE = "cashew_schedules";
 
-    const params = new URLSearchParams(window.location.search);
-
-    const schedulingKey = params.get("key");
-    const schedulingCode = params.get("code");
-    const schedulingSubject = params.get("subject");
-    const schedulingPath = params.get("path");
-
-    let schedulingActive = Boolean(schedulingKey);
     let currentMonth = new Date();
 
     currentMonth.setDate(1);
@@ -5269,25 +5231,6 @@ function generateSchedulerPage() {
 
     }
 
-    function renderBanner() {
-
-        const banner = document.getElementById("schedulingBanner");
-
-        if (!schedulingActive) {
-            banner.style.display = "none";
-            return;
-        }
-
-        banner.style.display = "block";
-
-        banner.textContent =
-            "scheduling " +
-            (schedulingCode || "this paper") +
-            (schedulingSubject ? " · " + schedulingSubject : "") +
-            " — click a date to add it.";
-
-    }
-
     function renderAuthNotice() {
 
         const notice = document.getElementById("schedulerLoginNotice");
@@ -5413,14 +5356,6 @@ function generateSchedulerPage() {
             { weekday: "long", month: "long", day: "numeric", year: "numeric" }
         );
 
-        if (schedulingActive) {
-            if (!currentUser) {
-                errorBox.textContent = "log in before scheduling papers.";
-            } else {
-                await addSchedulingPaperToDate(key);
-            }
-        }
-
         renderModalEntries();
         modal.classList.add("open");
 
@@ -5535,46 +5470,6 @@ function generateSchedulerPage() {
 
     }
 
-    async function addSchedulingPaperToDate(key) {
-
-        if (!currentUser || !schedulingActive) {
-            return false;
-        }
-
-        const index =
-            typeof cashewPaperSearchIndex !== "undefined"
-                ? cashewPaperSearchIndex
-                : {};
-
-        const match =
-            index[String(schedulingCode || "").toLowerCase()] || null;
-
-        await addEntryToDate(key, {
-            code: schedulingCode || "paper",
-            subject: schedulingSubject || "",
-            subjectName: schedulingSubject || "",
-            path: schedulingPath || (match ? match.path : ""),
-            paperNumber: match ? match.paperNumber : String(schedulingKey || "").split("-").pop()
-        });
-
-        schedulingActive = false;
-
-        renderBanner();
-        renderGrid();
-
-        const url = new URL(window.location.href);
-
-        url.searchParams.delete("key");
-        url.searchParams.delete("code");
-        url.searchParams.delete("subject");
-        url.searchParams.delete("path");
-
-        window.history.replaceState({}, "", url.toString());
-
-        return true;
-
-    }
-
     async function handleAddFormSubmit(event) {
 
         event.preventDefault();
@@ -5643,7 +5538,6 @@ function generateSchedulerPage() {
             clearLocalSchedule();
             scheduleReady = true;
             renderAuthNotice();
-            renderBanner();
             renderGrid();
             return;
         }
@@ -5653,7 +5547,6 @@ function generateSchedulerPage() {
         scheduleReady = true;
 
         renderAuthNotice();
-        renderBanner();
         renderGrid();
 
     }
@@ -5763,7 +5656,6 @@ function generateSchedulerPage() {
 
     renderDayLabels();
     renderAuthNotice();
-    renderBanner();
     renderGrid();
     initializeScheduler();
 
