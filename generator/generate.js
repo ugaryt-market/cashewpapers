@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.71
+    Version Alpha 0.1.72
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1163,6 +1163,70 @@ main {
     line-height: 1.5;
 }
 
+/* ---------------- OVERVIEW PROGRESS ---------------- */
+
+.progress-overview-card {
+    overflow: visible;
+}
+
+.progress-overview-content {
+    width: min(100%, 420px);
+    min-width: 0;
+}
+
+.progress-overview-title {
+    font-size: 29px;
+    font-weight: 400;
+    text-align: center;
+    line-height: 1.15;
+}
+
+.progress-overview-bar {
+    width: 100%;
+    height: 7px;
+    margin-top: 14px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #3a3c3f;
+    border: 1px solid var(--border);
+}
+
+.progress-overview-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+    transition: width 0.25s ease;
+}
+
+.progress-overview-label {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.year-session-card .progress-overview-content {
+    width: min(100%, 360px);
+}
+
+.year-session-card .year-session-name {
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.year-session-card .progress-overview-bar {
+    margin-top: 8px;
+    height: 6px;
+}
+
+.year-session-card .progress-overview-label {
+    margin-top: 5px;
+    text-align: left;
+}
+
+
 /* ---------------- YEAR CARDS ---------------- */
 
 .year-grid {
@@ -1949,6 +2013,18 @@ body:has(.home-page) footer {
         font-size: 16px;
     }
 
+    .progress-overview-content {
+        width: 100%;
+    }
+
+    .progress-overview-title {
+        font-size: 27px;
+    }
+
+    .year-session-card .progress-overview-content {
+        width: 100%;
+    }
+
     .paper-actions {
         width: 100%;
     }
@@ -2011,7 +2087,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.71">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.72">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2026,9 +2102,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.71"></script>
+    <script src="${prefix}auth.js?v=0.1.72"></script>
 
-    <script src="${prefix}search.js?v=0.1.71"></script>
+    <script src="${prefix}search.js?v=0.1.72"></script>
 
 </head>
 
@@ -2126,11 +2202,13 @@ async function updateAuthNavigation() {
 document.addEventListener("DOMContentLoaded", () => {
     updateAuthNavigation();
     initializePaperProgress();
+    initializeOverviewProgress();
 });
 
 window.addEventListener("cashew-auth-change", () => {
     updateAuthNavigation();
     initializePaperProgress();
+    initializeOverviewProgress();
 });
 
 function getPaperStatus(key) {
@@ -2782,7 +2860,90 @@ async function refreshPaperProgress(progress) {
 
 }
 
-async function initializePaperProgress() {
+async 
+function getOverviewCompletedCount(keys) {
+
+    return keys.reduce(
+        (count, key) =>
+            getPaperStatus(key) === "completed"
+                ? count + 1
+                : count,
+        0
+    );
+
+}
+
+function updateOverviewProgressCard(card) {
+
+    const rawKeys =
+        card.dataset.progressKeys || "";
+
+    const keys =
+        rawKeys
+            ? rawKeys.split("|").filter(Boolean)
+            : [];
+
+    const total =
+        Number(card.dataset.progressTotal || keys.length);
+
+    const completed =
+        getOverviewCompletedCount(keys);
+
+    const value =
+        total > 0
+            ? Math.round(
+                (completed / total) * 100
+            )
+            : 0;
+
+    const fill =
+        card.querySelector(
+            "[data-overview-progress-fill]"
+        );
+
+    const label =
+        card.querySelector(
+            "[data-overview-progress-label]"
+        );
+
+    if (fill) {
+
+        fill.style.width =
+            value + "%";
+
+    }
+
+    if (label) {
+
+        label.textContent =
+            String(completed) +
+            "/" +
+            String(total) +
+            " papers completed";
+
+    }
+
+}
+
+function initializeOverviewProgress() {
+
+    const cards =
+        document.querySelectorAll(
+            "[data-progress-keys]"
+        );
+
+    if (!cards.length) {
+        return;
+    }
+
+    cards.forEach(
+        updateOverviewProgressCard
+    );
+
+}
+
+
+function initializePaperProgress() {
 
     const progressElements = document.querySelectorAll(".paper-progress");
 
@@ -2816,6 +2977,8 @@ async function togglePaperStatus(button) {
     renderPaperStatus(button, next);
 
     renderPaperAttempts(progress, key, next === "completed", user);
+
+    initializeOverviewProgress();
 
 }
 
@@ -2882,7 +3045,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.71</div>
+                <div class="version">Version Alpha 0.1.72</div>
 
             </section>
 
@@ -3111,11 +3274,69 @@ function generateSubjectPage(subjectKey, data) {
     const years = Object.keys(data.years).sort((a, b) => Number(b) - Number(a));
 
     const links = years
-        .map(year => `
+        .map(year => {
 
-            <a class="year-link" href="${year}/">${year}</a>
+            const yearSessions =
+                data.years[year] || {};
 
-        `)
+            const yearPaperKeys = [];
+
+            for (const session of Object.values(yearSessions)) {
+
+                for (const paper of Object.values(session.papers || {})) {
+
+                    yearPaperKeys.push(
+                        [
+                            subject.code,
+                            "",
+                            year,
+                            session.sessionCode,
+                            paper.paper
+                        ].join("-")
+                    );
+
+                }
+
+            }
+
+            return `
+
+                <a
+                    class="year-link progress-overview-card"
+                    href="${year}/"
+                    data-progress-keys="${yearPaperKeys.join("|")}"
+                    data-progress-total="${yearPaperKeys.length}"
+                >
+
+                    <div class="progress-overview-content">
+
+                        <div class="progress-overview-title">
+                            ${year}
+                        </div>
+
+                        <div class="progress-overview-bar">
+
+                            <div
+                                class="progress-overview-fill"
+                                data-overview-progress-fill
+                            ></div>
+
+                        </div>
+
+                        <div
+                            class="progress-overview-label"
+                            data-overview-progress-label
+                        >
+                            0/${yearPaperKeys.length} papers completed
+                        </div>
+
+                    </div>
+
+                </a>
+
+            `;
+
+        })
         .join("");
 
     return documentHTML(
@@ -3205,11 +3426,69 @@ function generateCategoryPage(subjectKey, subject, categoryKey, years) {
 
     const links = Object.keys(years)
         .sort((a, b) => Number(b) - Number(a))
-        .map(year => `
+        .map(year => {
 
-            <a class="year-link" href="${year}/">${year}</a>
+            const yearSessions =
+                years[year] || {};
 
-        `)
+            const yearPaperKeys = [];
+
+            for (const session of Object.values(yearSessions)) {
+
+                for (const paper of Object.values(session.papers || {})) {
+
+                    yearPaperKeys.push(
+                        [
+                            subject.code,
+                            categoryKey || "",
+                            year,
+                            session.sessionCode,
+                            paper.paper
+                        ].join("-")
+                    );
+
+                }
+
+            }
+
+            return `
+
+                <a
+                    class="year-link progress-overview-card"
+                    href="${year}/"
+                    data-progress-keys="${yearPaperKeys.join("|")}"
+                    data-progress-total="${yearPaperKeys.length}"
+                >
+
+                    <div class="progress-overview-content">
+
+                        <div class="progress-overview-title">
+                            ${year}
+                        </div>
+
+                        <div class="progress-overview-bar">
+
+                            <div
+                                class="progress-overview-fill"
+                                data-overview-progress-fill
+                            ></div>
+
+                        </div>
+
+                        <div
+                            class="progress-overview-label"
+                            data-overview-progress-label
+                        >
+                            0/${yearPaperKeys.length} papers completed
+                        </div>
+
+                    </div>
+
+                </a>
+
+            `;
+
+        })
         .join("");
 
     return documentHTML(
@@ -3260,9 +3539,27 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
             const slug = sessionSlug(session.sessionCode);
             const count = Object.keys(session.papers).length;
 
+            const sessionPaperKeys =
+                Object.values(session.papers || {})
+                    .map(
+                        paper =>
+                            [
+                                subject.code,
+                                categoryKey || "",
+                                year,
+                                session.sessionCode,
+                                paper.paper
+                            ].join("-")
+                    );
+
             return `
 
-                <a class="year-session-card" href="${slug}/">
+                <a
+                    class="year-session-card progress-overview-card"
+                    href="${slug}/"
+                    data-progress-keys="${sessionPaperKeys.join("|")}"
+                    data-progress-total="${count}"
+                >
 
                     <div class="year-session-left">
 
@@ -3276,14 +3573,26 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                         </div>
 
-                        <div>
+                        <div class="progress-overview-content">
 
                             <div class="year-session-name">
                                 ${sessionName(session.sessionCode, year)}
                             </div>
 
-                            <div class="year-session-count">
-                                ${count} paper${count !== 1 ? "s" : ""}
+                            <div class="progress-overview-bar">
+
+                                <div
+                                    class="progress-overview-fill"
+                                    data-overview-progress-fill
+                                ></div>
+
+                            </div>
+
+                            <div
+                                class="progress-overview-label"
+                                data-overview-progress-label
+                            >
+                                0/${count} papers completed
                             </div>
 
                         </div>
