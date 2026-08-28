@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.75
+    Version Alpha 0.1.76
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -465,8 +465,13 @@ function buildDatabase(subjects) {
    ============================================================ */
 
 let PAPER_SEARCH_INDEX = {};
+let PAPER_SEARCH_SUBJECTS = {};
 
 function buildPaperSearchIndex(database) {
+
+    PAPER_SEARCH_SUBJECTS = Object.fromEntries(
+        Object.entries(database).map(([key, data]) => [key, data.subject])
+    );
 
     const index = {};
 
@@ -494,7 +499,13 @@ function buildPaperSearchIndex(database) {
 
                     index[paper.code.toLowerCase()] = {
                         path: `${subjectKey}/${year}/${slug}/#paper-${paper.code}`,
-                        code: paper.code
+                        code: paper.code,
+                        subjectKey,
+                        subjectName: data.subject.name,
+                        categoryKey: null,
+                        year,
+                        sessionCode: session.sessionCode,
+                        paperNumber: paper.paper
                     };
 
                 }
@@ -550,9 +561,17 @@ function addCategorizedSearchIndex(subjectKey) {
 
             const code = filename.replace(/\.pdf$/i, "");
 
+            const subjectInfo = PAPER_SEARCH_SUBJECTS[subjectKey] || {};
+
             PAPER_SEARCH_INDEX[code.toLowerCase()] = {
                 path: `${subjectKey}/${categoryKey}/${year}/${sessionSlug(parsed.sessionCode)}/#paper-${code}`,
-                code
+                code,
+                subjectKey,
+                subjectName: subjectInfo.name || subjectKey,
+                categoryKey,
+                year,
+                sessionCode: parsed.sessionCode,
+                paperNumber: parsed.paper
             };
 
         }
@@ -578,7 +597,184 @@ function normalizePaperSearchCode(value) {
     return String(value || "")
         .trim()
         .toLowerCase()
-        .replace(/\\\\s+/g, "");
+        .replace(/\\s+/g, "");
+
+}
+
+function escapeSearchHtml(value) {
+
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+function getPaperSearchItems() {
+
+    return Object.values(cashewPaperSearchIndex || {})
+        .filter(item => item && item.code && item.path);
+
+}
+
+function getPaperSuggestionLabel(item) {
+
+    const subject = String(item.subjectName || item.subjectKey || "paper")
+        .toLowerCase();
+
+    const number = String(item.paperNumber || "");
+    const component = number ? "p" + number.charAt(0) : "paper";
+
+    return subject + " " + component;
+
+}
+
+function scorePaperSuggestion(item, query) {
+
+    const q = String(query || "").trim().toLowerCase();
+
+    if (!q) {
+        return 0;
+    }
+
+    const normalized = normalizePaperSearchCode(q);
+    const code = String(item.code || "").toLowerCase();
+    const label = getPaperSuggestionLabel(item);
+    const subject = String(item.subjectName || item.subjectKey || "").toLowerCase();
+    const category = String(item.categoryKey || "").toLowerCase();
+    const year = String(item.year || "").toLowerCase();
+    const session = String(item.sessionCode || "").toLowerCase();
+    const paper = String(item.paperNumber || "").toLowerCase();
+
+    if (code === normalized) {
+        return 1000;
+    }
+
+    const terms = q
+        .split(/\\s+/)
+        .map(term => term.trim())
+        .filter(Boolean);
+
+    let score = 0;
+
+    if (code.startsWith(normalized)) score += 180;
+    if (code.includes(normalized)) score += 120;
+    if (label.startsWith(q)) score += 110;
+    if (subject.startsWith(q)) score += 90;
+    if (subject.includes(q)) score += 60;
+    if (category.includes(q)) score += 25;
+    if (year === q) score += 45;
+    if (session === q) score += 40;
+    if (paper === q || (paper && ("p" + paper.charAt(0)) === q)) score += 60;
+
+    for (const term of terms) {
+        if (code.includes(term)) score += 28;
+        if (label.includes(term)) score += 24;
+        if (subject.includes(term)) score += 20;
+        if (category.includes(term)) score += 10;
+        if (year.includes(term)) score += 12;
+        if (session.includes(term)) score += 12;
+        if (paper.includes(term)) score += 15;
+    }
+
+    return score;
+
+}
+
+function getPaperSuggestions(query, limit = 8) {
+
+    const q = String(query || "").trim();
+
+    if (!q) {
+        return [];
+    }
+
+    return getPaperSearchItems()
+        .map(item => ({ item, score: scorePaperSuggestion(item, q) }))
+        .filter(result => result.score > 0)
+        .sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            }
+
+            return String(a.item.code).localeCompare(String(b.item.code));
+        })
+        .slice(0, limit)
+        .map(result => result.item);
+
+}
+
+function closePaperSuggestions(container) {
+
+    if (!container) {
+        return;
+    }
+
+    container.classList.remove("open");
+    container.innerHTML = "";
+
+}
+
+function attachPaperSuggestions(input, container, onPick) {
+
+    if (!input || !container) {
+        return;
+    }
+
+    function render() {
+
+        const query = input.value.trim();
+        const suggestions = getPaperSuggestions(query);
+
+        if (!query || !suggestions.length) {
+            closePaperSuggestions(container);
+            return;
+        }
+
+        container.innerHTML = suggestions
+            .map(item =>
+                '<button type="button" class="paper-search-suggestion" ' +
+                'data-search-code="' + escapeSearchHtml(item.code) + '">' +
+                    '<span class="paper-search-suggestion-main">' +
+                        escapeSearchHtml(getPaperSuggestionLabel(item)) +
+                    '</span>' +
+                    '<span class="paper-search-suggestion-code">' +
+                        escapeSearchHtml(item.code) +
+                    '</span>' +
+                '</button>'
+            )
+            .join("");
+
+        container.classList.add("open");
+
+        container.querySelectorAll(".paper-search-suggestion").forEach(button => {
+            button.addEventListener("mousedown", event => {
+                event.preventDefault();
+            });
+
+            button.addEventListener("click", () => {
+                const code = button.dataset.searchCode || "";
+                input.value = code;
+                closePaperSuggestions(container);
+
+                if (typeof onPick === "function") {
+                    onPick(code);
+                }
+            });
+        });
+
+    }
+
+    input.addEventListener("input", render);
+    input.addEventListener("focus", render);
+
+    input.addEventListener("blur", () => {
+        window.setTimeout(() => closePaperSuggestions(container), 120);
+    });
+
+    return render;
 
 }
 
@@ -587,7 +783,7 @@ function highlightPaper(code) {
     const normalized = normalizePaperSearchCode(code);
 
     const target = document.querySelector(
-        "[data-paper-code=\\"" + normalized + "\\"]"
+        "[data-paper-code=\\\"" + normalized + "\\\"]"
     );
 
     if (!target) {
@@ -676,9 +872,18 @@ function initializePaperSearch() {
         return;
     }
 
+    const suggestionContainer = document.createElement("div");
+    suggestionContainer.className = "paper-search-suggestions";
+    suggestionContainer.setAttribute("role", "listbox");
+    form.appendChild(suggestionContainer);
+
     function updateArrow() {
         form.classList.toggle("has-text", input.value.trim().length > 0);
     }
+
+    attachPaperSuggestions(input, suggestionContainer, code => {
+        runPaperSearch(code);
+    });
 
     input.addEventListener("input", updateArrow);
 
@@ -687,6 +892,10 @@ function initializePaperSearch() {
         if (event.key === "Enter") {
             event.preventDefault();
             runPaperSearch(input.value);
+        }
+
+        if (event.key === "Escape") {
+            closePaperSuggestions(suggestionContainer);
         }
 
     });
@@ -701,6 +910,44 @@ function initializePaperSearch() {
 
 window.runPaperSearch = runPaperSearch;
 window.cashewPaperSearchIndex = cashewPaperSearchIndex;
+window.getPaperSuggestions = getPaperSuggestions;
+window.getPaperSuggestionLabel = getPaperSuggestionLabel;
+window.attachPaperSuggestions = attachPaperSuggestions;
+window.closePaperSuggestions = closePaperSuggestions;
+
+(function bindScheduleAuthCleanup() {
+
+    function getAuthClient() {
+        try {
+            if (typeof supabaseClient !== "undefined" && supabaseClient && supabaseClient.auth) {
+                return supabaseClient;
+            }
+        } catch (error) {}
+
+        try {
+            if (typeof supabase !== "undefined" && supabase && supabase.auth) {
+                return supabase;
+            }
+        } catch (error) {}
+
+        if (window.cashewSupabase && window.cashewSupabase.auth) {
+            return window.cashewSupabase;
+        }
+
+        return null;
+    }
+
+    const authClient = getAuthClient();
+
+    if (authClient && typeof authClient.auth.onAuthStateChange === "function") {
+        authClient.auth.onAuthStateChange(event => {
+            if (event === "SIGNED_OUT") {
+                localStorage.removeItem("cashew-schedule");
+            }
+        });
+    }
+
+})();
 
 document.addEventListener("DOMContentLoaded", initializePaperSearch);
 
@@ -721,11 +968,6 @@ function highlightSearchTargetAfterLoad() {
         return;
     }
 
-    /*
-       Wait until the browser has laid out the paper cards.
-       Two animation frames makes this reliable on GitHub Pages
-       after navigation.
-    */
     window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
             highlightPaper(code);
@@ -1879,6 +2121,80 @@ main {
     color: var(--text);
 }
 
+
+.paper-search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 1200;
+    display: none;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #2c2e31;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+}
+
+.paper-search-suggestions.open {
+    display: block;
+}
+
+.calendar-add-suggestions {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.paper-search-suggestion {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.paper-search-suggestion:last-child {
+    border-bottom: none;
+}
+
+.paper-search-suggestion:hover,
+.paper-search-suggestion:focus {
+    background: #3a3c3f;
+    outline: none;
+}
+
+.paper-search-suggestion-main {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.paper-search-suggestion-code {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.calendar-entry-button {
+    width: 100%;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.calendar-entry-pill:hover {
+    background: #414346;
+    border-color: var(--subdued);
+}
+
 .calendar-entry-pill {
     font-size: 11px;
     padding: 3px 6px;
@@ -1907,6 +2223,7 @@ main {
 }
 
 .calendar-day-modal-content {
+    position: relative;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -1940,6 +2257,25 @@ main {
     min-height: 14px;
 }
 
+
+.calendar-modal-entry-link {
+    color: var(--text);
+    font-size: 13px;
+}
+
+.calendar-modal-entry-link:hover {
+    color: var(--primary);
+}
+
+.calendar-add-suggestions {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 8px;
+    z-index: 900;
+}
 
 /* ---------------- NATIVE PDF VIEWER ---------------- */
 
@@ -2341,7 +2677,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.75">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.76">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2356,9 +2692,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.75"></script>
+    <script src="${prefix}auth.js?v=0.1.76"></script>
 
-    <script src="${prefix}search.js?v=0.1.75"></script>
+    <script src="${prefix}search.js?v=0.1.76"></script>
 
 </head>
 
@@ -3347,7 +3683,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.75</div>
+                <div class="version">Version Alpha 0.1.76</div>
 
             </section>
 
@@ -4058,7 +4394,13 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                 "&code=" +
                                 encodeURIComponent(paperDisplayCode) +
                                 "&subject=" +
-                                encodeURIComponent(subject.name);
+                                encodeURIComponent(subject.name) +
+                                "&path=" +
+                                encodeURIComponent(
+                                    PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()]
+                                        ? PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()].path
+                                        : ""
+                                );
 
                             return `
                                 <div
@@ -4293,7 +4635,13 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                 "&code=" +
                 encodeURIComponent(paperDisplayCode) +
                 "&subject=" +
-                encodeURIComponent(subject.name);
+                encodeURIComponent(subject.name) +
+                "&path=" +
+                encodeURIComponent(
+                    PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()]
+                        ? PAPER_SEARCH_INDEX[String(paperDisplayCode).toLowerCase()].path
+                        : ""
+                );
 
             return `
 
@@ -4601,7 +4949,6 @@ function generateSchedulerPage() {
         "Scheduler",
 
         `
-
             <div class="page-header">
 
                 ${breadcrumbHTML([
@@ -4620,6 +4967,14 @@ function generateSchedulerPage() {
                 class="calendar-scheduling-banner"
                 style="display:none;"
             ></div>
+
+            <div
+                id="schedulerLoginNotice"
+                class="calendar-scheduling-banner"
+                style="display:none;"
+            >
+                log in to save and restore your schedule across devices.
+            </div>
 
             <div class="calendar-shell">
 
@@ -4680,8 +5035,9 @@ function generateSchedulerPage() {
                             id="calendarAddInput"
                             class="attempt-input"
                             type="text"
-                            placeholder="enter paper code, e.g. 9709_w25_qp_12"
+                            placeholder="search paper code or subject..."
                             autocomplete="off"
+                            spellcheck="false"
                         >
 
                         <button
@@ -4692,6 +5048,12 @@ function generateSchedulerPage() {
                         </button>
 
                     </form>
+
+                    <div
+                        id="calendarAddSuggestions"
+                        class="paper-search-suggestions calendar-add-suggestions"
+                        role="listbox"
+                    ></div>
 
                     <div
                         id="calendarModalError"
@@ -4707,27 +5069,56 @@ function generateSchedulerPage() {
 (function () {
 
     const STORAGE_KEY = "cashew-schedule";
+    const SUPABASE_TABLE = "cashew_schedules";
 
     const params = new URLSearchParams(window.location.search);
 
     const schedulingKey = params.get("key");
     const schedulingCode = params.get("code");
     const schedulingSubject = params.get("subject");
+    const schedulingPath = params.get("path");
 
     let schedulingActive = Boolean(schedulingKey);
-
     let currentMonth = new Date();
+
     currentMonth.setDate(1);
     currentMonth.setHours(0, 0, 0, 0);
 
     let selectedDateKey = null;
+    let currentUser = null;
+    let scheduleReady = false;
 
-    function loadSchedule() {
+    function getSupabaseClient() {
+
+        try {
+
+            if (typeof supabaseClient !== "undefined" && supabaseClient && typeof supabaseClient.from === "function") {
+                return supabaseClient;
+            }
+
+        } catch (error) {}
+
+        try {
+
+            if (typeof supabase !== "undefined" && supabase && typeof supabase.from === "function") {
+                return supabase;
+            }
+
+        } catch (error) {}
+
+        if (window.cashewSupabase && typeof window.cashewSupabase.from === "function") {
+            return window.cashewSupabase;
+        }
+
+        return null;
+
+    }
+
+    function loadLocalSchedule() {
 
         try {
 
             const value = localStorage.getItem(STORAGE_KEY);
-
             return value ? JSON.parse(value) : {};
 
         } catch (error) {
@@ -4738,8 +5129,113 @@ function generateSchedulerPage() {
 
     }
 
-    function saveSchedule(schedule) {
+    function loadSchedule() {
+        return currentUser ? loadLocalSchedule() : {};
+    }
+
+    function saveLocalSchedule(schedule) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+    }
+
+    function clearLocalSchedule() {
+        localStorage.removeItem(STORAGE_KEY);
+    }
+
+    async function loadRemoteSchedule(user) {
+
+        const client = getSupabaseClient();
+
+        if (!client || !user) {
+            return {};
+        }
+
+        const { data, error } = await client
+            .from(SUPABASE_TABLE)
+            .select("schedule")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error("cashewpapers: could not load schedule:", error);
+            return {};
+        }
+
+        return data && data.schedule && typeof data.schedule === "object"
+            ? data.schedule
+            : {};
+
+    }
+
+    async function persistSchedule(schedule) {
+
+        if (!currentUser) {
+            return false;
+        }
+
+        const client = getSupabaseClient();
+
+        if (!client) {
+            console.warn("cashewpapers: Supabase client was not found; schedule remains local for this session.");
+            return true;
+        }
+
+        const { error } = await client
+            .from(SUPABASE_TABLE)
+            .upsert(
+                {
+                    user_id: currentUser.id,
+                    schedule,
+                    updated_at: new Date().toISOString()
+                },
+                { onConflict: "user_id" }
+            );
+
+        if (error) {
+            console.error("cashewpapers: could not save schedule:", error);
+            return false;
+        }
+
+        return true;
+
+    }
+
+    function scheduleEntryLabel(entry) {
+
+        const subject = String(entry.subject || entry.subjectName || "paper").toLowerCase();
+        const number = String(entry.paperNumber || "");
+        const component = number ? "p" + number.charAt(0) : "paper";
+
+        return subject + " " + component;
+
+    }
+
+    function scheduleEntryCode(entry) {
+        return String(entry.code || entry.label || "paper");
+    }
+
+    function scheduleEntryHref(entry) {
+
+        const prefix = document.body.dataset.searchPrefix || "";
+        const path = String(entry.path || "");
+        const code = scheduleEntryCode(entry);
+
+        let resolvedPath = path;
+
+        if (!resolvedPath && typeof cashewPaperSearchIndex !== "undefined") {
+            const match = cashewPaperSearchIndex[String(code).toLowerCase()];
+            resolvedPath = match ? match.path : "";
+        }
+
+        if (!resolvedPath) {
+            return "";
+        }
+
+        const cleanPath = resolvedPath.split("#")[0];
+
+        return prefix + cleanPath +
+            "?search=" + encodeURIComponent(code) +
+            "#paper-" + encodeURIComponent(code);
+
     }
 
     function dateKey(date) {
@@ -4792,6 +5288,18 @@ function generateSchedulerPage() {
 
     }
 
+    function renderAuthNotice() {
+
+        const notice = document.getElementById("schedulerLoginNotice");
+
+        if (!notice) {
+            return;
+        }
+
+        notice.style.display = currentUser ? "none" : "block";
+
+    }
+
     function renderGrid() {
 
         const grid = document.getElementById("calendarGrid");
@@ -4824,11 +5332,19 @@ function generateSchedulerPage() {
 
             const pills = entries
                 .slice(0, 3)
-                .map(entry =>
-                    '<div class="calendar-entry-pill">' +
-                    (entry.code || entry.label || "paper") +
-                    "</div>"
-                )
+                .map((entry, index) => {
+
+                    const href = scheduleEntryHref(entry);
+
+                    return href
+                        ? '<button type="button" class="calendar-entry-pill calendar-entry-button" data-entry-index="' + index + '">' +
+                            scheduleEntryLabel(entry) +
+                          "</button>"
+                        : '<div class="calendar-entry-pill">' +
+                            scheduleEntryLabel(entry) +
+                          "</div>";
+
+                })
                 .join("");
 
             const more =
@@ -4850,6 +5366,26 @@ function generateSchedulerPage() {
 
         grid.innerHTML = html;
 
+        grid.querySelectorAll(".calendar-entry-button").forEach(button => {
+
+            button.addEventListener("click", event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const cell = button.closest(".calendar-cell");
+                const entries = loadSchedule()[cell.dataset.date] || [];
+                const entry = entries[Number(button.dataset.entryIndex)];
+                const href = entry ? scheduleEntryHref(entry) : "";
+
+                if (href) {
+                    window.location.assign(href);
+                }
+
+            });
+
+        });
+
         grid.querySelectorAll(".calendar-cell").forEach(cell => {
 
             cell.addEventListener("click", () => {
@@ -4860,7 +5396,7 @@ function generateSchedulerPage() {
 
     }
 
-    function openDayModal(key) {
+    async function openDayModal(key) {
 
         selectedDateKey = key;
 
@@ -4878,13 +5414,14 @@ function generateSchedulerPage() {
         );
 
         if (schedulingActive) {
-
-            addSchedulingPaperToDate(key);
-
+            if (!currentUser) {
+                errorBox.textContent = "log in before scheduling papers.";
+            } else {
+                await addSchedulingPaperToDate(key);
+            }
         }
 
         renderModalEntries();
-
         modal.classList.add("open");
 
     }
@@ -4898,6 +5435,12 @@ function generateSchedulerPage() {
 
         if (input) {
             input.value = "";
+        }
+
+        const suggestions = document.getElementById("calendarAddSuggestions");
+
+        if (suggestions) {
+            window.closePaperSuggestions(suggestions);
         }
 
     }
@@ -4918,20 +5461,29 @@ function generateSchedulerPage() {
         }
 
         container.innerHTML = entries
-            .map((entry, index) =>
-                '<div class="attempt-row">' +
-                '<div class="attempt-row-text">' +
-                (entry.code || entry.label || "paper") +
-                (entry.subject ? " · " + entry.subject : "") +
-                "</div>" +
-                '<button type="button" class="attempt-remove" data-index="' + index + '" aria-label="remove">×</button>' +
-                "</div>"
-            )
+            .map((entry, index) => {
+
+                const href = scheduleEntryHref(entry);
+                const label = scheduleEntryLabel(entry);
+                const code = scheduleEntryCode(entry);
+
+                return
+                    '<div class="attempt-row">' +
+                        '<div class="attempt-row-text">' +
+                            '<a href="' + href + '" class="calendar-modal-entry-link">' +
+                                label +
+                            '</a>' +
+                            '<div class="muted">' + code + '</div>' +
+                        '</div>' +
+                        '<button type="button" class="attempt-remove" data-index="' + index + '" aria-label="remove">×</button>' +
+                    '</div>';
+
+            })
             .join("");
 
         container.querySelectorAll(".attempt-remove").forEach(button => {
 
-            button.addEventListener("click", () => {
+            button.addEventListener("click", async () => {
 
                 const schedule = loadSchedule();
                 const list = schedule[selectedDateKey] || [];
@@ -4944,7 +5496,8 @@ function generateSchedulerPage() {
                     schedule[selectedDateKey] = list;
                 }
 
-                saveSchedule(schedule);
+                saveLocalSchedule(schedule);
+                await persistSchedule(schedule);
 
                 renderModalEntries();
                 renderGrid();
@@ -4955,7 +5508,11 @@ function generateSchedulerPage() {
 
     }
 
-    function addEntryToDate(key, entry) {
+    async function addEntryToDate(key, entry) {
+
+        if (!currentUser) {
+            return false;
+        }
 
         const schedule = loadSchedule();
 
@@ -4963,17 +5520,41 @@ function generateSchedulerPage() {
             schedule[key] = [];
         }
 
-        schedule[key].push(entry);
+        const duplicate = schedule[key].some(existing =>
+            scheduleEntryCode(existing).toLowerCase() === scheduleEntryCode(entry).toLowerCase()
+        );
 
-        saveSchedule(schedule);
+        if (!duplicate) {
+            schedule[key].push(entry);
+        }
+
+        saveLocalSchedule(schedule);
+        await persistSchedule(schedule);
+
+        return true;
 
     }
 
-    function addSchedulingPaperToDate(key) {
+    async function addSchedulingPaperToDate(key) {
 
-        addEntryToDate(key, {
+        if (!currentUser || !schedulingActive) {
+            return false;
+        }
+
+        const index =
+            typeof cashewPaperSearchIndex !== "undefined"
+                ? cashewPaperSearchIndex
+                : {};
+
+        const match =
+            index[String(schedulingCode || "").toLowerCase()] || null;
+
+        await addEntryToDate(key, {
             code: schedulingCode || "paper",
-            subject: schedulingSubject || ""
+            subject: schedulingSubject || "",
+            subjectName: schedulingSubject || "",
+            path: schedulingPath || (match ? match.path : ""),
+            paperNumber: match ? match.paperNumber : String(schedulingKey || "").split("-").pop()
         });
 
         schedulingActive = false;
@@ -4986,12 +5567,15 @@ function generateSchedulerPage() {
         url.searchParams.delete("key");
         url.searchParams.delete("code");
         url.searchParams.delete("subject");
+        url.searchParams.delete("path");
 
         window.history.replaceState({}, "", url.toString());
 
+        return true;
+
     }
 
-    function handleAddFormSubmit(event) {
+    async function handleAddFormSubmit(event) {
 
         event.preventDefault();
 
@@ -5004,6 +5588,11 @@ function generateSchedulerPage() {
             return;
         }
 
+        if (!currentUser) {
+            errorBox.textContent = "log in to add papers to your schedule.";
+            return;
+        }
+
         const index =
             typeof cashewPaperSearchIndex !== "undefined"
                 ? cashewPaperSearchIndex
@@ -5012,23 +5601,59 @@ function generateSchedulerPage() {
         const match = index[value];
 
         if (!match) {
-
-            errorBox.textContent =
-                "couldn't find a paper with that code.";
-
+            errorBox.textContent = "couldn't find a paper with that code.";
             return;
-
         }
 
-        addEntryToDate(selectedDateKey, {
+        await addEntryToDate(selectedDateKey, {
             code: match.code,
-            path: match.path
+            subject: match.subjectName || match.subjectKey || "",
+            subjectName: match.subjectName || match.subjectKey || "",
+            path: match.path,
+            paperNumber: match.paperNumber || ""
         });
 
         input.value = "";
         errorBox.textContent = "";
 
+        const suggestions = document.getElementById("calendarAddSuggestions");
+        if (suggestions) {
+            window.closePaperSuggestions(suggestions);
+        }
+
         renderModalEntries();
+        renderGrid();
+
+    }
+
+    async function initializeScheduler() {
+
+        if (typeof getCurrentUser !== "function") {
+            currentUser = null;
+            clearLocalSchedule();
+            scheduleReady = true;
+            renderAuthNotice();
+            renderGrid();
+            return;
+        }
+
+        currentUser = await getCurrentUser();
+
+        if (!currentUser) {
+            clearLocalSchedule();
+            scheduleReady = true;
+            renderAuthNotice();
+            renderBanner();
+            renderGrid();
+            return;
+        }
+
+        const remoteSchedule = await loadRemoteSchedule(currentUser);
+        saveLocalSchedule(remoteSchedule);
+        scheduleReady = true;
+
+        renderAuthNotice();
+        renderBanner();
         renderGrid();
 
     }
@@ -5069,9 +5694,78 @@ function generateSchedulerPage() {
         .getElementById("calendarAddForm")
         .addEventListener("submit", handleAddFormSubmit);
 
+    const addInput = document.getElementById("calendarAddInput");
+    const addSuggestions = document.getElementById("calendarAddSuggestions");
+
+    if (addInput && addSuggestions && typeof window.attachPaperSuggestions === "function") {
+
+        window.attachPaperSuggestions(addInput, addSuggestions, async code => {
+
+            if (!currentUser) {
+                document.getElementById("calendarModalError").textContent =
+                    "log in to add papers to your schedule.";
+                return;
+            }
+
+            const index = cashewPaperSearchIndex || {};
+            const match = index[String(code).toLowerCase()];
+
+            if (!match || !selectedDateKey) {
+                return;
+            }
+
+            await addEntryToDate(selectedDateKey, {
+                code: match.code,
+                subject: match.subjectName || match.subjectKey || "",
+                subjectName: match.subjectName || match.subjectKey || "",
+                path: match.path,
+                paperNumber: match.paperNumber || ""
+            });
+
+            addInput.value = "";
+            document.getElementById("calendarModalError").textContent = "";
+            window.closePaperSuggestions(addSuggestions);
+            renderModalEntries();
+            renderGrid();
+
+        });
+
+    }
+
+    const authClient = getSupabaseClient();
+
+    if (authClient && typeof authClient.auth?.onAuthStateChange === "function") {
+
+        authClient.auth.onAuthStateChange(async (event, session) => {
+
+            if (event === "SIGNED_OUT") {
+                currentUser = null;
+                clearLocalSchedule();
+                renderAuthNotice();
+                renderGrid();
+                return;
+            }
+
+            if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+                currentUser = session?.user || null;
+
+                if (currentUser) {
+                    const remoteSchedule = await loadRemoteSchedule(currentUser);
+                    saveLocalSchedule(remoteSchedule);
+                    renderAuthNotice();
+                    renderGrid();
+                }
+            }
+
+        });
+
+    }
+
     renderDayLabels();
+    renderAuthNotice();
     renderBanner();
     renderGrid();
+    initializeScheduler();
 
 })();
 
@@ -5084,7 +5778,6 @@ function generateSchedulerPage() {
     );
 
 }
-
 
 /* ============================================================
    CATEGORIZED SUBJECT SCANNING
