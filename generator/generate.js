@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.73
+    Version Alpha 0.1.74
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2087,7 +2087,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.73">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.74">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2102,9 +2102,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.73"></script>
+    <script src="${prefix}auth.js?v=0.1.74"></script>
 
-    <script src="${prefix}search.js?v=0.1.73"></script>
+    <script src="${prefix}search.js?v=0.1.74"></script>
 
 </head>
 
@@ -2873,7 +2873,10 @@ function getOverviewCompletedCount(keys) {
 
 }
 
-function updateOverviewProgressCard(card) {
+async function updateOverviewProgressCard(
+    card,
+    user
+) {
 
     const rawKeys =
         card.dataset.progressKeys || "";
@@ -2884,17 +2887,10 @@ function updateOverviewProgressCard(card) {
             : [];
 
     const total =
-        Number(card.dataset.progressTotal || keys.length);
-
-    const completed =
-        getOverviewCompletedCount(keys);
-
-    const value =
-        total > 0
-            ? Math.round(
-                (completed / total) * 100
-            )
-            : 0;
+        Number(
+            card.dataset.progressTotal ||
+            keys.length
+        );
 
     const fill =
         card.querySelector(
@@ -2905,6 +2901,35 @@ function updateOverviewProgressCard(card) {
         card.querySelector(
             "[data-overview-progress-label]"
         );
+
+    /*
+       Progress tracking is tied to the signed-in user's local progress.
+       Guests always see a zeroed bar with an explicit login prompt.
+    */
+    if (!user) {
+
+        if (fill) {
+            fill.style.width = "0%";
+        }
+
+        if (label) {
+            label.textContent =
+                "log in to track your progress";
+        }
+
+        return;
+
+    }
+
+    const completed =
+        getOverviewCompletedCount(keys);
+
+    const value =
+        total > 0
+            ? Math.round(
+                (completed / total) * 100
+            )
+            : 0;
 
     if (fill) {
 
@@ -2925,7 +2950,7 @@ function updateOverviewProgressCard(card) {
 
 }
 
-function initializeOverviewProgress() {
+async function initializeOverviewProgress() {
 
     const cards =
         document.querySelectorAll(
@@ -2936,8 +2961,19 @@ function initializeOverviewProgress() {
         return;
     }
 
-    cards.forEach(
-        updateOverviewProgressCard
+    const user =
+        typeof getCurrentUser === "function"
+            ? await getCurrentUser()
+            : null;
+
+    await Promise.all(
+        Array.from(cards).map(
+            card =>
+                updateOverviewProgressCard(
+                    card,
+                    user
+                )
+        )
     );
 
 }
@@ -3049,7 +3085,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.73</div>
+                <div class="version">Version Alpha 0.1.74</div>
 
             </section>
 
