@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.72
+    Version Alpha 0.1.73
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2087,7 +2087,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.72">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.73">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2102,9 +2102,9 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.72"></script>
+    <script src="${prefix}auth.js?v=0.1.73"></script>
 
-    <script src="${prefix}search.js?v=0.1.72"></script>
+    <script src="${prefix}search.js?v=0.1.73"></script>
 
 </head>
 
@@ -2943,7 +2943,7 @@ function initializeOverviewProgress() {
 }
 
 
-function initializePaperProgress() {
+async function initializePaperProgress() {
 
     const progressElements = document.querySelectorAll(".paper-progress");
 
@@ -2951,7 +2951,11 @@ function initializePaperProgress() {
         return;
     }
 
-    await Promise.all(Array.from(progressElements).map(refreshPaperProgress));
+    await Promise.all(
+        Array.from(progressElements).map(
+            refreshPaperProgress
+        )
+    );
 
 }
 
@@ -3045,7 +3049,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.72</div>
+                <div class="version">Version Alpha 0.1.73</div>
 
             </section>
 
