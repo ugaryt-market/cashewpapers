@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.75
+    Version Alpha 0.1.76
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2360,7 +2360,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.75">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.76">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2375,9 +2375,11 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.75"></script>
+    <script src="${prefix}auth.js?v=0.1.76"></script>
 
-    <script src="${prefix}search.js?v=0.1.75"></script>
+    <script src="${prefix}user-data.js?v=0.1.76"></script>
+
+    <script src="${prefix}search.js?v=0.1.76"></script>
 
 </head>
 
@@ -2492,67 +2494,41 @@ window.addEventListener("cashew-auth-change", () => {
     initializeOverviewProgress();
 });
 
-function getPaperStatus(key) {
-    return localStorage.getItem("cashew-paper-status-" + key) || "incomplete";
+async function getPaperStatus(key) {
+    const user = await getCurrentUser();
+    return user
+        ? await CashewUserData.getPaperStatus(key)
+        : "incomplete";
 }
 
-function setPaperStatus(key, status) {
-    localStorage.setItem("cashew-paper-status-" + key, status);
+async function setPaperStatus(key, status) {
+    return await CashewUserData.setPaperStatus(key, status);
 }
 
-function getPaperAttempts(key) {
-
-    try {
-
-        const value = localStorage.getItem("cashew-paper-attempts-" + key);
-
-        if (!value) {
-            return [];
-        }
-
-        const attempts = JSON.parse(value);
-
-        return Array.isArray(attempts) ? attempts : [];
-
-    } catch (error) {
-
-        return [];
-
-    }
-
-}
-
-function setPaperAttempts(key, attempts) {
-    localStorage.setItem(
-        "cashew-paper-attempts-" + key,
-        JSON.stringify(attempts)
-    );
+async function getPaperAttempts(key) {
+    const user = await getCurrentUser();
+    return user
+        ? await CashewUserData.getPaperAttempts(key)
+        : [];
 }
 
 function formatAttemptDate(isoDate) {
-
     const date = new Date(isoDate);
-
     if (Number.isNaN(date.getTime())) {
         return isoDate || "Unknown date";
     }
-
     return date.toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric"
     });
-
 }
 
 function clearLoginNotice(progress) {
-
     const existing = progress.querySelector(".paper-login-notice");
-
     if (existing) {
         existing.remove();
     }
-
 }
 
 function showLoginRequired() {
@@ -2560,28 +2536,20 @@ function showLoginRequired() {
 }
 
 function renderPaperStatus(button, status) {
-
     button.classList.remove("completed");
-
     if (status === "completed") {
-
         button.classList.add("completed");
         button.innerHTML = "✓ Completed";
         button.title = "Click to mark as incomplete";
         button.setAttribute("aria-label", "Mark paper as incomplete");
-
     } else {
-
         button.innerHTML = "☐ Mark as completed";
         button.title = "Click to mark as completed";
         button.setAttribute("aria-label", "Mark paper as completed");
-
     }
-
 }
 
-function renderPaperAttempts(progress, key, completed, user) {
-
+async function renderPaperAttempts(progress, key, completed, user) {
     const attemptsContainer =
         progress.querySelector("[data-paper-attempts]");
 
@@ -2590,679 +2558,362 @@ function renderPaperAttempts(progress, key, completed, user) {
     }
 
     attemptsContainer.innerHTML = "";
-
     clearLoginNotice(progress);
 
     if (!completed || !user) {
         return;
     }
 
-    const attempts =
-        getPaperAttempts(key);
+    const attempts = await getPaperAttempts(key);
 
-    const addButton =
-        document.createElement("button");
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "attempt-button";
+    addButton.textContent = "+ Add attempt";
 
-    addButton.type =
-        "button";
+    addButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        openAttemptForm(progress, key);
+    });
 
-    addButton.className =
-        "attempt-button";
+    attemptsContainer.appendChild(addButton);
 
-    addButton.textContent =
-        "+ Add attempt";
-
-    addButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            openAttemptForm(
-                progress,
-                key
-            );
-
-        }
-    );
-
-    attemptsContainer.appendChild(
-        addButton
-    );
-
-    if (attempts.length === 0) {
+    if (!attempts.length) {
         return;
     }
 
-    /*
-       Keep the card preview compact. The first ten scores remain visible;
-       when there are more than ten attempts, "see more" is appended.
-       It opens the history popup only; the Add Attempt GUI remains the
-       same compact score-entry GUI regardless of attempt count.
-    */
     const previewAttempts =
-        attempts.slice(
-            0,
-            Math.min(
-                6,
-                attempts.length
-            )
-        );
+        attempts.slice(0, Math.min(6, attempts.length));
 
-    const previewScores =
-        previewAttempts
-            .map(
-                attempt =>
-                    String(attempt.score)
-            )
-            .join(" · ");
+    const previewScores = previewAttempts
+        .map(attempt => String(attempt.score))
+        .join(" · ");
 
-    const summaryButton =
-        document.createElement("button");
-
-    summaryButton.type =
-        "button";
-
-    summaryButton.className =
-        "attempt-summary";
-
+    const summaryButton = document.createElement("button");
+    summaryButton.type = "button";
+    summaryButton.className = "attempt-summary";
     summaryButton.textContent =
         String(attempts.length) +
         " " +
-        (
-            attempts.length === 1
-                ? "attempt"
-                : "attempts"
-        ) +
-        (
-            previewScores
-                ? " · " + previewScores
-                : ""
-        ) +
-        (
-            attempts.length > 6
-                ? " · see more"
-                : ""
+        (attempts.length === 1 ? "attempt" : "attempts") +
+        (previewScores ? " · " + previewScores : "") +
+        (attempts.length > 6 ? " · see more" : "");
+    summaryButton.setAttribute("aria-expanded", "false");
+
+    const history = document.createElement("div");
+    history.className = "attempt-history";
+
+    attempts.forEach((attempt, index) => {
+        history.appendChild(
+            createAttemptHistoryRow(progress, key, attempt, index)
         );
+    });
 
-    summaryButton.setAttribute(
-        "aria-expanded",
-        "false"
-    );
+    summaryButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const isOpen = history.classList.toggle("open");
+        summaryButton.setAttribute(
+            "aria-expanded",
+            isOpen ? "true" : "false"
+        );
+    });
 
-    const history =
-        document.createElement("div");
-
-    history.className =
-        "attempt-history";
-
-    attempts.forEach(
-        (attempt, index) => {
-
-            history.appendChild(
-                createAttemptHistoryRow(
-                    progress,
-                    key,
-                    attempt,
-                    index
-                )
-            );
-
-        }
-    );
-
-    summaryButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            const isOpen =
-                history.classList.toggle(
-                    "open"
-                );
-
-            summaryButton.setAttribute(
-                "aria-expanded",
-                isOpen
-                    ? "true"
-                    : "false"
-            );
-
-        }
-    );
-
-    attemptsContainer.appendChild(
-        summaryButton
-    );
-
-    attemptsContainer.appendChild(
-        history
-    );
-
+    attemptsContainer.appendChild(summaryButton);
+    attemptsContainer.appendChild(history);
 }
 
-function createAttemptHistoryRow(
-    progress,
-    key,
-    attempt,
-    index
-) {
+function createAttemptHistoryRow(progress, key, attempt, index) {
+    const row = document.createElement("div");
+    row.className = "attempt-row";
 
-    const row =
-        document.createElement("div");
-
-    row.className =
-        "attempt-row";
-
-    const rowText =
-        document.createElement("div");
-
-    rowText.className =
-        "attempt-row-text";
-
+    const rowText = document.createElement("div");
+    rowText.className = "attempt-row-text";
     rowText.textContent =
         "Attempt " +
         String(index + 1) +
         " / " +
         String(attempt.score) +
         " marks / " +
-        formatAttemptDate(
-            attempt.date
-        );
+        formatAttemptDate(attempt.date);
 
-    const removeButton =
-        document.createElement("button");
-
-    removeButton.type =
-        "button";
-
-    removeButton.className =
-        "attempt-remove";
-
-    removeButton.textContent =
-        "×";
-
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "attempt-remove";
+    removeButton.textContent = "×";
     removeButton.setAttribute(
         "aria-label",
-        "Remove attempt " +
-        String(index + 1)
+        "Remove attempt " + String(index + 1)
     );
 
-    removeButton.title =
-        "Remove attempt";
+    removeButton.addEventListener("click", async event => {
+        event.preventDefault();
+        event.stopPropagation();
 
-    removeButton.addEventListener(
-        "click",
-        async event => {
+        const currentUser = await getCurrentUser();
+        if (!currentUser) {
+            showLoginRequired();
+            return;
+        }
 
-            event.preventDefault();
-            event.stopPropagation();
-
-            const currentUser =
-                await getCurrentUser();
-
-            if (!currentUser) {
-
-                showLoginRequired(
-                    progress.querySelector(
-                        ".paper-status"
-                    )
-                );
-
-                return;
-
-            }
-
-            const attempts =
-                getPaperAttempts(key);
-
-            attempts.splice(
-                index,
-                1
-            );
-
-            setPaperAttempts(
+        try {
+            await CashewUserData.deletePaperAttempt(
                 key,
-                attempts
+                attempt.id
             );
 
-            const historyWasOpen =
-                row.parentElement &&
-                row.parentElement.classList.contains(
-                    "open"
-                );
-
-            renderPaperAttempts(
+            await renderPaperAttempts(
                 progress,
                 key,
-                getPaperStatus(key) ===
-                    "completed",
+                (await getPaperStatus(key)) === "completed",
                 currentUser
             );
 
-            if (historyWasOpen) {
-
-                const newHistory =
-                    progress.querySelector(
-                        ".attempt-history"
-                    );
-
-                if (newHistory) {
-                    newHistory.classList.add(
-                        "open"
-                    );
-                }
-
+            const newHistory =
+                progress.querySelector(".attempt-history");
+            if (newHistory) {
+                newHistory.classList.add("open");
             }
-
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to delete attempt",
+                error
+            );
         }
-    );
+    });
 
-    row.appendChild(
-        rowText
-    );
-
-    row.appendChild(
-        removeButton
-    );
-
+    row.appendChild(rowText);
+    row.appendChild(removeButton);
     return row;
-
 }
 
 function openAttemptForm(progress, key) {
-
     const attemptsContainer =
-        progress.querySelector(
-            "[data-paper-attempts]"
-        );
+        progress.querySelector("[data-paper-attempts]");
 
     if (!attemptsContainer) {
         return;
     }
 
     const existingForm =
-        attemptsContainer.querySelector(
-            ".attempt-form"
-        );
+        attemptsContainer.querySelector(".attempt-form");
 
     if (existingForm) {
         return;
     }
 
-    const form =
-        document.createElement("form");
+    const form = document.createElement("form");
+    form.className = "attempt-form";
 
-    form.className =
-        "attempt-form";
+    const title = document.createElement("div");
+    title.className = "attempt-form-title";
 
-    const title =
-        document.createElement("div");
+    const titleText = document.createElement("span");
+    titleText.textContent = "add attempt";
 
-    title.className =
-        "attempt-form-title";
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "attempt-form-close";
+    closeButton.textContent = "×";
+    closeButton.setAttribute("aria-label", "Close add attempt");
 
-    const titleText =
-        document.createElement("span");
+    closeButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        form.remove();
+    });
 
-    titleText.textContent =
-        "add attempt";
+    title.appendChild(titleText);
+    title.appendChild(closeButton);
 
-    const closeButton =
-        document.createElement("button");
+    const input = document.createElement("input");
+    input.className = "attempt-input";
+    input.type = "number";
+    input.step = "1";
+    input.min = "0";
+    input.max = "100";
+    input.inputMode = "numeric";
+    input.placeholder = "score";
+    input.setAttribute("aria-label", "Attempt score");
+    input.required = true;
 
-    closeButton.type =
-        "button";
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.className = "attempt-save";
+    saveButton.textContent = "save";
 
-    closeButton.className =
-        "attempt-form-close";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "attempt-cancel";
+    cancelButton.textContent = "cancel";
+    cancelButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        form.remove();
+    });
 
-    closeButton.textContent =
-        "×";
+    const actions = document.createElement("div");
+    actions.className = "attempt-form-actions";
+    actions.appendChild(saveButton);
+    actions.appendChild(cancelButton);
 
-    closeButton.setAttribute(
-        "aria-label",
-        "Close add attempt"
-    );
+    form.appendChild(title);
+    form.appendChild(input);
+    form.appendChild(actions);
 
-    closeButton.title =
-        "Close";
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
 
-    closeButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            form.remove();
-
+        const user = await getCurrentUser();
+        if (!user) {
+            showLoginRequired();
+            return;
         }
-    );
 
-    title.appendChild(
-        titleText
-    );
-
-    title.appendChild(
-        closeButton
-    );
-
-    const input =
-        document.createElement("input");
-
-    input.className =
-        "attempt-input";
-
-    input.type =
-        "number";
-
-    input.step =
-        "1";
-
-    input.min =
-        "0";
-
-    input.max =
-        "100";
-
-    input.inputMode =
-        "numeric";
-
-    input.placeholder =
-        "score";
-
-    input.setAttribute(
-        "aria-label",
-        "Attempt score"
-    );
-
-    input.required =
-        true;
-
-    const saveButton =
-        document.createElement("button");
-
-    saveButton.type =
-        "submit";
-
-    saveButton.className =
-        "attempt-save";
-
-    saveButton.textContent =
-        "save";
-
-    const cancelButton =
-        document.createElement("button");
-
-    cancelButton.type =
-        "button";
-
-    cancelButton.className =
-        "attempt-cancel";
-
-    cancelButton.textContent =
-        "cancel";
-
-    cancelButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            form.remove();
-
+        const numericScore = Number(input.value.trim());
+        if (
+            !Number.isFinite(numericScore) ||
+            numericScore < 0 ||
+            numericScore > 100
+        ) {
+            input.setCustomValidity(
+                "Score must be between 0 and 100."
+            );
+            input.reportValidity();
+            input.focus();
+            return;
         }
-    );
 
-    const actions =
-        document.createElement("div");
+        input.setCustomValidity("");
 
-    actions.className =
-        "attempt-form-actions";
-
-    actions.appendChild(
-        saveButton
-    );
-
-    actions.appendChild(
-        cancelButton
-    );
-
-    form.appendChild(
-        title
-    );
-
-    form.appendChild(
-        input
-    );
-
-    form.appendChild(
-        actions
-    );
-
-    form.addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-            const user =
-                await getCurrentUser();
-
-            if (!user) {
-
-                showLoginRequired(
-                    progress.querySelector(
-                        ".paper-status"
-                    )
-                );
-
-                return;
-
-            }
-
-            const score =
-                input.value.trim();
-
-            const numericScore =
-                Number(score);
-
-            if (
-                !score ||
-                !Number.isFinite(
-                    numericScore
-                ) ||
-                numericScore < 0 ||
-                numericScore > 100
-            ) {
-
-                input.setCustomValidity(
-                    "Score must be between 0 and 100."
-                );
-
-                input.reportValidity();
-                input.focus();
-
-                return;
-
-            }
-
-            input.setCustomValidity("");
-
-            const attempts =
-                getPaperAttempts(key);
-
-            attempts.push({
-                score,
-                date:
-                    new Date().toISOString()
-            });
-
-            setPaperAttempts(
+        try {
+            await CashewUserData.addPaperAttempt(
                 key,
-                attempts
+                numericScore
             );
 
-            renderPaperAttempts(
+            form.remove();
+            await renderPaperAttempts(
                 progress,
                 key,
                 true,
                 user
             );
-
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to save attempt",
+                error
+            );
+            input.setCustomValidity(
+                error && error.message
+                    ? error.message
+                    : "Unable to save attempt."
+            );
+            input.reportValidity();
         }
-    );
+    });
 
-    attemptsContainer.appendChild(
-        form
-    );
-
+    attemptsContainer.appendChild(form);
     input.focus();
-
 }
 
 async function refreshPaperProgress(progress) {
-
     const button = progress.querySelector(".paper-status");
     const key = button.dataset.paperKey;
-
     const user = await getCurrentUser();
-
-    const status = user ? getPaperStatus(key) : "incomplete";
+    const status = user
+        ? await getPaperStatus(key)
+        : "incomplete";
 
     renderPaperStatus(button, status);
-
-    renderPaperAttempts(progress, key, status === "completed", user);
-
+    await renderPaperAttempts(
+        progress,
+        key,
+        status === "completed",
+        user
+    );
 }
 
-async 
-function getOverviewCompletedCount(keys) {
+async function getOverviewCompletedCount(keys) {
+    const user = await getCurrentUser();
+    if (!user) {
+        return 0;
+    }
+    return await CashewUserData.getCompletedPaperCount(keys);
+}
 
-    return keys.reduce(
-        (count, key) =>
-            getPaperStatus(key) === "completed"
-                ? count + 1
-                : count,
-        0
+async function updateOverviewProgressCard(card, user) {
+    const rawKeys = card.dataset.progressKeys || "";
+    const keys = rawKeys
+        ? rawKeys.split("|").filter(Boolean)
+        : [];
+
+    const total = Number(
+        card.dataset.progressTotal || keys.length
     );
 
-}
+    const fill = card.querySelector(
+        "[data-overview-progress-fill]"
+    );
 
-async function updateOverviewProgressCard(
-    card,
-    user
-) {
+    const label = card.querySelector(
+        "[data-overview-progress-label]"
+    );
 
-    const rawKeys =
-        card.dataset.progressKeys || "";
-
-    const keys =
-        rawKeys
-            ? rawKeys.split("|").filter(Boolean)
-            : [];
-
-    const total =
-        Number(
-            card.dataset.progressTotal ||
-            keys.length
-        );
-
-    const fill =
-        card.querySelector(
-            "[data-overview-progress-fill]"
-        );
-
-    const label =
-        card.querySelector(
-            "[data-overview-progress-label]"
-        );
-
-    /*
-       Progress tracking is tied to the signed-in user's local progress.
-       Guests always see a zeroed bar with an explicit login prompt.
-    */
     if (!user) {
-
         if (fill) {
             fill.style.width = "0%";
         }
-
         if (label) {
             label.textContent =
                 "log in to track your progress";
         }
-
         return;
-
     }
 
     const completed =
-        getOverviewCompletedCount(keys);
+        await CashewUserData.getCompletedPaperCount(keys);
 
-    const value =
-        total > 0
-            ? Math.round(
-                (completed / total) * 100
-            )
-            : 0;
+    const value = total > 0
+        ? Math.round((completed / total) * 100)
+        : 0;
 
     if (fill) {
-
-        fill.style.width =
-            value + "%";
-
+        fill.style.width = value + "%";
     }
 
     if (label) {
-
         label.textContent =
             String(completed) +
             "/" +
             String(total) +
             " papers completed";
-
     }
-
 }
 
 async function initializeOverviewProgress() {
-
-    const cards =
-        document.querySelectorAll(
-            "[data-progress-keys]"
-        );
+    const cards = document.querySelectorAll(
+        "[data-progress-keys]"
+    );
 
     if (!cards.length) {
         return;
     }
 
-    const user =
-        typeof getCurrentUser === "function"
-            ? await getCurrentUser()
-            : null;
+    const user = await getCurrentUser();
 
     await Promise.all(
-        Array.from(cards).map(
-            card =>
-                updateOverviewProgressCard(
-                    card,
-                    user
-                )
+        Array.from(cards).map(card =>
+            updateOverviewProgressCard(card, user)
         )
     );
-
 }
 
-
 async function initializePaperProgress() {
-
-    const progressElements = document.querySelectorAll(".paper-progress");
+    const progressElements = document.querySelectorAll(
+        ".paper-progress"
+    );
 
     if (!progressElements.length) {
         return;
@@ -3273,36 +2924,54 @@ async function initializePaperProgress() {
             refreshPaperProgress
         )
     );
-
 }
 
 async function togglePaperStatus(button) {
-
     const key = button.dataset.paperKey;
     const progress = button.closest(".paper-progress");
-
     const user = await getCurrentUser();
 
     if (!user) {
-        showLoginRequired(button);
+        showLoginRequired();
         return;
     }
 
     clearLoginNotice(progress);
 
-    const current = getPaperStatus(key);
-    const next = current === "completed" ? "incomplete" : "completed";
+    try {
+        const current =
+            await getPaperStatus(key);
 
-    setPaperStatus(key, next);
+        const next =
+            current === "completed"
+                ? "incomplete"
+                : "completed";
 
-    renderPaperStatus(button, next);
+        await setPaperStatus(
+            key,
+            next
+        );
 
-    renderPaperAttempts(progress, key, next === "completed", user);
+        renderPaperStatus(
+            button,
+            next
+        );
 
-    initializeOverviewProgress();
+        await renderPaperAttempts(
+            progress,
+            key,
+            next === "completed",
+            user
+        );
 
+        await initializeOverviewProgress();
+    } catch (error) {
+        console.error(
+            "cashewpapers: unable to update paper progress",
+            error
+        );
+    }
 }
-
 </script>
 
 </body>
@@ -3366,7 +3035,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.75</div>
+                <div class="version">Version Alpha 0.1.76</div>
 
             </section>
 
@@ -3464,47 +3133,40 @@ window.addEventListener("orientationchange", scheduleHomeScale);
 window.addEventListener("load", scheduleHomeScale);
 
 async function applySubjectFilter() {
-
     const user =
-        typeof getCurrentUser === "function" ? await getCurrentUser() : null;
+        typeof getCurrentUser === "function"
+            ? await getCurrentUser()
+            : null;
 
-    /*
-        Guests always see every subject.
-    */
     if (!user) {
         return;
     }
 
-    /*
-        Signed-in users only see their
-        selected subjects.
-    */
-    const selectedSubjects = JSON.parse(
-        localStorage.getItem("cashew-selected-subjects") || "[]"
-    );
+    try {
+        const selectedSubjects =
+            await CashewUserData.getSelectedSubjects();
 
-    const selectionComplete = localStorage.getItem(
-        "cashew-subject-selection-complete"
-    );
-
-    if (!selectionComplete || selectedSubjects.length === 0) {
-        return;
-    }
-
-    document.querySelectorAll("[data-subject]").forEach(card => {
-
-        const subject = card.dataset.subject;
-
-        if (!selectedSubjects.includes(subject)) {
-            card.style.display = "none";
+        if (!selectedSubjects.length) {
+            return;
         }
 
-    });
-
+        document
+            .querySelectorAll("[data-subject]")
+            .forEach(card => {
+                const subject = card.dataset.subject;
+                if (!selectedSubjects.includes(subject)) {
+                    card.style.display = "none";
+                }
+            });
+    } catch (error) {
+        console.error(
+            "cashewpapers: unable to load selected subjects",
+            error
+        );
+    }
 }
 
 applySubjectFilter();
-
 </script>
 
         `,
@@ -4739,11 +4401,11 @@ function generateSchedulerPage() {
 
             <script>
 
-(function () {
+(async function () {
 
-    const STORAGE_KEY = "cashew-schedule";
-
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(
+        window.location.search
+    );
 
     const schedulingKey = params.get("key");
     const schedulingCode = params.get("code");
@@ -4753,67 +4415,65 @@ function generateSchedulerPage() {
     const schedulingFile = params.get("file");
 
     let schedulingActive = Boolean(schedulingKey);
-
     let currentMonth = new Date();
     currentMonth.setDate(1);
     currentMonth.setHours(0, 0, 0, 0);
 
     let selectedDateKey = null;
+    let schedule = {};
 
-    function loadSchedule() {
-
-        try {
-
-            const value = localStorage.getItem(STORAGE_KEY);
-
-            return value ? JSON.parse(value) : {};
-
-        } catch (error) {
-
-            return {};
-
+    async function loadSchedule() {
+        const user = await getCurrentUser();
+        if (!user) {
+            schedule = {};
+            return schedule;
         }
-
+        schedule =
+            await CashewUserData.getCalendarSchedule();
+        return schedule;
     }
 
-    function saveSchedule(schedule) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+    async function refreshSchedule() {
+        await loadSchedule();
+        renderGrid();
+        if (selectedDateKey) {
+            renderModalEntries();
+        }
     }
 
     function dateKey(date) {
-
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const day = String(date.getDate()).padStart(2, "0");
-
         return year + "-" + month + "-" + day;
-
     }
 
     function formatMonthTitle(date) {
-
         return date.toLocaleDateString(
             "en-US",
             { month: "long", year: "numeric" }
         );
-
     }
 
-    const dayLabels = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const dayLabels = [
+        "sun", "mon", "tue", "wed", "thu", "fri", "sat"
+    ];
 
     function renderDayLabels() {
-
-        const container = document.getElementById("calendarDayLabels");
-
+        const container =
+            document.getElementById("calendarDayLabels");
         container.innerHTML = dayLabels
-            .map(label => '<div class="calendar-day-label">' + label + "</div>")
+            .map(label =>
+                '<div class="calendar-day-label">' +
+                label +
+                "</div>"
+            )
             .join("");
-
     }
 
     function renderBanner() {
-
-        const banner = document.getElementById("schedulingBanner");
+        const banner =
+            document.getElementById("schedulingBanner");
 
         if (!schedulingActive) {
             banner.style.display = "none";
@@ -4821,7 +4481,6 @@ function generateSchedulerPage() {
         }
 
         banner.style.display = "block";
-
         banner.textContent =
             "scheduling " +
             formatScheduledEntryLabel({
@@ -4830,7 +4489,6 @@ function generateSchedulerPage() {
                 paper: schedulingPaper
             }) +
             " — click a date to add it.";
-
     }
 
     function escapeHtml(value) {
@@ -4846,64 +4504,56 @@ function generateSchedulerPage() {
         if (entry && entry.paper) {
             return String(entry.paper);
         }
-
         const code = String(entry && entry.code || "");
         const match = code.match(/_(?:qp|ms|er|in)_(\d+)$/i);
         return match ? match[1] : "";
     }
 
     function formatScheduledEntryLabel(entry) {
-        const subject = String(entry && entry.subject || "").trim().toLowerCase();
+        const subject = String(
+            entry && entry.subject || ""
+        ).trim().toLowerCase();
         const paper = getScheduledPaperNumber(entry);
-
         if (subject && paper) {
             return subject + " p" + paper;
         }
-
-        return String(entry && (entry.code || entry.label) || "paper");
+        return String(
+            entry && (entry.code || entry.label) || "paper"
+        );
     }
 
     function getScheduledPaperHref(entry) {
         if (!entry) {
             return "";
         }
-
         if (entry.href) {
             return entry.href;
         }
-
         if (entry.path) {
             return "../" + entry.path;
         }
-
         if (entry.questionPath) {
-            return "../viewer/?file=" + encodeURIComponent(entry.questionPath);
+            return "../viewer/?file=" +
+                encodeURIComponent(entry.questionPath);
         }
-
         return "";
     }
 
     function navigateToScheduledPaper(entry) {
         const href = getScheduledPaperHref(entry);
-
-        if (!href) {
-            return;
+        if (href) {
+            window.location.assign(href);
         }
-
-        window.location.assign(href);
     }
 
     function renderGrid() {
-
         const grid = document.getElementById("calendarGrid");
         const title = document.getElementById("calendarMonthTitle");
-        const schedule = loadSchedule();
 
         title.textContent = formatMonthTitle(currentMonth);
 
         const firstOfMonth = new Date(currentMonth);
         const startOffset = firstOfMonth.getDay();
-
         const gridStart = new Date(firstOfMonth);
         gridStart.setDate(gridStart.getDate() - startOffset);
 
@@ -4913,225 +4563,254 @@ function generateSchedulerPage() {
         let html = "";
 
         for (let i = 0; i < 42; i++) {
-
             const cellDate = new Date(gridStart);
             cellDate.setDate(cellDate.getDate() + i);
 
             const key = dateKey(cellDate);
-            const outside = cellDate.getMonth() !== currentMonth.getMonth();
-            const isToday = cellDate.getTime() === today.getTime();
-
+            const outside =
+                cellDate.getMonth() !==
+                currentMonth.getMonth();
+            const isToday =
+                cellDate.getTime() === today.getTime();
             const entries = schedule[key] || [];
 
             const pills = entries
                 .slice(0, 3)
                 .map(entry =>
-                    '<div class="calendar-entry-pill" data-scheduled-entry="true">' +
-                    escapeHtml(formatScheduledEntryLabel(entry)) +
+                    '<div class="calendar-entry-pill" ' +
+                    'data-scheduled-entry="true">' +
+                    escapeHtml(
+                        formatScheduledEntryLabel(entry)
+                    ) +
                     "</div>"
                 )
                 .join("");
 
-            const more =
-                entries.length > 3
-                    ? '<div class="calendar-entry-pill">+' + (entries.length - 3) + " more</div>"
-                    : "";
+            const more = entries.length > 3
+                ? '<div class="calendar-entry-pill">+' +
+                  (entries.length - 3) +
+                  " more</div>"
+                : "";
 
             html +=
                 '<div class="calendar-cell' +
                 (outside ? " outside" : "") +
                 (isToday ? " today" : "") +
                 '" data-date="' + key + '">' +
-                '<div class="calendar-date-num">' + cellDate.getDate() + "</div>" +
+                '<div class="calendar-date-num">' +
+                cellDate.getDate() +
+                "</div>" +
                 pills +
                 more +
                 "</div>";
-
         }
 
         grid.innerHTML = html;
 
-        grid.querySelectorAll(".calendar-cell").forEach(cell => {
+        grid.querySelectorAll(".calendar-cell")
+            .forEach(cell => {
+                cell.addEventListener("click", event => {
+                    const entryElement =
+                        event.target.closest(
+                            "[data-scheduled-entry]"
+                        );
 
-            cell.addEventListener("click", event => {
-                const entryElement = event.target.closest("[data-scheduled-entry]");
+                    if (entryElement) {
+                        const entries =
+                            schedule[cell.dataset.date] || [];
+                        const elements = Array.from(
+                            cell.querySelectorAll(
+                                "[data-scheduled-entry]"
+                            )
+                        );
+                        const entryIndex =
+                            elements.indexOf(entryElement);
 
-                if (entryElement) {
-                    const entries = loadSchedule()[cell.dataset.date] || [];
-                    const entryElements = Array.from(
-                        cell.querySelectorAll("[data-scheduled-entry]")
-                    );
-                    const entryIndex = entryElements.indexOf(entryElement);
-
-                    if (entryIndex >= 0 && entries[entryIndex]) {
-                        navigateToScheduledPaper(entries[entryIndex]);
-                        return;
+                        if (
+                            entryIndex >= 0 &&
+                            entries[entryIndex]
+                        ) {
+                            navigateToScheduledPaper(
+                                entries[entryIndex]
+                            );
+                            return;
+                        }
                     }
-                }
 
-                openDayModal(cell.dataset.date);
+                    openDayModal(cell.dataset.date);
+                });
             });
-
-        });
-
     }
 
-    function openDayModal(key) {
-
+    async function openDayModal(key) {
         selectedDateKey = key;
 
-        const modal = document.getElementById("calendarDayModal");
-        const modalTitle = document.getElementById("calendarModalTitle");
-        const errorBox = document.getElementById("calendarModalError");
+        const modal =
+            document.getElementById("calendarDayModal");
+        const modalTitle =
+            document.getElementById("calendarModalTitle");
+        const errorBox =
+            document.getElementById("calendarModalError");
 
         errorBox.textContent = "";
 
-        const parsed = new Date(key + "T00:00:00");
+        const parsed =
+            new Date(key + "T00:00:00");
 
-        modalTitle.textContent = parsed.toLocaleDateString(
-            "en-US",
-            { weekday: "long", month: "long", day: "numeric", year: "numeric" }
-        );
+        modalTitle.textContent =
+            parsed.toLocaleDateString(
+                "en-US",
+                {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            );
 
         if (schedulingActive) {
-
-            addSchedulingPaperToDate(key);
-
+            await addSchedulingPaperToDate(key);
         }
 
         renderModalEntries();
-
         modal.classList.add("open");
-
     }
 
     function closeDayModal() {
+        document
+            .getElementById("calendarDayModal")
+            .classList.remove("open");
 
-        document.getElementById("calendarDayModal").classList.remove("open");
-        document.getElementById("calendarModalError").textContent = "";
+        document
+            .getElementById("calendarModalError")
+            .textContent = "";
 
-        const input = document.getElementById("calendarAddInput");
-
+        const input =
+            document.getElementById("calendarAddInput");
         if (input) {
             input.value = "";
         }
-
     }
 
     function renderModalEntries() {
-
-        const schedule = loadSchedule();
         const entries = schedule[selectedDateKey] || [];
-        const container = document.getElementById("calendarModalEntries");
+        const container =
+            document.getElementById("calendarModalEntries");
 
-        if (entries.length === 0) {
-
+        if (!entries.length) {
             container.innerHTML =
                 '<div class="muted">Nothing scheduled yet.</div>';
-
             return;
-
         }
 
-        container.innerHTML = entries
-            .map((entry, index) => {
-                const href = getScheduledPaperHref(entry);
-                const label = formatScheduledEntryLabel(entry);
-                const detail = entry.code || "";
+        container.innerHTML = entries.map(entry => {
+            const href = getScheduledPaperHref(entry);
+            const label =
+                formatScheduledEntryLabel(entry);
+            const detail = entry.code || "";
 
-                return (
-                    '<div class="attempt-row">' +
-                    '<div class="attempt-row-text">' +
-                    (href
-                        ? '<a href="' + escapeHtml(href) + '" class="scheduled-paper-link">' +
+            return (
+                '<div class="attempt-row">' +
+                '<div class="attempt-row-text">' +
+                (
+                    href
+                        ? '<a href="' +
+                          escapeHtml(href) +
+                          '" class="scheduled-paper-link">' +
                           escapeHtml(label) +
-                          '</a>'
-                        : escapeHtml(label)) +
-                    (detail
-                        ? '<div class="muted">' + escapeHtml(detail) + '</div>'
-                        : '') +
-                    "</div>" +
-                    '<button type="button" class="attempt-remove" data-index="' + index + '" aria-label="remove">×</button>' +
-                    "</div>"
-                );
-            })
-            .join("");
+                          "</a>"
+                        : escapeHtml(label)
+                ) +
+                (
+                    detail
+                        ? '<div class="muted">' +
+                          escapeHtml(detail) +
+                          "</div>"
+                        : ""
+                ) +
+                "</div>" +
+                '<button type="button" class="attempt-remove" ' +
+                'data-event-id="' +
+                escapeHtml(entry.id) +
+                '" aria-label="remove">×</button>' +
+                "</div>"
+            );
+        }).join("");
 
-        container.querySelectorAll(".attempt-remove").forEach(button => {
+        container.querySelectorAll(".attempt-remove")
+            .forEach(button => {
+                button.addEventListener("click", async event => {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-            button.addEventListener("click", () => {
+                    try {
+                        await CashewUserData.deleteCalendarEvent(
+                            button.dataset.eventId
+                        );
+                        await refreshSchedule();
+                    } catch (error) {
+                        document.getElementById(
+                            "calendarModalError"
+                        ).textContent =
+                            "couldn't remove that paper.";
+                    }
+                });
+            });
+    }
 
-                const schedule = loadSchedule();
-                const list = schedule[selectedDateKey] || [];
+    async function addEntryToDate(key, entry) {
+        await CashewUserData.addCalendarEvent(
+            key,
+            entry
+        );
+        await loadSchedule();
+    }
 
-                list.splice(Number(button.dataset.index), 1);
-
-                if (list.length === 0) {
-                    delete schedule[selectedDateKey];
-                } else {
-                    schedule[selectedDateKey] = list;
-                }
-
-                saveSchedule(schedule);
-
-                renderModalEntries();
-                renderGrid();
-
+    async function addSchedulingPaperToDate(key) {
+        try {
+            await addEntryToDate(key, {
+                code: schedulingCode || "paper",
+                subject: schedulingSubject || "",
+                paper: schedulingPaper || "",
+                path: schedulingPath || "",
+                questionPath: schedulingFile || "",
+                paperKey: schedulingKey || ""
             });
 
-        });
+            schedulingActive = false;
+            renderBanner();
+            renderGrid();
 
-    }
-
-    function addEntryToDate(key, entry) {
-
-        const schedule = loadSchedule();
-
-        if (!schedule[key]) {
-            schedule[key] = [];
+            const url = new URL(window.location.href);
+            url.searchParams.delete("key");
+            url.searchParams.delete("code");
+            url.searchParams.delete("subject");
+            window.history.replaceState({}, "", url.toString());
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to schedule paper",
+                error
+            );
         }
-
-        schedule[key].push(entry);
-
-        saveSchedule(schedule);
-
     }
 
-    function addSchedulingPaperToDate(key) {
-
-        addEntryToDate(key, {
-            code: schedulingCode || "paper",
-            subject: schedulingSubject || "",
-            paper: schedulingPaper || "",
-            path: schedulingPath || "",
-            questionPath: schedulingFile || ""
-        });
-
-        schedulingActive = false;
-
-        renderBanner();
-        renderGrid();
-
-        const url = new URL(window.location.href);
-
-        url.searchParams.delete("key");
-        url.searchParams.delete("code");
-        url.searchParams.delete("subject");
-
-        window.history.replaceState({}, "", url.toString());
-
-    }
-
-    function handleAddFormSubmit(event) {
-
+    async function handleAddFormSubmit(event) {
         event.preventDefault();
 
-        const input = document.getElementById("calendarAddInput");
-        const errorBox = document.getElementById("calendarModalError");
-
-        const value = input.value.trim().toLowerCase();
+        const input =
+            document.getElementById("calendarAddInput");
+        const errorBox =
+            document.getElementById("calendarModalError");
+        const value =
+            input.value.trim().toLowerCase();
 
         if (!value) {
+            return;
+        }
+
+        const user = await getCurrentUser();
+        if (!user) {
+            window.location.href = "../login/";
             return;
         }
 
@@ -5139,50 +4818,50 @@ function generateSchedulerPage() {
             typeof cashewPaperSearchIndex !== "undefined"
                 ? cashewPaperSearchIndex
                 : {};
-
         const match = index[value];
 
         if (!match) {
-
             errorBox.textContent =
                 "couldn't find a paper with that code.";
-
             return;
-
         }
 
-        addEntryToDate(selectedDateKey, {
-            code: match.code,
-            subject: match.subject || "",
-            paper: match.paper || "",
-            path: match.path || "",
-            questionPath: match.questionPath || ""
-        });
+        try {
+            await addEntryToDate(selectedDateKey, {
+                code: match.code,
+                subject: match.subject || "",
+                paper: match.paper || "",
+                path: match.path || "",
+                questionPath: match.questionPath || "",
+                paperKey: match.code || ""
+            });
 
-        input.value = "";
-        errorBox.textContent = "";
-
-        renderModalEntries();
-        renderGrid();
-
+            input.value = "";
+            errorBox.textContent = "";
+            renderModalEntries();
+            renderGrid();
+        } catch (error) {
+            errorBox.textContent =
+                "couldn't add that paper.";
+        }
     }
 
     document
         .getElementById("calendarPrevMonth")
         .addEventListener("click", () => {
-
-            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            currentMonth.setMonth(
+                currentMonth.getMonth() - 1
+            );
             renderGrid();
-
         });
 
     document
         .getElementById("calendarNextMonth")
         .addEventListener("click", () => {
-
-            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            currentMonth.setMonth(
+                currentMonth.getMonth() + 1
+            );
             renderGrid();
-
         });
 
     document
@@ -5192,19 +4871,42 @@ function generateSchedulerPage() {
     document
         .getElementById("calendarDayModal")
         .addEventListener("click", event => {
-
-            if (event.target.id === "calendarDayModal") {
+            if (
+                event.target.id ===
+                "calendarDayModal"
+            ) {
                 closeDayModal();
             }
-
         });
 
     document
         .getElementById("calendarAddForm")
-        .addEventListener("submit", handleAddFormSubmit);
+        .addEventListener(
+            "submit",
+            handleAddFormSubmit
+        );
+
+    window.addEventListener(
+        "cashew-auth-change",
+        async () => {
+            try {
+                await refreshSchedule();
+            } catch (error) {
+                schedule = {};
+                renderGrid();
+            }
+        }
+    );
 
     renderDayLabels();
     renderBanner();
+
+    try {
+        await loadSchedule();
+    } catch (error) {
+        schedule = {};
+    }
+
     renderGrid();
 
 })();
@@ -5464,6 +5166,13 @@ function generate() {
     fs.copyFileSync(
         path.join(WEB_DIR, "auth.js"),
         path.join(DIST_DIR, "auth.js")
+    );
+
+    /* Account data layer */
+
+    fs.copyFileSync(
+        path.join(WEB_DIR, "user-data.js"),
+        path.join(DIST_DIR, "user-data.js")
     );
 
     /* Home */
