@@ -123,6 +123,14 @@ function generateSubjectSelectionPage(subjects) {
         rel="stylesheet"
     >
 
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <script src="../auth.js"></script>
+
+    <script src="../user-data.js"></script>
+
     <style>
 
         * {
@@ -415,17 +423,43 @@ function generateSubjectSelectionPage(subjects) {
 
 <script>
 
-const STORAGE_KEY =
-    "cashew-selected-subjects";
+let selectedSubjects =
+    new Set();
 
-const selectedSubjects =
-    new Set(
-        JSON.parse(
-            localStorage.getItem(
-                STORAGE_KEY
-            ) || "[]"
-        )
-    );
+async function loadSubjects() {
+
+    try {
+
+        const user =
+            typeof getCurrentUser === "function"
+                ? await getCurrentUser()
+                : null;
+
+        if (!user) {
+            window.location.href = "../login/";
+            return;
+        }
+
+        const saved =
+            await CashewUserData.getSelectedSubjects();
+
+        selectedSubjects =
+            new Set(saved || []);
+
+        updateUI();
+
+    } catch (error) {
+
+        console.error(
+            "cashewpapers: unable to load selected subjects",
+            error
+        );
+
+        updateUI();
+
+    }
+
+}
 
 function updateUI() {
 
@@ -442,6 +476,7 @@ function updateUI() {
                 "selected",
                 selectedSubjects.has(key)
             );
+
         });
 
     const count =
@@ -461,47 +496,131 @@ function updateUI() {
         count === 0;
 
     if (count === 0) {
+
         selectionCount.textContent =
             "Select at least one subject.";
+
     } else {
+
         selectionCount.textContent =
             count === 1
                 ? "1 subject selected."
                 : count + " subjects selected.";
+
     }
+
 }
 
 function toggleSubject(key) {
 
-    if (selectedSubjects.has(key)) {
-        selectedSubjects.delete(key);
+    if (
+        selectedSubjects.has(key)
+    ) {
+
+        selectedSubjects.delete(
+            key
+        );
+
     } else {
-        selectedSubjects.add(key);
+
+        selectedSubjects.add(
+            key
+        );
+
     }
 
     updateUI();
+
 }
 
-function saveSubjects() {
+async function saveSubjects() {
 
-    if (selectedSubjects.size === 0) {
+    if (
+        selectedSubjects.size === 0
+    ) {
         return;
     }
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify([...selectedSubjects])
-    );
+    const user =
+        typeof getCurrentUser === "function"
+            ? await getCurrentUser()
+            : null;
 
-    localStorage.setItem(
-        "cashew-subject-selection-complete",
-        "true"
-    );
+    if (!user) {
 
-    window.location.href = "../";
+        window.location.href =
+            "../login/";
+
+        return;
+
+    }
+
+    const continueButton =
+        document.getElementById(
+            "continueButton"
+        );
+
+    continueButton.disabled =
+        true;
+
+    try {
+
+        await CashewUserData
+            .saveSelectedSubjects(
+                [...selectedSubjects]
+            );
+
+        window.location.href =
+            "../";
+
+    } catch (error) {
+
+        console.error(
+            "cashewpapers: unable to save selected subjects",
+            error
+        );
+
+        continueButton.disabled =
+            false;
+
+        const selectionCount =
+            document.getElementById(
+                "selectionCount"
+            );
+
+        selectionCount.textContent =
+            "Unable to save subjects. Please try again.";
+
+    }
+
 }
 
-updateUI();
+window.addEventListener(
+    "cashew-auth-change",
+    event => {
+
+        const authEvent =
+            event &&
+            event.detail &&
+            event.detail.event;
+
+        if (
+            authEvent === "SIGNED_OUT"
+        ) {
+
+            window.location.href =
+                "../login/";
+
+            return;
+
+        }
+
+        loadSubjects();
+
+    }
+);
+
+loadSubjects();
 
 </script>
 
