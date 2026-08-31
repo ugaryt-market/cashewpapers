@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.78
+    Version Alpha 0.1.80
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1217,6 +1217,14 @@ main {
     transition: width 0.25s ease;
 }
 
+.user-data-pending {
+    visibility: hidden;
+}
+
+.user-data-pending-placeholder {
+    min-height: 1em;
+}
+
 .progress-overview-label {
     margin-top: 7px;
     color: var(--muted);
@@ -2360,7 +2368,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.78">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.80">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2375,11 +2383,11 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.78"></script>
+    <script src="${prefix}auth.js?v=0.1.80"></script>
 
-    <script src="${prefix}user-data.js?v=0.1.78"></script>
+    <script src="${prefix}user-data.js?v=0.1.80"></script>
 
-    <script src="${prefix}search.js?v=0.1.78"></script>
+    <script src="${prefix}search.js?v=0.1.80"></script>
 
 </head>
 
@@ -2904,11 +2912,24 @@ async function initializeOverviewProgress() {
     const user = await getCurrentUser();
 
     await Promise.all(
-        Array.from(cards).map(card =>
-            updateOverviewProgressCard(card, user)
-        )
+        Array.from(cards).map(async card => {
+
+            try {
+                await updateOverviewProgressCard(
+                    card,
+                    user
+                );
+            } finally {
+                card.classList.remove(
+                    "user-data-pending"
+                );
+            }
+
+        })
     );
 }
+
+let paperProgressInitializationPromise = null;
 
 let paperProgressInitializationPromise = null;
 
@@ -2922,19 +2943,123 @@ async function initializePaperProgress() {
         (async () => {
 
             const progressElements =
-                document.querySelectorAll(
-                    ".paper-progress"
+                Array.from(
+                    document.querySelectorAll(
+                        ".paper-progress"
+                    )
                 );
 
             if (!progressElements.length) {
                 return;
             }
 
+            const user =
+                await getCurrentUser();
+
+            if (!user) {
+
+                await Promise.all(
+                    progressElements.map(
+                        async progress => {
+
+                            const button =
+                                progress.querySelector(
+                                    ".paper-status"
+                                );
+
+                            if (button) {
+                                renderPaperStatus(
+                                    button,
+                                    "incomplete"
+                                );
+                            }
+
+                            await renderPaperAttempts(
+                                progress,
+                                button
+                                    ? button.dataset.paperKey
+                                    : "",
+                                false,
+                                null
+                            );
+
+                            progress.classList.remove(
+                                "user-data-pending"
+                            );
+
+                        }
+                    )
+                );
+
+                return;
+
+            }
+
+            const keys =
+                progressElements
+                    .map(progress => {
+                        const button =
+                            progress.querySelector(
+                                ".paper-status"
+                            );
+
+                        return button
+                            ? button.dataset.paperKey
+                            : "";
+                    })
+                    .filter(Boolean);
+
+            const statuses =
+                await CashewUserData
+                    .getPaperStatuses(keys);
+
             await Promise.all(
-                Array.from(
-                    progressElements
-                ).map(
-                    refreshPaperProgress
+                progressElements.map(
+                    async progress => {
+
+                        const button =
+                            progress.querySelector(
+                                ".paper-status"
+                            );
+
+                        if (!button) {
+                            progress.classList.remove(
+                                "user-data-pending"
+                            );
+                            return;
+                        }
+
+                        const key =
+                            button.dataset.paperKey;
+
+                        const status =
+                            statuses[key] ||
+                            "incomplete";
+
+                        renderPaperStatus(
+                            button,
+                            status
+                        );
+
+                        try {
+
+                            await renderPaperAttempts(
+                                progress,
+                                key,
+                                status ===
+                                    "completed",
+                                user
+                            );
+
+                        } finally {
+
+                            progress.classList.remove(
+                                "user-data-pending"
+                            );
+
+                        }
+
+                    }
                 )
             );
 
@@ -2942,7 +3067,8 @@ async function initializePaperProgress() {
 
     try {
 
-        return await paperProgressInitializationPromise;
+        return await
+            paperProgressInitializationPromise;
 
     } finally {
 
@@ -3062,7 +3188,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.78</div>
+                <div class="version">Version Alpha 0.1.80</div>
 
             </section>
 
@@ -3160,18 +3286,24 @@ window.addEventListener("orientationchange", scheduleHomeScale);
 window.addEventListener("load", scheduleHomeScale);
 
 async function applySubjectFilter() {
-    const user =
-        typeof getCurrentUser === "function"
-            ? await getCurrentUser()
-            : null;
 
-    if (!user) {
-        return;
-    }
+    const home =
+        document.querySelector(".home-page");
 
     try {
+
+        const user =
+            typeof getCurrentUser === "function"
+                ? await getCurrentUser()
+                : null;
+
+        if (!user) {
+            return;
+        }
+
         const selectedSubjects =
-            await CashewUserData.getSelectedSubjects();
+            await CashewUserData
+                .getSelectedSubjects();
 
         if (!selectedSubjects.length) {
             return;
@@ -3180,17 +3312,46 @@ async function applySubjectFilter() {
         document
             .querySelectorAll("[data-subject]")
             .forEach(card => {
-                const subject = card.dataset.subject;
-                if (!selectedSubjects.includes(subject)) {
-                    card.style.display = "none";
+
+                const subject =
+                    card.dataset.subject;
+
+                if (
+                    !selectedSubjects
+                        .includes(subject)
+                ) {
+                    card.style.display =
+                        "none";
                 }
+
             });
+
     } catch (error) {
+
         console.error(
             "cashewpapers: unable to load selected subjects",
             error
         );
+
+    } finally {
+
+        if (home) {
+            home.classList.remove(
+                "user-data-pending"
+            );
+        }
+
     }
+
+}
+
+const homePage =
+    document.querySelector(".home-page");
+
+if (homePage) {
+    homePage.classList.add(
+        "user-data-pending"
+    );
 }
 
 applySubjectFilter();
@@ -3312,7 +3473,7 @@ function generateSubjectPage(subjectKey, data) {
             return `
 
                 <a
-                    class="year-link progress-overview-card"
+                    class="year-link progress-overview-card user-data-pending"
                     href="${year}/"
                     data-progress-keys="${yearPaperKeys.join("|")}"
                     data-progress-total="${yearPaperKeys.length}"
@@ -3565,7 +3726,7 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
             return `
 
                 <a
-                    class="year-session-card progress-overview-card"
+                    class="year-session-card progress-overview-card user-data-pending"
                     href="${slug}/"
                     data-progress-keys="${sessionPaperKeys.join("|")}"
                     data-progress-total="${count}"
