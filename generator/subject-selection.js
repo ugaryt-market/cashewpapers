@@ -105,7 +105,7 @@ function generateSubjectSelectionPage(subjects) {
 
     <link
         rel="stylesheet"
-        href="../style.css"
+        href="../style.css?v=0.1.80"
     >
 
     <link
@@ -208,6 +208,14 @@ function generateSubjectSelectionPage(subjects) {
             font-size: 17px;
             line-height: 1.6;
             font-weight: 400;
+        }
+
+        body.user-data-pending .subject-grid {
+            visibility: hidden;
+        }
+
+        body.user-data-pending .continue-wrapper {
+            visibility: hidden;
         }
 
         .subject-grid {
@@ -358,7 +366,7 @@ function generateSubjectSelectionPage(subjects) {
 
 </head>
 
-<body>
+<body class="user-data-pending">
 
 <nav class="nav">
 
@@ -456,6 +464,12 @@ async function loadSubjects() {
         );
 
         updateUI();
+
+    } finally {
+
+        document.body.classList.remove(
+            "user-data-pending"
+        );
 
     }
 
