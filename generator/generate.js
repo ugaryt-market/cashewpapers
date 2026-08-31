@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.84
+    Version Alpha 0.1.85
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1582,6 +1582,25 @@ main {
     background: #40382e;
 }
 
+.paper-status.status-pop {
+    animation: paperStatusPop 0.24s ease;
+}
+
+@keyframes paperStatusPop {
+
+    0% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.06);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 /*
    The attempt controls stay in the same row as the completion button.
    Expanded content is positioned out of flow, so the paper card keeps
@@ -1929,15 +1948,26 @@ main {
     border-radius: 6px;
     background: #3a3c3f;
     color: var(--text);
+    border: 1px solid transparent;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
 }
 
 .calendar-entry-pill:hover {
-    border-color: var(--subdued);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow:
+        0 4px 12px rgba(255, 150, 79, 0.16);
 }
 
 .scheduled-paper-link {
@@ -2207,6 +2237,26 @@ footer {
     font-size: 11px;
 }
 
+.home-page .subject-grid.subjects-loading {
+    position: relative;
+}
+
+.home-page .subject-grid.subjects-loading::before {
+    content: "loading subjects...";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.home-page .subject-grid.subjects-loading .subject-card {
+    visibility: hidden;
+}
+
 .home-page .subject-grid {
     width: min(100%, 1080px);
     margin: 0 auto;
@@ -2467,9 +2517,9 @@ function documentHTML(title, body, depth = 0) {
             <a
                 href="${prefix}scheduler/"
                 class="nav-account nav-calendar-button"
-                title="scheduler"
+                title="my calendar"
             >
-                calendar
+                my calendar
             </a>
 
             <a id="authNav" href="${prefix}login/" class="nav-account">
@@ -3464,6 +3514,25 @@ async function togglePaperStatus(button) {
             next
         );
 
+        button.classList.remove(
+            "status-pop"
+        );
+
+        void button.offsetWidth;
+
+        button.classList.add(
+            "status-pop"
+        );
+
+        window.setTimeout(
+            () => {
+                button.classList.remove(
+                    "status-pop"
+                );
+            },
+            260
+        );
+
         await renderPaperAttempts(
             progress,
             key,
@@ -3553,11 +3622,11 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.84</div>
+                <div class="version">Version Alpha 0.1.85</div>
 
             </section>
 
-            <div class="subject-grid">
+            <div class="subject-grid subjects-loading">
 
                 ${cards}
 
@@ -3684,7 +3753,8 @@ async function applySubjectFilter() {
             .forEach(card => {
 
                 const subject =
-                    card.dataset.subject;
+                    card.dataset
+                        .subject;
 
                 card.style.display =
                     selectedSubjects
@@ -3700,6 +3770,14 @@ async function applySubjectFilter() {
             "cashewpapers: unable to load selected subjects",
             error
         );
+
+    } finally {
+
+        subjectGrid.classList.remove(
+            "subjects-loading"
+        );
+
+        scheduleHomeScale();
 
     }
 
@@ -4854,7 +4932,7 @@ function generateSchedulerPage() {
 
     return documentHTML(
 
-        "Scheduler",
+        "My Calendar",
 
         `
 
@@ -4862,10 +4940,10 @@ function generateSchedulerPage() {
 
                 ${breadcrumbHTML([
                     { label: "subjects", href: "../" },
-                    { label: "scheduler", current: true }
+                    { label: "my calendar", current: true }
                 ])}
 
-                <h1>scheduler</h1>
+                <h1>my calendar</h1>
 
                 <p>plan out when you'll tackle each past paper.</p>
 
