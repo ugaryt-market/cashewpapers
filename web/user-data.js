@@ -32,11 +32,41 @@
         calendar: "calendar_events"
     };
 
+    const cache = {
+        userId: null,
+        subjects: null,
+        progress: new Map(),
+        attempts: new Map(),
+        calendar: null
+    };
+
+    function resetCache(userId = null) {
+        cache.userId = userId;
+        cache.subjects = null;
+        cache.progress = new Map();
+        cache.attempts = new Map();
+        cache.calendar = null;
+    }
+
+    function ensureUserCache(user) {
+        const userId = user ? user.id : null;
+
+        if (cache.userId !== userId) {
+            resetCache(userId);
+        }
+    }
+
     async function getUser() {
         if (typeof getCurrentUser !== "function") {
+            resetCache();
             return null;
         }
-        return await getCurrentUser();
+
+        const user = await getCurrentUser();
+
+        ensureUserCache(user);
+
+        return user;
     }
 
     async function requireUser() {
@@ -59,6 +89,12 @@
     async function getSelectedSubjects() {
         const user = await requireUser();
 
+        ensureUserCache(user);
+
+        if (Array.isArray(cache.subjects)) {
+            return cache.subjects.slice();
+        }
+
         const { data, error } =
             await client
                 .from(TABLES.subjects)
@@ -66,11 +102,17 @@
                 .eq("user_id", user.id)
                 .order("created_at", { ascending: true });
 
-        checkError(error, "Unable to load selected subjects");
-
-        return (data || []).map(row =>
-            String(row.subject_key)
+        checkError(
+            error,
+            "Unable to load selected subjects"
         );
+
+        cache.subjects =
+            (data || []).map(row =>
+                String(row.subject_key)
+            );
+
+        return cache.subjects.slice();
     }
 
     async function saveSelectedSubjects(subjectKeys) {
@@ -102,32 +144,30 @@
                         }))
                     );
 
-            checkError(insertError, "Unable to save selected subjects");
+            checkError(
+                insertError,
+                "Unable to save selected subjects"
+            );
         }
+
+        cache.subjects = values.slice();
 
         return values;
     }
 
     async function getPaperStatus(paperKey) {
-        const user = await requireUser();
+        const key = String(paperKey);
+        const statuses =
+            await getPaperStatuses([key]);
 
-        const { data, error } =
-            await client
-                .from(TABLES.progress)
-                .select("status")
-                .eq("user_id", user.id)
-                .eq("paper_key", String(paperKey))
-                .maybeSingle();
-
-        checkError(error, "Unable to load paper progress");
-
-        return data && data.status === "completed"
-            ? "completed"
-            : "incomplete";
+        return statuses[key] || "incomplete";
     }
 
     async function getPaperStatuses(paperKeys) {
         const user = await requireUser();
+
+        ensureUserCache(user);
+
         const keys = Array.from(
             new Set(
                 (paperKeys || [])
@@ -137,11 +177,20 @@
         );
 
         const result = {};
+
         keys.forEach(key => {
-            result[key] = "incomplete";
+            result[key] =
+                cache.progress.has(key)
+                    ? cache.progress.get(key)
+                    : "incomplete";
         });
 
-        if (!keys.length) {
+        const missingKeys =
+            keys.filter(
+                key => !cache.progress.has(key)
+            );
+
+        if (!missingKeys.length) {
             return result;
         }
 
@@ -150,14 +199,39 @@
                 .from(TABLES.progress)
                 .select("paper_key,status")
                 .eq("user_id", user.id)
-                .in("paper_key", keys);
+                .in("paper_key", missingKeys);
 
-        checkError(error, "Unable to load paper progress");
+        checkError(
+            error,
+            "Unable to load paper progress"
+        );
+
+        missingKeys.forEach(key => {
+            cache.progress.set(
+                key,
+                "incomplete"
+            );
+        });
 
         (data || []).forEach(row => {
-            if (row.status === "completed") {
-                result[String(row.paper_key)] = "completed";
-            }
+            const key =
+                String(row.paper_key);
+
+            const status =
+                row.status === "completed"
+                    ? "completed"
+                    : "incomplete";
+
+            cache.progress.set(
+                key,
+                status
+            );
+        });
+
+        keys.forEach(key => {
+            result[key] =
+                cache.progress.get(key) ||
+                "incomplete";
         });
 
         return result;
@@ -189,7 +263,16 @@
                         }
                     );
 
-            checkError(error, "Unable to save paper progress");
+            checkError(
+                error,
+                "Unable to save paper progress"
+            );
+
+            cache.progress.set(
+                key,
+                "completed"
+            );
+
             return "completed";
         }
 
@@ -200,7 +283,16 @@
                 .eq("user_id", user.id)
                 .eq("paper_key", key);
 
-        checkError(error, "Unable to clear paper progress");
+        checkError(
+            error,
+            "Unable to clear paper progress"
+        );
+
+        cache.progress.set(
+            key,
+            "incomplete"
+        );
+
         return "incomplete";
     }
 
@@ -208,21 +300,49 @@
         const user = await requireUser();
         const key = String(paperKey);
 
+        ensureUserCache(user);
+
+        if (cache.attempts.has(key)) {
+            return cache.attempts
+                .get(key)
+                .map(attempt => ({ ...attempt }));
+        }
+
         const { data, error } =
             await client
                 .from(TABLES.attempts)
-                .select("id,score,attempted_at,created_at")
+                .select(
+                    "id,score,attempted_at,created_at"
+                )
                 .eq("user_id", user.id)
                 .eq("paper_key", key)
-                .order("created_at", { ascending: true });
+                .order(
+                    "created_at",
+                    { ascending: true }
+                );
 
-        checkError(error, "Unable to load paper attempts");
+        checkError(
+            error,
+            "Unable to load paper attempts"
+        );
 
-        return (data || []).map(row => ({
-            id: row.id,
-            score: String(row.score),
-            date: row.attempted_at || row.created_at
-        }));
+        const attempts =
+            (data || []).map(row => ({
+                id: row.id,
+                score: String(row.score),
+                date:
+                    row.attempted_at ||
+                    row.created_at
+            }));
+
+        cache.attempts.set(
+            key,
+            attempts
+        );
+
+        return attempts.map(
+            attempt => ({ ...attempt })
+        );
     }
 
     async function addPaperAttempt(paperKey, score) {
@@ -251,13 +371,32 @@
                 .select("id,score,attempted_at,created_at")
                 .single();
 
-        checkError(error, "Unable to save attempt");
+        checkError(
+            error,
+            "Unable to save attempt"
+        );
 
-        return {
+        const attempt = {
             id: data.id,
             score: String(data.score),
-            date: data.attempted_at || data.created_at
+            date:
+                data.attempted_at ||
+                data.created_at
         };
+
+        const current =
+            cache.attempts.get(
+                String(paperKey)
+            ) || [];
+
+        current.push(attempt);
+
+        cache.attempts.set(
+            String(paperKey),
+            current
+        );
+
+        return { ...attempt };
     }
 
     async function deletePaperAttempt(paperKey, attemptId) {
@@ -271,11 +410,36 @@
                 .eq("id", attemptId)
                 .eq("paper_key", String(paperKey));
 
-        checkError(error, "Unable to delete attempt");
+        checkError(
+            error,
+            "Unable to delete attempt"
+        );
+
+        const key =
+            String(paperKey);
+
+        if (cache.attempts.has(key)) {
+            cache.attempts.set(
+                key,
+                cache.attempts
+                    .get(key)
+                    .filter(
+                        attempt =>
+                            String(attempt.id) !==
+                            String(attemptId)
+                    )
+            );
+        }
     }
 
     async function getCalendarSchedule() {
         const user = await requireUser();
+
+        ensureUserCache(user);
+
+        if (cache.calendar) {
+            return cloneCalendar(cache.calendar);
+        }
 
         const { data, error } =
             await client
@@ -284,15 +448,25 @@
                     "id,date,paper_key,paper_code,subject,paper,path,file"
                 )
                 .eq("user_id", user.id)
-                .order("date", { ascending: true })
-                .order("created_at", { ascending: true });
+                .order(
+                    "date",
+                    { ascending: true }
+                )
+                .order(
+                    "created_at",
+                    { ascending: true }
+                );
 
-        checkError(error, "Unable to load calendar");
+        checkError(
+            error,
+            "Unable to load calendar"
+        );
 
         const schedule = {};
 
         (data || []).forEach(row => {
-            const key = String(row.date);
+            const key =
+                String(row.date);
 
             if (!schedule[key]) {
                 schedule[key] = [];
@@ -309,7 +483,23 @@
             });
         });
 
-        return schedule;
+        cache.calendar = schedule;
+
+        return cloneCalendar(schedule);
+    }
+
+    function cloneCalendar(schedule) {
+        const clone = {};
+
+        Object.keys(schedule || {}).forEach(key => {
+            clone[key] =
+                (schedule[key] || [])
+                    .map(entry => ({
+                        ...entry
+                    }));
+        });
+
+        return clone;
     }
 
     async function addCalendarEvent(date, entry) {
@@ -333,9 +523,19 @@
                 )
                 .single();
 
-        checkError(error, "Unable to schedule paper");
+        checkError(
+            error,
+            "Unable to schedule paper"
+        );
 
-        return {
+        if (!cache.calendar) {
+            cache.calendar = {};
+        }
+
+        const key =
+            String(data.date);
+
+        const entryValue = {
             id: data.id,
             code: data.paper_code || "",
             subject: data.subject || "",
@@ -344,6 +544,16 @@
             questionPath: data.file || "",
             paperKey: data.paper_key || ""
         };
+
+        if (!cache.calendar[key]) {
+            cache.calendar[key] = [];
+        }
+
+        cache.calendar[key].push(
+            entryValue
+        );
+
+        return { ...entryValue };
     }
 
     async function deleteCalendarEvent(eventId) {
@@ -356,8 +566,38 @@
                 .eq("user_id", user.id)
                 .eq("id", eventId);
 
-        checkError(error, "Unable to remove calendar event");
+        checkError(
+            error,
+            "Unable to remove calendar event"
+        );
+
+        if (cache.calendar) {
+            Object.keys(cache.calendar)
+                .forEach(dateKey => {
+                    cache.calendar[dateKey] =
+                        cache.calendar[dateKey]
+                            .filter(
+                                entry =>
+                                    String(entry.id) !==
+                                    String(eventId)
+                            );
+
+                    if (
+                        cache.calendar[dateKey]
+                            .length === 0
+                    ) {
+                        delete cache.calendar[dateKey];
+                    }
+                });
+        }
     }
+
+    window.addEventListener(
+        "cashew-auth-change",
+        () => {
+            resetCache();
+        }
+    );
 
     window.CashewUserData = {
         getUser,
