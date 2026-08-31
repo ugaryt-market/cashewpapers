@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.77
+    Version Alpha 0.1.78
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2360,7 +2360,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.77">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.78">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2375,11 +2375,11 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.77"></script>
+    <script src="${prefix}auth.js?v=0.1.78"></script>
 
-    <script src="${prefix}user-data.js?v=0.1.77"></script>
+    <script src="${prefix}user-data.js?v=0.1.78"></script>
 
-    <script src="${prefix}search.js?v=0.1.77"></script>
+    <script src="${prefix}search.js?v=0.1.78"></script>
 
 </head>
 
@@ -2550,209 +2550,80 @@ function renderPaperStatus(button, status) {
 }
 
 async function renderPaperAttempts(progress, key, completed, user) {
-
     const attemptsContainer =
-        progress.querySelector(
-            "[data-paper-attempts]"
-        );
+        progress.querySelector("[data-paper-attempts]");
 
     if (!attemptsContainer) {
         return;
     }
 
-    /*
-       Multiple async initializers can run at almost the same time
-       (for example DOMContentLoaded + auth-change). Each render gets
-       a token, and only the newest render is allowed to modify the
-       container after awaiting Supabase data.
-    */
-    const renderToken =
-        String(
-            Number(
-                attemptsContainer.dataset.renderToken ||
-                "0"
-            ) + 1
-        );
-
-    attemptsContainer.dataset.renderToken =
-        renderToken;
-
     attemptsContainer.innerHTML = "";
-
     clearLoginNotice(progress);
 
-    if (
-        !completed ||
-        !user
-    ) {
+    if (!completed || !user) {
         return;
     }
 
-    const attempts =
-        await getPaperAttempts(key);
+    const attempts = await getPaperAttempts(key);
 
-    if (
-        attemptsContainer.dataset.renderToken !==
-        renderToken
-    ) {
-        return;
-    }
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "attempt-button";
+    addButton.textContent = "+ Add attempt";
 
-    /*
-       Clear again after the async read. This guarantees that an older
-       render cannot leave behind a duplicate button if another render
-       finished just before it.
-    */
-    attemptsContainer.innerHTML = "";
+    addButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        openAttemptForm(progress, key);
+    });
 
-    const addButton =
-        document.createElement(
-            "button"
-        );
-
-    addButton.type =
-        "button";
-
-    addButton.className =
-        "attempt-button";
-
-    addButton.textContent =
-        "+ Add attempt";
-
-    addButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            openAttemptForm(
-                progress,
-                key
-            );
-
-        }
-    );
-
-    attemptsContainer.appendChild(
-        addButton
-    );
+    attemptsContainer.appendChild(addButton);
 
     if (!attempts.length) {
         return;
     }
 
     const previewAttempts =
-        attempts.slice(
-            0,
-            Math.min(
-                6,
-                attempts.length
-            )
-        );
+        attempts.slice(0, Math.min(6, attempts.length));
 
-    const previewScores =
-        previewAttempts
-            .map(
-                attempt =>
-                    String(
-                        attempt.score
-                    )
-            )
-            .join(" · ");
+    const previewScores = previewAttempts
+        .map(attempt => String(attempt.score))
+        .join(" · ");
 
-    const summaryButton =
-        document.createElement(
-            "button"
-        );
-
-    summaryButton.type =
-        "button";
-
-    summaryButton.className =
-        "attempt-summary";
-
+    const summaryButton = document.createElement("button");
+    summaryButton.type = "button";
+    summaryButton.className = "attempt-summary";
     summaryButton.textContent =
-        String(
-            attempts.length
-        ) +
+        String(attempts.length) +
         " " +
-        (
-            attempts.length === 1
-                ? "attempt"
-                : "attempts"
-        ) +
-        (
-            previewScores
-                ? " · " +
-                  previewScores
-                : ""
-        ) +
-        (
-            attempts.length > 6
-                ? " · see more"
-                : ""
+        (attempts.length === 1 ? "attempt" : "attempts") +
+        (previewScores ? " · " + previewScores : "") +
+        (attempts.length > 6 ? " · see more" : "");
+    summaryButton.setAttribute("aria-expanded", "false");
+
+    const history = document.createElement("div");
+    history.className = "attempt-history";
+
+    attempts.forEach((attempt, index) => {
+        history.appendChild(
+            createAttemptHistoryRow(progress, key, attempt, index)
         );
+    });
 
-    summaryButton.setAttribute(
-        "aria-expanded",
-        "false"
-    );
-
-    const history =
-        document.createElement(
-            "div"
+    summaryButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const isOpen = history.classList.toggle("open");
+        summaryButton.setAttribute(
+            "aria-expanded",
+            isOpen ? "true" : "false"
         );
+    });
 
-    history.className =
-        "attempt-history";
-
-    attempts.forEach(
-        (attempt, index) => {
-
-            history.appendChild(
-                createAttemptHistoryRow(
-                    progress,
-                    key,
-                    attempt,
-                    index
-                )
-            );
-
-        }
-    );
-
-    summaryButton.addEventListener(
-        "click",
-        event => {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            const isOpen =
-                history.classList.toggle(
-                    "open"
-                );
-
-            summaryButton.setAttribute(
-                "aria-expanded",
-                isOpen
-                    ? "true"
-                    : "false"
-            );
-
-        }
-    );
-
-    attemptsContainer.appendChild(
-        summaryButton
-    );
-
-    attemptsContainer.appendChild(
-        history
-    );
-
+    attemptsContainer.appendChild(summaryButton);
+    attemptsContainer.appendChild(history);
 }
+
 function createAttemptHistoryRow(progress, key, attempt, index) {
     const row = document.createElement("div");
     row.className = "attempt-row";
@@ -3039,20 +2910,47 @@ async function initializeOverviewProgress() {
     );
 }
 
-async function initializePaperProgress() {
-    const progressElements = document.querySelectorAll(
-        ".paper-progress"
-    );
+let paperProgressInitializationPromise = null;
 
-    if (!progressElements.length) {
-        return;
+async function initializePaperProgress() {
+
+    if (paperProgressInitializationPromise) {
+        return paperProgressInitializationPromise;
     }
 
-    await Promise.all(
-        Array.from(progressElements).map(
-            refreshPaperProgress
-        )
-    );
+    paperProgressInitializationPromise =
+        (async () => {
+
+            const progressElements =
+                document.querySelectorAll(
+                    ".paper-progress"
+                );
+
+            if (!progressElements.length) {
+                return;
+            }
+
+            await Promise.all(
+                Array.from(
+                    progressElements
+                ).map(
+                    refreshPaperProgress
+                )
+            );
+
+        })();
+
+    try {
+
+        return await paperProgressInitializationPromise;
+
+    } finally {
+
+        paperProgressInitializationPromise =
+            null;
+
+    }
+
 }
 
 async function togglePaperStatus(button) {
@@ -3164,7 +3062,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.77</div>
+                <div class="version">Version Alpha 0.1.78</div>
 
             </section>
 
