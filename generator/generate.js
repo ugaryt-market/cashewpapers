@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.83
+    Version Alpha 0.1.84
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1221,6 +1221,26 @@ main {
     visibility: hidden;
 }
 
+.paper-progress-loading {
+    position: relative;
+    min-width: 170px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.paper-progress-loading::before {
+    content: "loading attempts...";
+}
+
+.paper-progress-loading.ready {
+    display: none;
+}
+
 .account-data-placeholder {
     display: inline-block;
     min-width: 96px;
@@ -2378,7 +2398,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.83">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.84">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2393,11 +2413,11 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.83"></script>
+    <script src="${prefix}auth.js?v=0.1.84"></script>
 
-    <script src="${prefix}user-data.js?v=0.1.83"></script>
+    <script src="${prefix}user-data.js?v=0.1.84"></script>
 
-    <script src="${prefix}search.js?v=0.1.83"></script>
+    <script src="${prefix}search.js?v=0.1.84"></script>
 
 </head>
 
@@ -2599,11 +2619,17 @@ function showLoginRequired() {
     window.location.href = "${prefix}login/";
 }
 
-function renderPaperStatus(button, status) {
+function renderPaperStatus(
+    button,
+    status,
+    keepHidden = false
+) {
 
-    button.classList.remove(
-        "account-data-pending"
-    );
+    if (!keepHidden) {
+        button.classList.remove(
+            "account-data-pending"
+        );
+    }
 
     button.classList.toggle(
         "completed",
@@ -2661,6 +2687,17 @@ async function renderPaperAttempts(
     );
 
     attemptsContainer.innerHTML = "";
+
+    const loader =
+        progress.querySelector(
+            ".paper-progress-loading"
+        );
+
+    if (loader) {
+        loader.classList.remove(
+            "ready"
+        );
+    }
 
     clearLoginNotice(progress);
 
@@ -2831,6 +2868,25 @@ async function renderPaperAttempts(
     attemptsContainer.classList.remove(
         "account-data-pending"
     );
+
+    if (loader) {
+        loader.classList.add(
+            "ready"
+        );
+    }
+
+    if (arguments.length >= 0) {
+        const statusButton =
+            progress.querySelector(
+                ".paper-status"
+            );
+
+        if (statusButton) {
+            statusButton.classList.remove(
+                "account-data-pending"
+            );
+        }
+    }
 
 }
 function createAttemptHistoryRow(progress, key, attempt, index) {
@@ -3287,7 +3343,9 @@ async function initializePaperProgress() {
             const statuses =
                 user
                     ? await CashewUserData
-                        .getPaperStatuses(keys)
+                        .getPaperStatuses(
+                            keys
+                        )
                     : {};
 
             await Promise.all(
@@ -3297,6 +3355,11 @@ async function initializePaperProgress() {
                         const button =
                             progress.querySelector(
                                 ".paper-status"
+                            );
+
+                        const loader =
+                            progress.querySelector(
+                                ".paper-progress-loading"
                             );
 
                         if (!button) {
@@ -3315,9 +3378,15 @@ async function initializePaperProgress() {
                                 )
                                 : "incomplete";
 
+                        /*
+                           Do not expose any account state yet.
+                           The loader remains visible while the attempt
+                           data is fetched and rendered.
+                        */
                         renderPaperStatus(
                             button,
-                            status
+                            status,
+                            true
                         );
 
                         await renderPaperAttempts(
@@ -3326,6 +3395,16 @@ async function initializePaperProgress() {
                             status ===
                                 "completed",
                             user
+                        );
+
+                        if (loader) {
+                            loader.classList.add(
+                                "ready"
+                            );
+                        }
+
+                        button.classList.remove(
+                            "account-data-pending"
                         );
 
                     }
@@ -3391,6 +3470,17 @@ async function togglePaperStatus(button) {
             next === "completed",
             user
         );
+
+        const loader =
+            progress.querySelector(
+                ".paper-progress-loading"
+            );
+
+        if (loader) {
+            loader.classList.add(
+                "ready"
+            );
+        }
 
         await initializeOverviewProgress();
     } catch (error) {
@@ -3463,7 +3553,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.83</div>
+                <div class="version">Version Alpha 0.1.84</div>
 
             </section>
 
@@ -3614,6 +3704,8 @@ async function applySubjectFilter() {
     }
 
 }
+
+applySubjectFilter();
 
 </script>
 
@@ -4236,6 +4328,8 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                             data-paper-progress
                                         >
 
+                                            <div class="paper-progress-loading"></div>
+
                                             <button
                                                 type="button"
                                                 class="paper-status account-data-pending"
@@ -4477,6 +4571,8 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                     <div class="paper-actions">
 
                         <div class="paper-progress" data-paper-progress>
+
+                            <div class="paper-progress-loading"></div>
 
                             <button
                                 type="button"
