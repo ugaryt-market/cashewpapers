@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.86
+    Version Alpha 0.1.87
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -808,6 +808,17 @@ body {
     min-height: 100vh;
     font-weight: 400;
     text-transform: lowercase;
+}
+
+.mobile-block-screen { display: none; }
+.mobile-block-screen-inner { width: min(520px, calc(100% - 40px)); text-align: center; }
+.mobile-block-logo { width: 150px; height: auto; display: block; margin: 0 auto 28px; }
+.mobile-block-screen h1 { margin: 0; color: var(--text); font-size: clamp(32px, 8vw, 46px); font-weight: 400; letter-spacing: -1.5px; }
+.mobile-block-screen p { margin: 14px auto 0; max-width: 420px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+@media (max-width: 767px) {
+    body { overflow: hidden; }
+    body > * { display: none !important; }
+    body > .mobile-block-screen { display: flex !important; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px; background: var(--bg); color: var(--text); }
 }
 
 a {
@@ -2444,6 +2455,8 @@ function documentHTML(title, body, depth = 0) {
 <html lang="en">
 
 <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
 
     <meta charset="UTF-8">
 
@@ -2480,6 +2493,14 @@ function documentHTML(title, body, depth = 0) {
 </head>
 
 <body data-search-prefix="${prefix}">
+        <div class="mobile-block-screen" aria-hidden="true">
+            <div class="mobile-block-screen-inner">
+                <img class="mobile-block-logo" src="${prefix}assets/cashewpapers.svg" alt="cashewpapers">
+                <h1>desktop required</h1>
+                <p>cashewpapers is currently designed for desktop screens. please open this website on a computer.</p>
+            </div>
+        </div>
+
 
 <nav>
 
