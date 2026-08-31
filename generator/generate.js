@@ -3735,6 +3735,11 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
         groups
             .map(([folder, session]) => {
 
+                const slug =
+                    sessionSlug(
+                        session.sessionCode
+                    );
+
                 const papers =
                     Object.values(session.papers).sort(
                         (a, b) =>
@@ -3977,6 +3982,11 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
     const categoryBreadcrumbLabel =
         categoryInfo && categoryInfo[3] ? categoryInfo[3] : categoryKey;
     const categoryDisplayName = categoryInfo ? categoryInfo[1] : categoryKey;
+
+    const slug =
+        sessionSlug(
+            session.sessionCode
+        );
 
     const papers = Object.values(session.papers).sort((a, b) =>
         a.paper.localeCompare(b.paper, undefined, { numeric: true })
