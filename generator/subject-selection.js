@@ -129,7 +129,7 @@ function generateSubjectSelectionPage(subjects) {
 
     <script src="../auth.js"></script>
 
-    <script src="../user-data.js?v=0.1.82"></script>
+    <script src="../user-data.js?v=0.1.83"></script>
 
     <style>
 
@@ -208,10 +208,6 @@ function generateSubjectSelectionPage(subjects) {
             font-size: 17px;
             line-height: 1.6;
             font-weight: 400;
-        }
-
-        .subject-grid.subject-selection-pending {
-            visibility: hidden;
         }
 
         .subject-grid {
@@ -398,7 +394,7 @@ function generateSubjectSelectionPage(subjects) {
 
     </section>
 
-<div class="subject-grid subject-selection-pending">
+<div class="subject-grid">
     ${cards}
 </div>
 
@@ -431,17 +427,6 @@ let selectedSubjects =
     new Set();
 
 async function loadSubjects() {
-
-    const grid =
-        document.querySelector(
-            ".subject-grid"
-        );
-
-    if (grid) {
-        grid.classList.add(
-            "subject-selection-pending"
-        );
-    }
 
     try {
 
@@ -476,14 +461,6 @@ async function loadSubjects() {
         );
 
         updateUI();
-
-    } finally {
-
-        if (grid) {
-            grid.classList.remove(
-                "subject-selection-pending"
-            );
-        }
 
     }
 
