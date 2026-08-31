@@ -3722,6 +3722,10 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                     papers
                         .map((paper, index) => {
 
+            const slug =
+                sessionSlug(
+                    session.sessionCode
+                );
                             const paperStatusKey = [
                                 subject.code,
                                 categoryKey || "",
@@ -3958,6 +3962,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
     const cards = papers
         .map((paper, index) => {
 
+            const slug =
+                sessionSlug(
+                    session.sessionCode
+                );
             const currentGroup = String(paper.paper).charAt(0);
 
             const previousGroup =
