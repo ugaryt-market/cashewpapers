@@ -2,8 +2,7 @@
  * Cashew Papers
  * Account data layer
  *
- * Supabase is the source of truth for account-owned data.
- * This file intentionally does not use localStorage for normal operation.
+ * Supabase is the source of truth for all account-owned data.
  */
 (function () {
 
