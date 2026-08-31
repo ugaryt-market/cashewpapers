@@ -33,7 +33,7 @@
     };
 
     const CACHE_VERSION = "1";
-    const CACHE_TTL_MS = 5 * 60 * 1000;
+    const CACHE_TTL_MS = 30 * 60 * 1000;
     const CACHE_PREFIX = "cashewpapers:account-cache:";
 
     let activeUserId = null;
@@ -873,13 +873,6 @@
             writeStoredCache();
         }
     }
-
-    window.addEventListener(
-        "cashew-auth-change",
-        () => {
-            clearAccountCache();
-        }
-    );
 
     window.CashewUserData = {
         getUser,
