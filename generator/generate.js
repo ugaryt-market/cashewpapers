@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.85
+    Version Alpha 0.1.86
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1570,6 +1570,14 @@ main {
     transform: translateY(-1px);
     border-color: var(--muted);
     background: #3a3c3f;
+}
+
+.paper-status:disabled {
+    cursor: wait;
+}
+
+.paper-status:disabled:hover {
+    transform: none;
 }
 
 .paper-status.completed {
@@ -3478,9 +3486,17 @@ async function initializePaperProgress() {
 }
 
 async function togglePaperStatus(button) {
-    const key = button.dataset.paperKey;
-    const progress = button.closest(".paper-progress");
-    const user = await getCurrentUser();
+
+    const key =
+        button.dataset.paperKey;
+
+    const progress =
+        button.closest(
+            ".paper-progress"
+        );
+
+    const user =
+        await getCurrentUser();
 
     if (!user) {
         showLoginRequired();
@@ -3489,14 +3505,43 @@ async function togglePaperStatus(button) {
 
     clearLoginNotice(progress);
 
+    /*
+       Give immediate visual feedback before any network request.
+       The button itself does not change to completed until the
+       Supabase write succeeds.
+    */
+    button.classList.remove(
+        "status-pop"
+    );
+
+    void button.offsetWidth;
+
+    button.classList.add(
+        "status-pop"
+    );
+
+    window.setTimeout(
+        () => {
+            button.classList.remove(
+                "status-pop"
+            );
+        },
+        260
+    );
+
+    button.disabled = true;
+
     try {
+
         const current =
             button.classList.contains(
                 "completed"
             )
                 ? "completed"
                 : (
-                    await getPaperStatus(key)
+                    await getPaperStatus(
+                        key
+                    )
                 );
 
         const next =
@@ -3512,25 +3557,6 @@ async function togglePaperStatus(button) {
         renderPaperStatus(
             button,
             next
-        );
-
-        button.classList.remove(
-            "status-pop"
-        );
-
-        void button.offsetWidth;
-
-        button.classList.add(
-            "status-pop"
-        );
-
-        window.setTimeout(
-            () => {
-                button.classList.remove(
-                    "status-pop"
-                );
-            },
-            260
         );
 
         await renderPaperAttempts(
@@ -3552,13 +3578,22 @@ async function togglePaperStatus(button) {
         }
 
         await initializeOverviewProgress();
+
     } catch (error) {
+
         console.error(
             "cashewpapers: unable to update paper progress",
             error
         );
+
+    } finally {
+
+        button.disabled = false;
+
     }
+
 }
+
 </script>
 
 </body>
