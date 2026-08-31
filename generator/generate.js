@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.81
+    Version Alpha 0.1.82
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1217,12 +1217,16 @@ main {
     transition: width 0.25s ease;
 }
 
-.user-data-pending {
+.account-data-pending {
     visibility: hidden;
 }
 
-.user-data-pending-placeholder {
-    min-height: 1em;
+.account-progress-pending {
+    visibility: hidden;
+}
+
+.subject-selection-pending {
+    visibility: hidden;
 }
 
 .progress-overview-label {
@@ -2368,7 +2372,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.81">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.82">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2383,11 +2387,11 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.81"></script>
+    <script src="${prefix}auth.js?v=0.1.82"></script>
 
-    <script src="${prefix}user-data.js?v=0.1.81"></script>
+    <script src="${prefix}user-data.js?v=0.1.82"></script>
 
-    <script src="${prefix}search.js?v=0.1.81"></script>
+    <script src="${prefix}search.js?v=0.1.82"></script>
 
 </head>
 
@@ -2490,17 +2494,63 @@ async function updateAuthNavigation() {
 
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    updateAuthNavigation();
-    initializePaperProgress();
-    initializeOverviewProgress();
-});
+let renderedAccountUserId =
+    null;
 
-window.addEventListener("cashew-auth-change", () => {
-    updateAuthNavigation();
-    initializePaperProgress();
-    initializeOverviewProgress();
-});
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
+
+        const user =
+            await getCurrentUser();
+
+        renderedAccountUserId =
+            user
+                ? String(user.id)
+                : null;
+
+        updateAuthNavigation();
+
+        await Promise.all([
+            initializePaperProgress(),
+            initializeOverviewProgress()
+        ]);
+
+    }
+);
+
+window.addEventListener(
+    "cashew-auth-change",
+    async () => {
+
+        const user =
+            await getCurrentUser();
+
+        const nextUserId =
+            user
+                ? String(user.id)
+                : null;
+
+        updateAuthNavigation();
+
+        if (
+            nextUserId ===
+            renderedAccountUserId
+        ) {
+            return;
+        }
+
+        renderedAccountUserId =
+            nextUserId;
+
+        await Promise.all([
+            initializePaperProgress(),
+            initializeOverviewProgress()
+        ]);
+
+    }
+);
+
 
 async function getPaperStatus(key) {
     const user = await getCurrentUser();
@@ -2901,37 +2951,159 @@ async function updateOverviewProgressCard(card, user) {
 }
 
 async function initializeOverviewProgress() {
-    const cards = document.querySelectorAll(
-        "[data-progress-keys]"
-    );
+
+    const cards =
+        Array.from(
+            document.querySelectorAll(
+                "[data-progress-keys]"
+            )
+        );
 
     if (!cards.length) {
         return;
     }
 
-    const user = await getCurrentUser();
+    const user =
+        await getCurrentUser();
 
-    await Promise.all(
-        Array.from(cards).map(async card => {
+    if (!user) {
 
-            try {
-                await updateOverviewProgressCard(
-                    card,
-                    user
+        cards.forEach(card => {
+
+            const fill =
+                card.querySelector(
+                    "[data-overview-progress-fill]"
                 );
-            } finally {
-                card.classList.remove(
-                    "user-data-pending"
+
+            const label =
+                card.querySelector(
+                    "[data-overview-progress-label]"
                 );
+
+            if (fill) {
+                fill.style.width =
+                    "0%";
             }
 
-        })
-    );
+            if (label) {
+                label.textContent =
+                    "log in to track your progress";
+            }
+
+            card
+                .querySelectorAll(
+                    ".account-progress-pending"
+                )
+                .forEach(
+                    element =>
+                        element.classList
+                            .remove(
+                                "account-progress-pending"
+                            )
+                );
+
+        });
+
+        return;
+    }
+
+    const allKeys =
+        Array.from(
+            new Set(
+                cards
+                    .flatMap(card =>
+                        String(
+                            card.dataset
+                                .progressKeys ||
+                            ""
+                        )
+                            .split("|")
+                            .filter(Boolean)
+                    )
+            )
+        );
+
+    const statuses =
+        await CashewUserData
+            .getPaperStatuses(
+                allKeys
+            );
+
+    cards.forEach(card => {
+
+        const keys =
+            String(
+                card.dataset
+                    .progressKeys ||
+                ""
+            )
+                .split("|")
+                .filter(Boolean);
+
+        const total =
+            Number(
+                card.dataset
+                    .progressTotal ||
+                keys.length
+            );
+
+        const completed =
+            keys.filter(
+                key =>
+                    statuses[key] ===
+                    "completed"
+            ).length;
+
+        const value =
+            total > 0
+                ? Math.round(
+                    (
+                        completed /
+                        total
+                    ) * 100
+                )
+                : 0;
+
+        const fill =
+            card.querySelector(
+                "[data-overview-progress-fill]"
+            );
+
+        const label =
+            card.querySelector(
+                "[data-overview-progress-label]"
+            );
+
+        if (fill) {
+            fill.style.width =
+                value + "%";
+        }
+
+        if (label) {
+            label.textContent =
+                String(completed) +
+                "/" +
+                String(total) +
+                " papers completed";
+        }
+
+        card
+            .querySelectorAll(
+                ".account-progress-pending"
+            )
+            .forEach(
+                element =>
+                    element.classList
+                        .remove(
+                            "account-progress-pending"
+                        )
+            );
+
+    });
+
 }
 
 let paperProgressInitializationPromise = null;
-
-
 
 async function initializePaperProgress() {
 
@@ -2956,62 +3128,30 @@ async function initializePaperProgress() {
             const user =
                 await getCurrentUser();
 
-            if (!user) {
-
-                await Promise.all(
-                    progressElements.map(
-                        async progress => {
-
-                            const button =
-                                progress.querySelector(
-                                    ".paper-status"
-                                );
-
-                            if (button) {
-                                renderPaperStatus(
-                                    button,
-                                    "incomplete"
-                                );
-                            }
-
-                            await renderPaperAttempts(
-                                progress,
-                                button
-                                    ? button.dataset.paperKey
-                                    : "",
-                                false,
-                                null
-                            );
-
-                            progress.classList.remove(
-                                "user-data-pending"
-                            );
-
-                        }
-                    )
-                );
-
-                return;
-
-            }
-
             const keys =
                 progressElements
                     .map(progress => {
+
                         const button =
                             progress.querySelector(
                                 ".paper-status"
                             );
 
                         return button
-                            ? button.dataset.paperKey
+                            ? button.dataset
+                                .paperKey
                             : "";
+
                     })
                     .filter(Boolean);
 
             const statuses =
-                await CashewUserData
-                    .getPaperStatuses(keys);
+                user
+                    ? await CashewUserData
+                        .getPaperStatuses(
+                            keys
+                        )
+                    : {};
 
             await Promise.all(
                 progressElements.map(
@@ -3023,18 +3163,24 @@ async function initializePaperProgress() {
                             );
 
                         if (!button) {
-                            progress.classList.remove(
-                                "user-data-pending"
-                            );
+                            progress.classList
+                                .remove(
+                                    "account-data-pending"
+                                );
                             return;
                         }
 
                         const key =
-                            button.dataset.paperKey;
+                            button.dataset
+                                .paperKey;
 
                         const status =
-                            statuses[key] ||
-                            "incomplete";
+                            user
+                                ? (
+                                    statuses[key] ||
+                                    "incomplete"
+                                )
+                                : "incomplete";
 
                         renderPaperStatus(
                             button,
@@ -3053,9 +3199,15 @@ async function initializePaperProgress() {
 
                         } finally {
 
-                            progress.classList.remove(
-                                "user-data-pending"
-                            );
+                            /*
+                               The status + attempts are now committed
+                               before the account-dependent area becomes
+                               visible, so no intermediate state flashes.
+                            */
+                            progress.classList
+                                .remove(
+                                    "account-data-pending"
+                                );
 
                         }
 
@@ -3093,7 +3245,13 @@ async function togglePaperStatus(button) {
 
     try {
         const current =
-            await getPaperStatus(key);
+            button.classList.contains(
+                "completed"
+            )
+                ? "completed"
+                : (
+                    await getPaperStatus(key)
+                );
 
         const next =
             current === "completed"
@@ -3188,11 +3346,11 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.81</div>
+                <div class="version">Version Alpha 0.1.82</div>
 
             </section>
 
-            <div class="subject-grid">
+            <div class="subject-grid subject-selection-pending">
 
                 ${cards}
 
@@ -3287,13 +3445,24 @@ window.addEventListener("load", scheduleHomeScale);
 
 async function applySubjectFilter() {
 
-    const home =
-        document.querySelector(".home-page");
+    const subjectGrid =
+        document.querySelector(
+            ".subject-grid"
+        );
+
+    if (!subjectGrid) {
+        return;
+    }
+
+    subjectGrid.classList.add(
+        "subject-selection-pending"
+    );
 
     try {
 
         const user =
-            typeof getCurrentUser === "function"
+            typeof getCurrentUser ===
+            "function"
                 ? await getCurrentUser()
                 : null;
 
@@ -3305,24 +3474,21 @@ async function applySubjectFilter() {
             await CashewUserData
                 .getSelectedSubjects();
 
-        if (!selectedSubjects.length) {
-            return;
-        }
-
         document
-            .querySelectorAll("[data-subject]")
+            .querySelectorAll(
+                ".subject-card[data-subject]"
+            )
             .forEach(card => {
 
                 const subject =
-                    card.dataset.subject;
+                    card.dataset
+                        .subject;
 
-                if (
-                    !selectedSubjects
+                card.style.display =
+                    selectedSubjects
                         .includes(subject)
-                ) {
-                    card.style.display =
-                        "none";
-                }
+                        ? ""
+                        : "none";
 
             });
 
@@ -3335,26 +3501,14 @@ async function applySubjectFilter() {
 
     } finally {
 
-        if (home) {
-            home.classList.remove(
-                "user-data-pending"
-            );
-        }
+        subjectGrid.classList.remove(
+            "subject-selection-pending"
+        );
 
     }
 
 }
 
-const homePage =
-    document.querySelector(".home-page");
-
-if (homePage) {
-    homePage.classList.add(
-        "user-data-pending"
-    );
-}
-
-applySubjectFilter();
 </script>
 
         `,
@@ -3473,7 +3627,7 @@ function generateSubjectPage(subjectKey, data) {
             return `
 
                 <a
-                    class="year-link progress-overview-card user-data-pending"
+                    class="year-link progress-overview-card"
                     href="${year}/"
                     data-progress-keys="${yearPaperKeys.join("|")}"
                     data-progress-total="${yearPaperKeys.length}"
@@ -3485,7 +3639,9 @@ function generateSubjectPage(subjectKey, data) {
                             ${year}
                         </div>
 
-                        <div class="progress-overview-bar">
+                        <div
+                            class="progress-overview-bar account-progress-pending"
+                        >
 
                             <div
                                 class="progress-overview-fill"
@@ -3497,6 +3653,7 @@ function generateSubjectPage(subjectKey, data) {
                         <div
                             class="progress-overview-label"
                             data-overview-progress-label
+                            class="account-progress-pending"
                         >
                             0/${yearPaperKeys.length} papers completed
                         </div>
@@ -3637,7 +3794,9 @@ function generateCategoryPage(subjectKey, subject, categoryKey, years) {
                             ${year}
                         </div>
 
-                        <div class="progress-overview-bar">
+                        <div
+                            class="progress-overview-bar account-progress-pending"
+                        >
 
                             <div
                                 class="progress-overview-fill"
@@ -3649,6 +3808,7 @@ function generateCategoryPage(subjectKey, subject, categoryKey, years) {
                         <div
                             class="progress-overview-label"
                             data-overview-progress-label
+                            class="account-progress-pending"
                         >
                             0/${yearPaperKeys.length} papers completed
                         </div>
@@ -3726,7 +3886,7 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
             return `
 
                 <a
-                    class="year-session-card progress-overview-card user-data-pending"
+                    class="year-session-card progress-overview-card"
                     href="${slug}/"
                     data-progress-keys="${sessionPaperKeys.join("|")}"
                     data-progress-total="${count}"
@@ -3966,7 +4126,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                     <div class="paper-actions">
 
                                         <div
-                                            class="paper-progress"
+                                            class="paper-progress account-data-pending"
                                             data-paper-progress
                                         >
 
@@ -4210,7 +4370,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                     <div class="paper-actions">
 
-                        <div class="paper-progress" data-paper-progress>
+                        <div class="paper-progress account-data-pending" data-paper-progress>
 
                             <button
                                 type="button"
@@ -4473,8 +4633,8 @@ function generatePdfReaderPage() {
 /* ============================================================
    SCHEDULER / CALENDAR PAGE
 
-   The scheduler is account-backed and stores scheduled paper
-   entries in Supabase, keyed to the signed-in user.
+   A lightweight, client-side scheduler stored entirely in
+   ("YYYY-MM-DD") to an array of scheduled paper entries.
 
    Two ways in:
      1. General browsing via the nav "calendar" button:
