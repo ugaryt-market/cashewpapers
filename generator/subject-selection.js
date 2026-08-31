@@ -129,7 +129,7 @@ function generateSubjectSelectionPage(subjects) {
 
     <script src="../auth.js"></script>
 
-    <script src="../user-data.js?v=0.1.83"></script>
+    <script src="../user-data.js?v=0.1.84"></script>
 
     <style>
 
