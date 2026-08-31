@@ -32,41 +32,177 @@
         calendar: "calendar_events"
     };
 
-    const cache = {
-        userId: null,
-        subjects: null,
-        progress: new Map(),
-        attempts: new Map(),
-        calendar: null
-    };
+    const CACHE_VERSION = "1";
+    const CACHE_TTL_MS = 5 * 60 * 1000;
+    const CACHE_PREFIX = "cashewpapers:account-cache:";
 
-    function resetCache(userId = null) {
-        cache.userId = userId;
-        cache.subjects = null;
-        cache.progress = new Map();
-        cache.attempts = new Map();
-        cache.calendar = null;
+    let activeUserId = null;
+    let memoryCache = null;
+
+    function cacheKey(userId) {
+        return CACHE_PREFIX + CACHE_VERSION + ":" + userId;
     }
 
-    function ensureUserCache(user) {
-        const userId = user ? user.id : null;
-
-        if (cache.userId !== userId) {
-            resetCache(userId);
-        }
+    function emptyCache(userId) {
+        return {
+            userId,
+            savedAt: Date.now(),
+            subjects: null,
+            progress: {},
+            attempts: {},
+            calendar: null
+        };
     }
 
-    async function getUser() {
-        if (typeof getCurrentUser !== "function") {
-            resetCache();
+    function readStoredCache(userId) {
+
+        if (!userId) {
             return null;
         }
 
-        const user = await getCurrentUser();
+        try {
 
-        ensureUserCache(user);
+            const raw =
+                sessionStorage.getItem(
+                    cacheKey(userId)
+                );
+
+            if (!raw) {
+                return null;
+            }
+
+            const parsed =
+                JSON.parse(raw);
+
+            if (
+                !parsed ||
+                parsed.userId !== userId ||
+                !parsed.savedAt ||
+                Date.now() - parsed.savedAt > CACHE_TTL_MS
+            ) {
+                sessionStorage.removeItem(
+                    cacheKey(userId)
+                );
+                return null;
+            }
+
+            return parsed;
+
+        } catch (error) {
+
+            console.warn(
+                "cashewpapers: unable to read account cache",
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+    function writeStoredCache() {
+
+        if (!memoryCache || !activeUserId) {
+            return;
+        }
+
+        memoryCache.savedAt =
+            Date.now();
+
+        try {
+
+            sessionStorage.setItem(
+                cacheKey(activeUserId),
+                JSON.stringify(memoryCache)
+            );
+
+        } catch (error) {
+
+            /*
+               Cache failure must never affect the actual Supabase
+               data path. The cache is only an optimization.
+            */
+            console.warn(
+                "cashewpapers: unable to write account cache",
+                error
+            );
+
+        }
+
+    }
+
+    function ensureCache(user) {
+
+        const userId =
+            user
+                ? String(user.id)
+                : null;
+
+        if (activeUserId === userId && memoryCache) {
+            return memoryCache;
+        }
+
+        activeUserId = userId;
+
+        if (!userId) {
+            memoryCache = null;
+            return null;
+        }
+
+        memoryCache =
+            readStoredCache(userId) ||
+            emptyCache(userId);
+
+        return memoryCache;
+    }
+
+    function clearAccountCache() {
+        activeUserId = null;
+        memoryCache = null;
+    }
+
+    function setCachedProgress(key, status) {
+
+        if (!memoryCache) {
+            return;
+        }
+
+        memoryCache.progress[String(key)] =
+            status;
+
+    }
+
+    function setCachedAttempts(key, attempts) {
+
+        if (!memoryCache) {
+            return;
+        }
+
+        memoryCache.attempts[String(key)] =
+            (attempts || []).map(
+                attempt => ({ ...attempt })
+            );
+
+    }
+
+    async function getUser() {
+
+        if (
+            typeof getCurrentUser !==
+            "function"
+        ) {
+            clearAccountCache();
+            return null;
+        }
+
+        const user =
+            await getCurrentUser();
+
+        ensureCache(user);
 
         return user;
+
     }
 
     async function requireUser() {
@@ -87,11 +223,16 @@
     }
 
     async function getSelectedSubjects() {
-        const user = await requireUser();
 
-        ensureUserCache(user);
+        const user =
+            await requireUser();
 
-        if (Array.isArray(cache.subjects)) {
+        const cache =
+            ensureCache(user);
+
+        if (
+            Array.isArray(cache.subjects)
+        ) {
             return cache.subjects.slice();
         }
 
@@ -100,7 +241,10 @@
                 .from(TABLES.subjects)
                 .select("subject_key")
                 .eq("user_id", user.id)
-                .order("created_at", { ascending: true });
+                .order(
+                    "created_at",
+                    { ascending: true }
+                );
 
         checkError(
             error,
@@ -108,9 +252,14 @@
         );
 
         cache.subjects =
-            (data || []).map(row =>
-                String(row.subject_key)
+            (data || []).map(
+                row =>
+                    String(
+                        row.subject_key
+                    )
             );
+
+        writeStoredCache();
 
         return cache.subjects.slice();
     }
@@ -150,45 +299,71 @@
             );
         }
 
-        cache.subjects = values.slice();
+        const cache =
+            ensureCache(user);
+
+        cache.subjects =
+            values.slice();
+
+        writeStoredCache();
 
         return values;
     }
 
     async function getPaperStatus(paperKey) {
-        const key = String(paperKey);
+
+        const key =
+            String(paperKey);
+
         const statuses =
             await getPaperStatuses([key]);
 
-        return statuses[key] || "incomplete";
+        return statuses[key] ||
+            "incomplete";
     }
 
     async function getPaperStatuses(paperKeys) {
-        const user = await requireUser();
 
-        ensureUserCache(user);
+        const user =
+            await requireUser();
 
-        const keys = Array.from(
-            new Set(
-                (paperKeys || [])
-                    .map(value => String(value))
-                    .filter(Boolean)
-            )
-        );
+        const cache =
+            ensureCache(user);
+
+        const keys =
+            Array.from(
+                new Set(
+                    (paperKeys || [])
+                        .map(
+                            value =>
+                                String(value)
+                        )
+                        .filter(Boolean)
+                )
+            );
 
         const result = {};
 
-        keys.forEach(key => {
-            result[key] =
-                cache.progress.has(key)
-                    ? cache.progress.get(key)
-                    : "incomplete";
-        });
+        const missingKeys = [];
 
-        const missingKeys =
-            keys.filter(
-                key => !cache.progress.has(key)
-            );
+        keys.forEach(key => {
+
+            if (
+                Object.prototype.hasOwnProperty
+                    .call(
+                        cache.progress,
+                        key
+                    )
+            ) {
+                result[key] =
+                    cache.progress[key];
+            } else {
+                result[key] =
+                    "incomplete";
+                missingKeys.push(key);
+            }
+
+        });
 
         if (!missingKeys.length) {
             return result;
@@ -197,9 +372,17 @@
         const { data, error } =
             await client
                 .from(TABLES.progress)
-                .select("paper_key,status")
-                .eq("user_id", user.id)
-                .in("paper_key", missingKeys);
+                .select(
+                    "paper_key,status"
+                )
+                .eq(
+                    "user_id",
+                    user.id
+                )
+                .in(
+                    "paper_key",
+                    missingKeys
+                );
 
         checkError(
             error,
@@ -207,30 +390,28 @@
         );
 
         missingKeys.forEach(key => {
-            cache.progress.set(
-                key,
-                "incomplete"
-            );
+            cache.progress[key] =
+                "incomplete";
         });
 
         (data || []).forEach(row => {
+
             const key =
                 String(row.paper_key);
 
-            const status =
-                row.status === "completed"
+            cache.progress[key] =
+                row.status ===
+                    "completed"
                     ? "completed"
                     : "incomplete";
 
-            cache.progress.set(
-                key,
-                status
-            );
         });
+
+        writeStoredCache();
 
         keys.forEach(key => {
             result[key] =
-                cache.progress.get(key) ||
+                cache.progress[key] ||
                 "incomplete";
         });
 
@@ -268,10 +449,13 @@
                 "Unable to save paper progress"
             );
 
-            cache.progress.set(
-                key,
-                "completed"
-            );
+            const cache =
+                ensureCache(user);
+
+            cache.progress[key] =
+                "completed";
+
+            writeStoredCache();
 
             return "completed";
         }
@@ -288,24 +472,40 @@
             "Unable to clear paper progress"
         );
 
-        cache.progress.set(
-            key,
-            "incomplete"
-        );
+        const cache =
+            ensureCache(user);
+
+        cache.progress[key] =
+            "incomplete";
+
+        writeStoredCache();
 
         return "incomplete";
     }
 
     async function getPaperAttempts(paperKey) {
-        const user = await requireUser();
-        const key = String(paperKey);
 
-        ensureUserCache(user);
+        const user =
+            await requireUser();
 
-        if (cache.attempts.has(key)) {
-            return cache.attempts
-                .get(key)
-                .map(attempt => ({ ...attempt }));
+        const key =
+            String(paperKey);
+
+        const cache =
+            ensureCache(user);
+
+        if (
+            Object.prototype.hasOwnProperty
+                .call(
+                    cache.attempts,
+                    key
+                )
+        ) {
+            return cache.attempts[key]
+                .map(
+                    attempt =>
+                        ({ ...attempt })
+                );
         }
 
         const { data, error } =
@@ -314,8 +514,14 @@
                 .select(
                     "id,score,attempted_at,created_at"
                 )
-                .eq("user_id", user.id)
-                .eq("paper_key", key)
+                .eq(
+                    "user_id",
+                    user.id
+                )
+                .eq(
+                    "paper_key",
+                    key
+                )
                 .order(
                     "created_at",
                     { ascending: true }
@@ -327,21 +533,28 @@
         );
 
         const attempts =
-            (data || []).map(row => ({
-                id: row.id,
-                score: String(row.score),
-                date:
-                    row.attempted_at ||
-                    row.created_at
-            }));
+            (data || []).map(
+                row => ({
+                    id: row.id,
+                    score: String(
+                        row.score
+                    ),
+                    date:
+                        row.attempted_at ||
+                        row.created_at
+                })
+            );
 
-        cache.attempts.set(
+        setCachedAttempts(
             key,
             attempts
         );
 
+        writeStoredCache();
+
         return attempts.map(
-            attempt => ({ ...attempt })
+            attempt =>
+                ({ ...attempt })
         );
     }
 
@@ -384,17 +597,23 @@
                 data.created_at
         };
 
-        const current =
-            cache.attempts.get(
-                String(paperKey)
-            ) || [];
+        const cache =
+            ensureCache(user);
 
-        current.push(attempt);
+        const key =
+            String(paperKey);
 
-        cache.attempts.set(
-            String(paperKey),
-            current
+        if (!Array.isArray(
+            cache.attempts[key]
+        )) {
+            cache.attempts[key] = [];
+        }
+
+        cache.attempts[key].push(
+            { ...attempt }
         );
+
+        writeStoredCache();
 
         return { ...attempt };
     }
@@ -415,30 +634,45 @@
             "Unable to delete attempt"
         );
 
+        const cache =
+            ensureCache(user);
+
         const key =
             String(paperKey);
 
-        if (cache.attempts.has(key)) {
-            cache.attempts.set(
-                key,
-                cache.attempts
-                    .get(key)
+        if (
+            Array.isArray(
+                cache.attempts[key]
+            )
+        ) {
+            cache.attempts[key] =
+                cache.attempts[key]
                     .filter(
                         attempt =>
-                            String(attempt.id) !==
-                            String(attemptId)
-                    )
-            );
+                            String(
+                                attempt.id
+                            ) !==
+                            String(
+                                attemptId
+                            )
+                    );
+
+            writeStoredCache();
         }
     }
 
     async function getCalendarSchedule() {
-        const user = await requireUser();
 
-        ensureUserCache(user);
+        const user =
+            await requireUser();
+
+        const cache =
+            ensureCache(user);
 
         if (cache.calendar) {
-            return cloneCalendar(cache.calendar);
+            return cloneCalendar(
+                cache.calendar
+            );
         }
 
         const { data, error } =
@@ -447,7 +681,10 @@
                 .select(
                     "id,date,paper_key,paper_code,subject,paper,path,file"
                 )
-                .eq("user_id", user.id)
+                .eq(
+                    "user_id",
+                    user.id
+                )
                 .order(
                     "date",
                     { ascending: true }
@@ -465,6 +702,7 @@
         const schedule = {};
 
         (data || []).forEach(row => {
+
             const key =
                 String(row.date);
 
@@ -474,29 +712,47 @@
 
             schedule[key].push({
                 id: row.id,
-                code: row.paper_code || "",
-                subject: row.subject || "",
-                paper: row.paper || "",
-                path: row.path || "",
-                questionPath: row.file || "",
-                paperKey: row.paper_key || ""
+                code:
+                    row.paper_code || "",
+                subject:
+                    row.subject || "",
+                paper:
+                    row.paper || "",
+                path:
+                    row.path || "",
+                questionPath:
+                    row.file || "",
+                paperKey:
+                    row.paper_key || ""
             });
+
         });
 
-        cache.calendar = schedule;
+        cache.calendar =
+            schedule;
 
-        return cloneCalendar(schedule);
+        writeStoredCache();
+
+        return cloneCalendar(
+            schedule
+        );
     }
 
     function cloneCalendar(schedule) {
+
         const clone = {};
 
-        Object.keys(schedule || {}).forEach(key => {
+        Object.keys(
+            schedule || {}
+        ).forEach(key => {
+
             clone[key] =
                 (schedule[key] || [])
-                    .map(entry => ({
-                        ...entry
-                    }));
+                    .map(
+                        entry =>
+                            ({ ...entry })
+                    );
+
         });
 
         return clone;
@@ -528,6 +784,25 @@
             "Unable to schedule paper"
         );
 
+        const entryValue = {
+            id: data.id,
+            code:
+                data.paper_code || "",
+            subject:
+                data.subject || "",
+            paper:
+                data.paper || "",
+            path:
+                data.path || "",
+            questionPath:
+                data.file || "",
+            paperKey:
+                data.paper_key || ""
+        };
+
+        const cache =
+            ensureCache(user);
+
         if (!cache.calendar) {
             cache.calendar = {};
         }
@@ -535,23 +810,15 @@
         const key =
             String(data.date);
 
-        const entryValue = {
-            id: data.id,
-            code: data.paper_code || "",
-            subject: data.subject || "",
-            paper: data.paper || "",
-            path: data.path || "",
-            questionPath: data.file || "",
-            paperKey: data.paper_key || ""
-        };
-
         if (!cache.calendar[key]) {
             cache.calendar[key] = [];
         }
 
         cache.calendar[key].push(
-            entryValue
+            { ...entryValue }
         );
+
+        writeStoredCache();
 
         return { ...entryValue };
     }
@@ -571,31 +838,46 @@
             "Unable to remove calendar event"
         );
 
-        if (cache.calendar) {
-            Object.keys(cache.calendar)
-                .forEach(dateKey => {
-                    cache.calendar[dateKey] =
-                        cache.calendar[dateKey]
-                            .filter(
-                                entry =>
-                                    String(entry.id) !==
-                                    String(eventId)
-                            );
+        const cache =
+            ensureCache(user);
 
-                    if (
-                        cache.calendar[dateKey]
-                            .length === 0
-                    ) {
-                        delete cache.calendar[dateKey];
-                    }
-                });
+        if (cache.calendar) {
+
+            Object.keys(
+                cache.calendar
+            ).forEach(dateKey => {
+
+                cache.calendar[dateKey] =
+                    cache.calendar[dateKey]
+                        .filter(
+                            entry =>
+                                String(
+                                    entry.id
+                                ) !==
+                                String(
+                                    eventId
+                                )
+                        );
+
+                if (
+                    cache.calendar[dateKey]
+                        .length === 0
+                ) {
+                    delete cache.calendar[
+                        dateKey
+                    ];
+                }
+
+            });
+
+            writeStoredCache();
         }
     }
 
     window.addEventListener(
         "cashew-auth-change",
         () => {
-            resetCache();
+            clearAccountCache();
         }
     );
 
