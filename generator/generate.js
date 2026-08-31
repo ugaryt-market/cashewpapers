@@ -2496,8 +2496,8 @@ function documentHTML(title, body, depth = 0) {
         <div class="mobile-block-screen" aria-hidden="true">
             <div class="mobile-block-screen-inner">
                 <img class="mobile-block-logo" src="${prefix}assets/cashewpapers.svg" alt="cashewpapers">
-                <h1>oops... desktop required</h1>
-                <p>cashewpapers is currently only designed for desktop screens. please open this website on a computer.</p>
+                <h1>desktop required</h1>
+                <p>oops... cashewpapers is currently only designed for desktop screens. please open this website on a computer.</p>
             </div>
         </div>
 
