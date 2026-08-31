@@ -105,7 +105,7 @@ function generateSubjectSelectionPage(subjects) {
 
     <link
         rel="stylesheet"
-        href="../style.css?v=0.1.80"
+        href="../style.css"
     >
 
     <link
@@ -129,7 +129,7 @@ function generateSubjectSelectionPage(subjects) {
 
     <script src="../auth.js"></script>
 
-    <script src="../user-data.js"></script>
+    <script src="../user-data.js?v=0.1.82"></script>
 
     <style>
 
@@ -210,11 +210,7 @@ function generateSubjectSelectionPage(subjects) {
             font-weight: 400;
         }
 
-        body.user-data-pending .subject-grid {
-            visibility: hidden;
-        }
-
-        body.user-data-pending .continue-wrapper {
+        .subject-grid.subject-selection-pending {
             visibility: hidden;
         }
 
@@ -366,7 +362,7 @@ function generateSubjectSelectionPage(subjects) {
 
 </head>
 
-<body class="user-data-pending">
+<body>
 
 <nav class="nav">
 
@@ -402,7 +398,7 @@ function generateSubjectSelectionPage(subjects) {
 
     </section>
 
-<div class="subject-grid">
+<div class="subject-grid subject-selection-pending">
     ${cards}
 </div>
 
@@ -436,23 +432,39 @@ let selectedSubjects =
 
 async function loadSubjects() {
 
+    const grid =
+        document.querySelector(
+            ".subject-grid"
+        );
+
+    if (grid) {
+        grid.classList.add(
+            "subject-selection-pending"
+        );
+    }
+
     try {
 
         const user =
-            typeof getCurrentUser === "function"
+            typeof getCurrentUser ===
+            "function"
                 ? await getCurrentUser()
                 : null;
 
         if (!user) {
-            window.location.href = "../login/";
+            window.location.href =
+                "../login/";
             return;
         }
 
         const saved =
-            await CashewUserData.getSelectedSubjects();
+            await CashewUserData
+                .getSelectedSubjects();
 
         selectedSubjects =
-            new Set(saved || []);
+            new Set(
+                saved || []
+            );
 
         updateUI();
 
@@ -467,9 +479,11 @@ async function loadSubjects() {
 
     } finally {
 
-        document.body.classList.remove(
-            "user-data-pending"
-        );
+        if (grid) {
+            grid.classList.remove(
+                "subject-selection-pending"
+            );
+        }
 
     }
 
