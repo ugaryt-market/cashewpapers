@@ -4312,9 +4312,8 @@ function generatePdfReaderPage() {
 /* ============================================================
    SCHEDULER / CALENDAR PAGE
 
-   A lightweight, client-side scheduler stored entirely in
-   localStorage (key: "cashew-schedule"), mapping ISO dates
-   ("YYYY-MM-DD") to an array of scheduled paper entries.
+   The scheduler is account-backed and stores scheduled paper
+   entries in Supabase, keyed to the signed-in user.
 
    Two ways in:
      1. General browsing via the nav "calendar" button:
