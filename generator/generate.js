@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.82
+    Version Alpha 0.1.83
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1221,12 +1221,18 @@ main {
     visibility: hidden;
 }
 
-.account-progress-pending {
-    visibility: hidden;
+.account-data-placeholder {
+    display: inline-block;
+    min-width: 96px;
+    height: 12px;
+    border-radius: 999px;
+    background: #3a3c3f;
+    vertical-align: middle;
 }
 
-.subject-selection-pending {
-    visibility: hidden;
+.account-progress-pending {
+    opacity: 0.65;
+    pointer-events: none;
 }
 
 .progress-overview-label {
@@ -2372,7 +2378,7 @@ function documentHTML(title, body, depth = 0) {
         ${String(title).toLowerCase()} · cashew papers
     </title>
 
-    <link rel="stylesheet" href="${prefix}style.css?v=0.1.82">
+    <link rel="stylesheet" href="${prefix}style.css?v=0.1.83">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2387,11 +2393,11 @@ function documentHTML(title, body, depth = 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="${prefix}auth.js?v=0.1.82"></script>
+    <script src="${prefix}auth.js?v=0.1.83"></script>
 
-    <script src="${prefix}user-data.js?v=0.1.82"></script>
+    <script src="${prefix}user-data.js?v=0.1.83"></script>
 
-    <script src="${prefix}search.js?v=0.1.82"></script>
+    <script src="${prefix}search.js?v=0.1.83"></script>
 
 </head>
 
@@ -2594,94 +2600,239 @@ function showLoginRequired() {
 }
 
 function renderPaperStatus(button, status) {
-    button.classList.remove("completed");
+
+    button.classList.remove(
+        "account-data-pending"
+    );
+
+    button.classList.toggle(
+        "completed",
+        status === "completed"
+    );
+
     if (status === "completed") {
-        button.classList.add("completed");
-        button.innerHTML = "✓ Completed";
-        button.title = "Click to mark as incomplete";
-        button.setAttribute("aria-label", "Mark paper as incomplete");
+
+        button.textContent =
+            "✓ completed";
+
+        button.title =
+            "Click to mark as incomplete";
+
+        button.setAttribute(
+            "aria-label",
+            "Mark paper as incomplete"
+        );
+
     } else {
-        button.innerHTML = "☐ Mark as completed";
-        button.title = "Click to mark as completed";
-        button.setAttribute("aria-label", "Mark paper as completed");
+
+        button.textContent =
+            "☐ Mark as completed";
+
+        button.title =
+            "Click to mark as completed";
+
+        button.setAttribute(
+            "aria-label",
+            "Mark paper as completed"
+        );
+
     }
+
 }
 
-async function renderPaperAttempts(progress, key, completed, user) {
+async function renderPaperAttempts(
+    progress,
+    key,
+    completed,
+    user
+) {
+
     const attemptsContainer =
-        progress.querySelector("[data-paper-attempts]");
+        progress.querySelector(
+            "[data-paper-attempts]"
+        );
 
     if (!attemptsContainer) {
         return;
     }
 
+    attemptsContainer.classList.add(
+        "account-data-pending"
+    );
+
     attemptsContainer.innerHTML = "";
+
     clearLoginNotice(progress);
 
-    if (!completed || !user) {
+    if (
+        !completed ||
+        !user
+    ) {
+
+        attemptsContainer.classList.remove(
+            "account-data-pending"
+        );
+
         return;
     }
 
-    const attempts = await getPaperAttempts(key);
+    const attempts =
+        await getPaperAttempts(key);
 
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "attempt-button";
-    addButton.textContent = "+ Add attempt";
+    const addButton =
+        document.createElement(
+            "button"
+        );
 
-    addButton.addEventListener("click", event => {
-        event.preventDefault();
-        event.stopPropagation();
-        openAttemptForm(progress, key);
-    });
+    addButton.type =
+        "button";
 
-    attemptsContainer.appendChild(addButton);
+    addButton.className =
+        "attempt-button";
 
-    if (!attempts.length) {
-        return;
+    addButton.textContent =
+        "+ Add attempt";
+
+    addButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openAttemptForm(
+                progress,
+                key
+            );
+
+        }
+    );
+
+    attemptsContainer.appendChild(
+        addButton
+    );
+
+    if (attempts.length) {
+
+        const previewAttempts =
+            attempts.slice(
+                0,
+                Math.min(
+                    6,
+                    attempts.length
+                )
+            );
+
+        const previewScores =
+            previewAttempts
+                .map(
+                    attempt =>
+                        String(
+                            attempt.score
+                        )
+                )
+                .join(" · ");
+
+        const summaryButton =
+            document.createElement(
+                "button"
+            );
+
+        summaryButton.type =
+            "button";
+
+        summaryButton.className =
+            "attempt-summary";
+
+        summaryButton.textContent =
+            String(
+                attempts.length
+            ) +
+            " " +
+            (
+                attempts.length === 1
+                    ? "attempt"
+                    : "attempts"
+            ) +
+            (
+                previewScores
+                    ? " · " +
+                      previewScores
+                    : ""
+            ) +
+            (
+                attempts.length > 6
+                    ? " · see more"
+                    : ""
+            );
+
+        const history =
+            document.createElement(
+                "div"
+            );
+
+        history.className =
+            "attempt-history";
+
+        attempts.forEach(
+            (
+                attempt,
+                index
+            ) => {
+
+                history.appendChild(
+                    createAttemptHistoryRow(
+                        progress,
+                        key,
+                        attempt,
+                        index
+                    )
+                );
+
+            }
+        );
+
+        summaryButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const isOpen =
+                    history.classList.toggle(
+                        "open"
+                    );
+
+                summaryButton.setAttribute(
+                    "aria-expanded",
+                    isOpen
+                        ? "true"
+                        : "false"
+                );
+
+            }
+        );
+
+        attemptsContainer.appendChild(
+            summaryButton
+        );
+
+        attemptsContainer.appendChild(
+            history
+        );
+
     }
 
-    const previewAttempts =
-        attempts.slice(0, Math.min(6, attempts.length));
+    /*
+       Reveal the complete attempts UI in one operation after both the
+       Supabase/cache read and DOM construction have finished.
+    */
+    attemptsContainer.classList.remove(
+        "account-data-pending"
+    );
 
-    const previewScores = previewAttempts
-        .map(attempt => String(attempt.score))
-        .join(" · ");
-
-    const summaryButton = document.createElement("button");
-    summaryButton.type = "button";
-    summaryButton.className = "attempt-summary";
-    summaryButton.textContent =
-        String(attempts.length) +
-        " " +
-        (attempts.length === 1 ? "attempt" : "attempts") +
-        (previewScores ? " · " + previewScores : "") +
-        (attempts.length > 6 ? " · see more" : "");
-    summaryButton.setAttribute("aria-expanded", "false");
-
-    const history = document.createElement("div");
-    history.className = "attempt-history";
-
-    attempts.forEach((attempt, index) => {
-        history.appendChild(
-            createAttemptHistoryRow(progress, key, attempt, index)
-        );
-    });
-
-    summaryButton.addEventListener("click", event => {
-        event.preventDefault();
-        event.stopPropagation();
-        const isOpen = history.classList.toggle("open");
-        summaryButton.setAttribute(
-            "aria-expanded",
-            isOpen ? "true" : "false"
-        );
-    });
-
-    attemptsContainer.appendChild(summaryButton);
-    attemptsContainer.appendChild(history);
 }
-
 function createAttemptHistoryRow(progress, key, attempt, index) {
     const row = document.createElement("div");
     row.className = "attempt-row";
@@ -2983,24 +3134,18 @@ async function initializeOverviewProgress() {
             if (fill) {
                 fill.style.width =
                     "0%";
+                fill.classList.remove(
+                    "account-progress-pending"
+                );
             }
 
             if (label) {
                 label.textContent =
                     "log in to track your progress";
-            }
-
-            card
-                .querySelectorAll(
-                    ".account-progress-pending"
-                )
-                .forEach(
-                    element =>
-                        element.classList
-                            .remove(
-                                "account-progress-pending"
-                            )
+                label.classList.remove(
+                    "account-progress-pending"
                 );
+            }
 
         });
 
@@ -3010,8 +3155,8 @@ async function initializeOverviewProgress() {
     const allKeys =
         Array.from(
             new Set(
-                cards
-                    .flatMap(card =>
+                cards.flatMap(
+                    card =>
                         String(
                             card.dataset
                                 .progressKeys ||
@@ -3019,7 +3164,7 @@ async function initializeOverviewProgress() {
                         )
                             .split("|")
                             .filter(Boolean)
-                    )
+                )
             )
         );
 
@@ -3077,6 +3222,9 @@ async function initializeOverviewProgress() {
         if (fill) {
             fill.style.width =
                 value + "%";
+            fill.classList.remove(
+                "account-progress-pending"
+            );
         }
 
         if (label) {
@@ -3085,19 +3233,10 @@ async function initializeOverviewProgress() {
                 "/" +
                 String(total) +
                 " papers completed";
-        }
-
-        card
-            .querySelectorAll(
-                ".account-progress-pending"
-            )
-            .forEach(
-                element =>
-                    element.classList
-                        .remove(
-                            "account-progress-pending"
-                        )
+            label.classList.remove(
+                "account-progress-pending"
             );
+        }
 
     });
 
@@ -3148,9 +3287,7 @@ async function initializePaperProgress() {
             const statuses =
                 user
                     ? await CashewUserData
-                        .getPaperStatuses(
-                            keys
-                        )
+                        .getPaperStatuses(keys)
                     : {};
 
             await Promise.all(
@@ -3163,10 +3300,6 @@ async function initializePaperProgress() {
                             );
 
                         if (!button) {
-                            progress.classList
-                                .remove(
-                                    "account-data-pending"
-                                );
                             return;
                         }
 
@@ -3187,29 +3320,13 @@ async function initializePaperProgress() {
                             status
                         );
 
-                        try {
-
-                            await renderPaperAttempts(
-                                progress,
-                                key,
-                                status ===
-                                    "completed",
-                                user
-                            );
-
-                        } finally {
-
-                            /*
-                               The status + attempts are now committed
-                               before the account-dependent area becomes
-                               visible, so no intermediate state flashes.
-                            */
-                            progress.classList
-                                .remove(
-                                    "account-data-pending"
-                                );
-
-                        }
+                        await renderPaperAttempts(
+                            progress,
+                            key,
+                            status ===
+                                "completed",
+                            user
+                        );
 
                     }
                 )
@@ -3346,11 +3463,11 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.82</div>
+                <div class="version">Version Alpha 0.1.83</div>
 
             </section>
 
-            <div class="subject-grid subject-selection-pending">
+            <div class="subject-grid">
 
                 ${cards}
 
@@ -3454,10 +3571,6 @@ async function applySubjectFilter() {
         return;
     }
 
-    subjectGrid.classList.add(
-        "subject-selection-pending"
-    );
-
     try {
 
         const user =
@@ -3481,8 +3594,7 @@ async function applySubjectFilter() {
             .forEach(card => {
 
                 const subject =
-                    card.dataset
-                        .subject;
+                    card.dataset.subject;
 
                 card.style.display =
                     selectedSubjects
@@ -3497,12 +3609,6 @@ async function applySubjectFilter() {
         console.error(
             "cashewpapers: unable to load selected subjects",
             error
-        );
-
-    } finally {
-
-        subjectGrid.classList.remove(
-            "subject-selection-pending"
         );
 
     }
@@ -3640,11 +3746,11 @@ function generateSubjectPage(subjectKey, data) {
                         </div>
 
                         <div
-                            class="progress-overview-bar account-progress-pending"
+                            class="progress-overview-bar"
                         >
 
                             <div
-                                class="progress-overview-fill"
+                                class="progress-overview-fill account-progress-pending"
                                 data-overview-progress-fill
                             ></div>
 
@@ -3795,11 +3901,11 @@ function generateCategoryPage(subjectKey, subject, categoryKey, years) {
                         </div>
 
                         <div
-                            class="progress-overview-bar account-progress-pending"
+                            class="progress-overview-bar"
                         >
 
                             <div
-                                class="progress-overview-fill"
+                                class="progress-overview-fill account-progress-pending"
                                 data-overview-progress-fill
                             ></div>
 
@@ -3913,7 +4019,7 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
                             <div class="progress-overview-bar">
 
                                 <div
-                                    class="progress-overview-fill"
+                                    class="progress-overview-fill account-progress-pending"
                                     data-overview-progress-fill
                                 ></div>
 
@@ -4126,13 +4232,13 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                     <div class="paper-actions">
 
                                         <div
-                                            class="paper-progress account-data-pending"
+                                            class="paper-progress"
                                             data-paper-progress
                                         >
 
                                             <button
                                                 type="button"
-                                                class="paper-status"
+                                                class="paper-status account-data-pending"
                                                 data-paper-key="${paperStatusKey}"
                                                 onclick="
                                                     event.preventDefault();
@@ -4144,7 +4250,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                             </button>
 
                                             <div
-                                                class="paper-attempts"
+                                                class="paper-attempts account-data-pending"
                                                 data-paper-attempts
                                             ></div>
 
@@ -4370,11 +4476,11 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                     <div class="paper-actions">
 
-                        <div class="paper-progress account-data-pending" data-paper-progress>
+                        <div class="paper-progress" data-paper-progress>
 
                             <button
                                 type="button"
-                                class="paper-status"
+                                class="paper-status account-data-pending"
                                 data-paper-key="${paperStatusKey}"
                                 onclick="
                                     event.preventDefault();
@@ -4385,7 +4491,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 ☐ Mark as completed
                             </button>
 
-                            <div class="paper-attempts" data-paper-attempts></div>
+                            <div class="paper-attempts account-data-pending" data-paper-attempts></div>
 
                         </div>
 
@@ -5243,28 +5349,81 @@ function generateSchedulerPage() {
             handleAddFormSubmit
         );
 
+    let calendarUserId =
+        null;
+
+    getCurrentUser()
+        .then(user => {
+
+            calendarUserId =
+                user
+                    ? String(user.id)
+                    : null;
+
+        });
+
     window.addEventListener(
         "cashew-auth-change",
         async () => {
+
+            const user =
+                await getCurrentUser();
+
+            const nextUserId =
+                user
+                    ? String(user.id)
+                    : null;
+
+            if (
+                nextUserId ===
+                calendarUserId
+            ) {
+                return;
+            }
+
+            calendarUserId =
+                nextUserId;
+
             try {
                 await refreshSchedule();
             } catch (error) {
                 schedule = {};
                 renderGrid();
             }
+
         }
     );
 
     renderDayLabels();
     renderBanner();
 
-    try {
-        await loadSchedule();
-    } catch (error) {
-        schedule = {};
-    }
-
+    /*
+       Render the calendar shell immediately. Account-owned scheduled entries
+       are filled from the cache/Supabase asynchronously afterward.
+    */
     renderGrid();
+
+    loadSchedule()
+        .then(() => {
+
+            renderGrid();
+
+            if (selectedDateKey) {
+                renderModalEntries();
+            }
+
+        })
+        .catch(error => {
+
+            console.error(
+                "cashewpapers: unable to load calendar",
+                error
+            );
+
+            schedule = {};
+            renderGrid();
+
+        });
 
 })();
 
