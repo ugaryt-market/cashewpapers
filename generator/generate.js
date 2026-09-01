@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.87
+    Version Alpha 0.1.88
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -810,15 +810,54 @@ body {
     text-transform: lowercase;
 }
 
-.mobile-block-screen { display: none; }
-.mobile-block-screen-inner { width: min(520px, calc(100% - 40px)); text-align: center; }
-.mobile-block-logo { width: 150px; height: auto; display: block; margin: 0 auto 28px; }
-.mobile-block-screen h1 { margin: 0; color: var(--text); font-size: clamp(32px, 8vw, 46px); font-weight: 400; letter-spacing: -1.5px; }
-.mobile-block-screen p { margin: 14px auto 0; max-width: 420px; color: var(--muted); font-size: 15px; line-height: 1.6; }
-@media (max-width: 767px) {
-    body { overflow: hidden; }
-    body > * { display: none !important; }
-    body > .mobile-block-screen { display: flex !important; min-height: 100dvh; align-items: center; justify-content: center; padding: 24px; background: var(--bg); color: var(--text); }
+.mobile-block-screen {
+    display: none;
+}
+
+.mobile-block-screen-inner {
+    width: min(520px, calc(100% - 40px));
+    text-align: center;
+}
+
+.mobile-block-logo {
+    width: 150px;
+    height: auto;
+    display: block;
+    margin: 0 auto 28px;
+}
+
+.mobile-block-screen h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(32px, 8vw, 46px);
+    font-weight: 400;
+    letter-spacing: -1.5px;
+}
+
+.mobile-block-screen p {
+    margin: 14px auto 0;
+    max-width: 420px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+body.mobile-device {
+    overflow: hidden;
+}
+
+body.mobile-device > * {
+    display: none !important;
+}
+
+body.mobile-device > .mobile-block-screen {
+    display: flex !important;
+    min-height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
 }
 
 a {
@@ -2489,6 +2528,70 @@ function documentHTML(title, body, depth = 0) {
     <script src="${prefix}user-data.js?v=0.1.84"></script>
 
     <script src="${prefix}search.js?v=0.1.84"></script>
+
+
+<script>
+(function () {
+
+    const ua =
+        navigator.userAgent || "";
+
+    const uaData =
+        navigator.userAgentData || null;
+
+    const mobileUA =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i
+            .test(ua);
+
+    const mobileUAData =
+        uaData &&
+        (
+            uaData.mobile === true ||
+            /Android|iPhone|iPad|iPod/i.test(
+                uaData.platform || ""
+            )
+        );
+
+    const coarsePointer =
+        window.matchMedia(
+            "(pointer: coarse)"
+        ).matches;
+
+    const noHover =
+        window.matchMedia(
+            "(hover: none)"
+        ).matches;
+
+    const isMobileDevice =
+        mobileUAData ||
+        (
+            mobileUA &&
+            coarsePointer &&
+            noHover
+        );
+
+    if (isMobileDevice) {
+
+        const apply =
+            () => {
+                document.body.classList.add(
+                    "mobile-device"
+                );
+            };
+
+        if (document.body) {
+            apply();
+        } else {
+            document.addEventListener(
+                "DOMContentLoaded",
+                apply,
+                { once: true }
+            );
+        }
+    }
+
+})();
+</script>
 
 </head>
 
