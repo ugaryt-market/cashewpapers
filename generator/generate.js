@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.91
+    Version Alpha 0.1.92
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -4116,7 +4116,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.90</div>
+                <div class="version">Version Alpha 0.1.92</div>
 
             </section>
 
@@ -5389,10 +5389,7 @@ function generatePdfReaderPage() {
 
             <script type="module">
 
-import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
+let pdfjsLib = null;
 
 (function () {
 
@@ -5942,6 +5939,21 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
         try {
 
+            if (!pdfjsLib) {
+
+                const pdfjsModule =
+                    await import(
+                        "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs"
+                    );
+
+                pdfjsLib =
+                    pdfjsModule;
+
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
+
+            }
+
             const markSchemeFileName =
                 markSchemeUrl
                     .split("/")
@@ -6212,7 +6224,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 })();
 
-            </script>            </script>
+            </script>
 
         `,
 
