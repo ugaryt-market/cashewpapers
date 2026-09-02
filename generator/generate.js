@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.95
+    Version Alpha 0.1.96
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -4255,7 +4255,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.95</div>
+                <div class="version">Version Alpha 0.1.96</div>
 
             </section>
 
@@ -5449,7 +5449,6 @@ function generatePdfReaderPage() {
                             type="button"
                             class="native-pdf-mark"
                             id="nativePdfMark"
-                            style="display:none;"
                         >
                             mark paper
                         </button>
@@ -5509,104 +5508,120 @@ function generatePdfReaderPage() {
             "nativePdfMark"
         );
 
-    if (!fileParam) {
+    function hideMarkButton() {
         if (markButton) {
             markButton.style.display = "none";
         }
+    }
+
+    if (!fileParam) {
+        hideMarkButton();
         return;
     }
 
+    let decodedFile = "";
+    let questionPaperUrl = "";
+
     try {
 
-        const decodedFile =
+        decodedFile =
             decodeURIComponent(
                 fileParam
             );
 
-        const questionPaperUrl =
+        questionPaperUrl =
             new URL(
                 "../" +
                 decodedFile,
                 window.location.href
             ).href;
 
-        frame.src =
-            questionPaperUrl +
-            "#zoom=page-fit&page=1";
+        if (frame) {
+            frame.src =
+                questionPaperUrl +
+                "#zoom=page-fit&page=1";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "cashewpapers: unable to load question paper",
+            error
+        );
+
+        hideMarkButton();
+        return;
+
+    }
+
+    /*
+       Set up the marking button independently from the PDF viewer.
+       The button is visible by default so a problem with another
+       viewer control cannot silently hide it.
+    */
+    const markSchemeMatch =
+        decodedFile.match(
+            /_qp_(\d+)\.pdf$/i
+        );
+
+    if (
+        markButton &&
+        markSchemeMatch
+    ) {
+
+        markButton.style.display =
+            "inline-flex";
+
+        const markPageUrl =
+            "../mark/?file=" +
+            encodeURIComponent(
+                decodedFile
+            );
+
+        markButton.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+                window.location.href =
+                    markPageUrl;
+            }
+        );
+
+    } else {
+        hideMarkButton();
+    }
+
+    if (fullscreen) {
 
         fullscreen.href =
             questionPaperUrl;
-
-        const markSchemeFile =
-            decodedFile.replace(
-                /_qp_(\d+)\.pdf$/i,
-                "_ms_$1.pdf"
-            );
-
-        if (
-            markSchemeFile !==
-            decodedFile
-        ) {
-
-            const markPageUrl =
-                new URL(
-                    "../mark/?file=" +
-                    encodeURIComponent(
-                        decodedFile
-                    ),
-                    window.location.href
-                ).href;
-
-            markButton.style.display =
-                "inline-flex";
-
-            markButton.addEventListener(
-                "click",
-                () => {
-                    window.location.href =
-                        markPageUrl;
-                }
-            );
-
-        }
-
-        if (returnButton) {
-            returnButton.addEventListener(
-                "click",
-                event => {
-                    event.preventDefault();
-
-                    if (window.opener) {
-                        window.close();
-                    } else {
-                        window.history.back();
-                    }
-                }
-            );
-        }
 
         fullscreen.addEventListener(
             "click",
             event => {
                 event.preventDefault();
-
                 window.location.replace(
                     questionPaperUrl
                 );
             }
         );
 
-    } catch (error) {
+    }
 
-        console.error(
-            "cashewpapers native PDF viewer error:",
-            error
+    if (returnButton) {
+
+        returnButton.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+
+                if (window.opener) {
+                    window.close();
+                } else {
+                    window.history.back();
+                }
+            }
         );
-
-        if (markButton) {
-            markButton.style.display =
-                "none";
-        }
 
     }
 
