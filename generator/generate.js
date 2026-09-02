@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.94
+    Version Alpha 0.1.95
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2548,6 +2548,145 @@ body:has(.native-pdf-page) main {
     overflow-wrap: anywhere;
 }
 
+/* ---------------- PAPER MARKING PAGE ---------------- */
+
+.mark-page {
+    width: min(720px, 100%);
+    margin: 0 auto;
+}
+
+.mark-page-header {
+    margin-bottom: 22px;
+}
+
+.mark-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.mark-paper-meta {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    margin-bottom: 22px;
+    overflow-wrap: anywhere;
+}
+
+.mark-answer-label {
+    display: block;
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.mark-answer-input {
+    width: 100%;
+    min-height: 170px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #242528;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    text-transform: uppercase;
+}
+
+.mark-answer-input:focus {
+    border-color: var(--subdued);
+    box-shadow: 0 0 0 2px rgba(147, 107, 60, 0.16);
+}
+
+.mark-answer-help {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.mark-submit {
+    width: 100%;
+    margin-top: 18px;
+    height: 44px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    background: var(--primary);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.mark-submit:hover {
+    background: #ffa86c;
+    border-color: #ffa86c;
+}
+
+.mark-submit:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.mark-status {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #3a3c3f;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.mark-status.success {
+    border-color: var(--subdued);
+    color: var(--primary);
+}
+
+.mark-status.error {
+    border-color: #704145;
+    background: #553234;
+    color: #ffd9dc;
+}
+
+.mark-result {
+    margin-top: 14px;
+    padding: 20px;
+    border: 1px solid var(--subdued);
+    border-radius: 14px;
+    background: #3a3127;
+    text-align: center;
+}
+
+.mark-result-score {
+    color: var(--primary);
+    font-size: 42px;
+    line-height: 1.1;
+}
+
+.mark-result-detail {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+@media (max-width: 700px) {
+
+    .mark-card {
+        padding: 18px;
+    }
+
+    .mark-answer-input {
+        min-height: 140px;
+    }
+
+}
+
 /* ---------------- EMPTY ---------------- */
 
 .empty {
@@ -4116,7 +4255,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.94</div>
+                <div class="version">Version Alpha 0.1.95</div>
 
             </section>
 
@@ -5327,61 +5466,6 @@ function generatePdfReaderPage() {
 
                 </div>
 
-                <div
-                    class="mcq-scan-modal"
-                    id="mcqScanModal"
-                    aria-hidden="true"
-                >
-
-                    <div class="mcq-scan-modal-content">
-
-                        <div class="mcq-scan-modal-header">
-
-                            <div>
-
-                                <div class="mcq-scan-title">
-                                    mark paper
-                                </div>
-
-                                <div
-                                    class="mcq-scan-paper"
-                                    id="mcqScanPaper"
-                                ></div>
-
-                            </div>
-
-                            <button
-                                type="button"
-                                class="mcq-scan-close"
-                                id="mcqScanClose"
-                                aria-label="close"
-                            >
-                                ×
-                            </button>
-
-                        </div>
-
-                        <div
-                            class="mcq-scan-status"
-                            id="mcqScanStatus"
-                        >
-                            ready
-                        </div>
-
-                        <div
-                            class="mcq-scan-answer-preview"
-                            id="mcqScanAnswerPreview"
-                        ></div>
-
-                        <pre
-                            class="mcq-scan-output"
-                            id="mcqScanOutput"
-                        ></pre>
-
-                    </div>
-
-                </div>
-
                 <div class="native-pdf-window">
 
                     <iframe
@@ -5425,158 +5509,272 @@ function generatePdfReaderPage() {
             "nativePdfMark"
         );
 
-    const scanModal =
-        document.getElementById(
-            "mcqScanModal"
+    if (!fileParam) {
+        if (markButton) {
+            markButton.style.display = "none";
+        }
+        return;
+    }
+
+    try {
+
+        const decodedFile =
+            decodeURIComponent(
+                fileParam
+            );
+
+        const questionPaperUrl =
+            new URL(
+                "../" +
+                decodedFile,
+                window.location.href
+            ).href;
+
+        frame.src =
+            questionPaperUrl +
+            "#zoom=page-fit&page=1";
+
+        fullscreen.href =
+            questionPaperUrl;
+
+        const markSchemeFile =
+            decodedFile.replace(
+                /_qp_(\d+)\.pdf$/i,
+                "_ms_$1.pdf"
+            );
+
+        if (
+            markSchemeFile !==
+            decodedFile
+        ) {
+
+            const markPageUrl =
+                new URL(
+                    "../mark/?file=" +
+                    encodeURIComponent(
+                        decodedFile
+                    ),
+                    window.location.href
+                ).href;
+
+            markButton.style.display =
+                "inline-flex";
+
+            markButton.addEventListener(
+                "click",
+                () => {
+                    window.location.href =
+                        markPageUrl;
+                }
+            );
+
+        }
+
+        if (returnButton) {
+            returnButton.addEventListener(
+                "click",
+                event => {
+                    event.preventDefault();
+
+                    if (window.opener) {
+                        window.close();
+                    } else {
+                        window.history.back();
+                    }
+                }
+            );
+        }
+
+        fullscreen.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+
+                window.location.replace(
+                    questionPaperUrl
+                );
+            }
         );
 
-    const scanClose =
-        document.getElementById(
-            "mcqScanClose"
+    } catch (error) {
+
+        console.error(
+            "cashewpapers native PDF viewer error:",
+            error
         );
 
-    const scanStatus =
-        document.getElementById(
-            "mcqScanStatus"
+        if (markButton) {
+            markButton.style.display =
+                "none";
+        }
+
+    }
+
+})();
+            </script>
+        `,
+        1
+    );
+}
+
+
+/* ============================================================
+   MARKING PAGE
+   ============================================================ */
+
+function generateMarkingPage() {
+
+    return documentHTML(
+        "Mark Paper",
+        `
+            <div class="mark-page">
+
+                <div class="page-header mark-page-header">
+
+                    <a
+                        class="native-pdf-return"
+                        id="markReturn"
+                        href="#"
+                    >
+                        ← return to PDF
+                    </a>
+
+                    <h1>mark paper</h1>
+
+                    <p id="markPaperName">
+                        enter your answers below.
+                    </p>
+
+                </div>
+
+                <div class="mark-card">
+
+                    <div class="mark-paper-meta" id="markPaperMeta">
+                        loading paper...
+                    </div>
+
+                    <label
+                        class="mark-answer-label"
+                        for="markAnswerInput"
+                    >
+                        your answers
+                    </label>
+
+                    <textarea
+                        id="markAnswerInput"
+                        class="mark-answer-input"
+                        spellcheck="false"
+                        autocomplete="off"
+                        autocapitalize="characters"
+                        placeholder="ABCDABCD..."
+                        rows="7"
+                    ></textarea>
+
+                    <div class="mark-answer-help">
+                        enter one answer per question using A, B, C, or D. spaces and line breaks are ignored.
+                    </div>
+
+                    <button
+                        type="button"
+                        class="mark-submit"
+                        id="markSubmit"
+                    >
+                        mark paper
+                    </button>
+
+                    <div
+                        class="mark-status"
+                        id="markStatus"
+                    >
+                        ready
+                    </div>
+
+                    <div
+                        class="mark-result"
+                        id="markResult"
+                        hidden
+                    >
+                        <div class="mark-result-score" id="markScore"></div>
+                        <div class="mark-result-detail" id="markDetail"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <script>
+(function () {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
         );
 
-    const scanPaper =
+    const fileParam =
+        params.get("file");
+
+    const answerInput =
         document.getElementById(
-            "mcqScanPaper"
+            "markAnswerInput"
         );
 
-    const scanAnswerPreview =
+    const submitButton =
         document.getElementById(
-            "mcqScanAnswerPreview"
+            "markSubmit"
         );
 
-    const scanOutput =
+    const status =
         document.getElementById(
-            "mcqScanOutput"
+            "markStatus"
         );
 
-    let questionPaperUrl = "";
-    let markSchemeUrl = "";
+    const resultBox =
+        document.getElementById(
+            "markResult"
+        );
+
+    const score =
+        document.getElementById(
+            "markScore"
+        );
+
+    const detail =
+        document.getElementById(
+            "markDetail"
+        );
+
+    const paperName =
+        document.getElementById(
+            "markPaperName"
+        );
+
+    const paperMeta =
+        document.getElementById(
+            "markPaperMeta"
+        );
+
+    const returnButton =
+        document.getElementById(
+            "markReturn"
+        );
+
     let pdfjsLib = null;
     let pdfjsLoadPromise = null;
+    let markSchemeUrl = "";
+    let expectedAnswers = [];
 
-    function setScanStatus(
+    function setStatus(
         message,
         kind = ""
     ) {
-
-        if (!scanStatus) {
-            return;
-        }
-
-        scanStatus.textContent =
-            message;
-
-        scanStatus.className =
-            "mcq-scan-status" +
+        status.textContent = message;
+        status.className =
+            "mark-status" +
             (
                 kind
                     ? " " + kind
                     : ""
             );
-
-    }
-
-    function openScanModal() {
-
-        if (!scanModal) {
-            return;
-        }
-
-        scanModal.classList.add(
-            "open"
-        );
-
-        scanModal.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-    }
-
-    function closeScanModal() {
-
-        if (!scanModal) {
-            return;
-        }
-
-        scanModal.classList.remove(
-            "open"
-        );
-
-        scanModal.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-    }
-
-    function lineText(items) {
-
-        const rows =
-            new Map();
-
-        for (
-            const item
-            of items
-        ) {
-
-            if (!item.str) {
-                continue;
-            }
-
-            const y =
-                Math.round(
-                    item.transform[5] * 10
-                ) / 10;
-
-            if (!rows.has(y)) {
-                rows.set(
-                    y,
-                    []
-                );
-            }
-
-            rows.get(y).push(item);
-
-        }
-
-        return [...rows.entries()]
-            .sort(
-                (a, b) =>
-                    b[0] - a[0]
-            )
-            .map(
-                ([, rowItems]) => {
-
-                    rowItems.sort(
-                        (a, b) =>
-                            a.transform[4] -
-                            b.transform[4]
-                    );
-
-                    return rowItems
-                        .map(
-                            item =>
-                                item.str
-                        )
-                        .join(" ")
-                        .replace(
-                            /\\s+/g,
-                            " "
-                        )
-                        .trim();
-
-                }
-            )
-            .filter(Boolean)
-            .join("\\n");
-
     }
 
     async function loadPdfJs() {
@@ -5591,35 +5789,76 @@ function generatePdfReaderPage() {
                 import(
                     "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs"
                 )
-                    .then(
-                        module => {
+                    .then(module => {
+                        module.GlobalWorkerOptions.workerSrc =
+                            "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
 
-                            module.GlobalWorkerOptions.workerSrc =
-                                "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
+                        pdfjsLib = module;
 
-                            pdfjsLib =
-                                module;
-
-                            return module;
-
-                        }
-                    );
+                        return module;
+                    })
+                    .catch(error => {
+                        pdfjsLoadPromise = null;
+                        throw error;
+                    });
 
         }
 
-        try {
-            return await pdfjsLoadPromise;
-        } catch (error) {
-            pdfjsLoadPromise =
-                null;
-            throw error;
-        }
+        return await pdfjsLoadPromise;
 
     }
 
-    async function extractPdfText(
-        url
-    ) {
+    function lineText(items) {
+
+        const rows = new Map();
+
+        for (const item of items) {
+
+            if (!item.str) {
+                continue;
+            }
+
+            const y =
+                Math.round(
+                    item.transform[5] * 10
+                ) / 10;
+
+            if (!rows.has(y)) {
+                rows.set(y, []);
+            }
+
+            rows.get(y).push(item);
+
+        }
+
+        return [...rows.entries()]
+            .sort(
+                (a, b) =>
+                    b[0] - a[0]
+            )
+            .map(([, rowItems]) => {
+
+                rowItems.sort(
+                    (a, b) =>
+                        a.transform[4] -
+                        b.transform[4]
+                );
+
+                return rowItems
+                    .map(item => item.str)
+                    .join(" ")
+                    .replace(/\\s+/g, " ")
+                    .trim();
+
+            })
+            .filter(Boolean)
+            .join("\\n");
+
+    }
+
+    async function extractPdfText(url) {
+
+        await loadPdfJs();
 
         const pdf =
             await pdfjsLib
@@ -5653,80 +5892,33 @@ function generatePdfReaderPage() {
         }
 
         return {
-            pageCount:
-                pdf.numPages,
-            text:
-                pages.join("\\n")
+            pageCount: pdf.numPages,
+            text: pages.join("\\n")
         };
 
     }
 
-    function parsePaperCode(
-        text,
-        fileName = ""
-    ) {
+    function parseMarkScheme(text) {
 
-        const headerMatch =
-            text.match(
-                /\\b(\\d{4})\\/(\\d{2})\\b/
-            );
-
-        if (headerMatch) {
-            return (
-                headerMatch[1] +
-                "/" +
-                headerMatch[2]
-            );
-        }
-
-        const filenameMatch =
-            fileName.match(
-                /(\\d{4})_[a-z]\\d{2}_ms_(\\d{2})/i
-            );
-
-        return filenameMatch
-            ? filenameMatch[1] +
-              "/" +
-              filenameMatch[2]
-            : null;
-
-    }
-
-    function parseMaximumMark(
-        text
-    ) {
-
-        const match =
+        const maximumMatch =
             text.match(
                 /Maximum Mark:\\s*(\\d+)/i
             );
 
-        return match
-            ? Number(match[1])
-            : null;
+        const maximumMark =
+            maximumMatch
+                ? Number(maximumMatch[1])
+                : null;
 
-    }
+        const matches = [
+            ...text.matchAll(
+                /^\\s*(\\d+)\\s+([A-D])\\s+(\\d+)\\s*$/gim
+            )
+        ];
 
-    function parseAnswerRows(
-        text
-    ) {
+        const answers = new Map();
 
-        const matches =
-            [
-                ...text.matchAll(
-                    /^\\s*(\\d+)\\s+([A-D])\\s+(\\d+)\\s*$/gim
-                )
-            ];
-
-        const answers =
-            new Map();
-
-        const errors = [];
-
-        for (
-            const match
-            of matches
-        ) {
+        for (const match of matches) {
 
             const question =
                 Number(match[1]);
@@ -5738,338 +5930,211 @@ function generatePdfReaderPage() {
                 Number(match[3]);
 
             if (
-                answers.has(
-                    question
-                )
+                question >= 1 &&
+                !answers.has(question) &&
+                marks === 1
             ) {
-
-                errors.push(
-                    "duplicate question " +
-                    question
-                );
-
-                continue;
-
-            }
-
-            if (
-                question < 1
-            ) {
-
-                errors.push(
-                    "invalid question number " +
-                    match[1]
-                );
-
-                continue;
-
-            }
-
-            if (
-                ![
-                    "A",
-                    "B",
-                    "C",
-                    "D"
-                ].includes(
-                    answer
-                )
-            ) {
-
-                errors.push(
-                    "invalid answer for question " +
-                    question +
-                    ": " +
+                answers.set(
+                    question,
                     answer
                 );
-
-                continue;
-
             }
-
-            if (
-                marks !== 1
-            ) {
-
-                errors.push(
-                    "question " +
-                    question +
-                    " has " +
-                    marks +
-                    " marks instead of 1"
-                );
-
-                continue;
-
-            }
-
-            answers.set(
-                question,
-                answer
-            );
 
         }
 
-        return {
-            answers,
-            errors
-        };
-
-    }
-
-    function validateAnswers(
-        answers,
-        maximumMark
-    ) {
+        const orderedQuestions =
+            [...answers.keys()].sort(
+                (a, b) => a - b
+            );
 
         const errors = [];
 
-        const questions =
-            [
-                ...answers.keys()
-            ].sort(
-                (a, b) =>
-                    a - b
-            );
-
-        if (
-            !questions.length
+        for (
+            let i = 0;
+            i < orderedQuestions.length;
+            i += 1
         ) {
+            if (
+                orderedQuestions[i] !==
+                i + 1
+            ) {
+                errors.push(
+                    "missing question " +
+                    (i + 1)
+                );
+            }
+        }
 
+        if (!orderedQuestions.length) {
             errors.push(
                 "no MCQ answer rows were found"
             );
-
-            return errors;
-
-        }
-
-        for (
-            let i = 0;
-            i < questions.length;
-            i += 1
-        ) {
-
-            const expected =
-                i + 1;
-
-            if (
-                questions[i] !==
-                expected
-            ) {
-
-                errors.push(
-                    "missing question " +
-                    expected
-                );
-
-            }
-
         }
 
         if (
-            maximumMark !==
-                null &&
-            questions.length !==
-                maximumMark
+            maximumMark !== null &&
+            orderedQuestions.length !== maximumMark
         ) {
-
             errors.push(
                 "found " +
-                questions.length +
-                " questions but maximum mark is " +
+                orderedQuestions.length +
+                " answers but the mark scheme says " +
                 maximumMark
             );
-
         }
 
-        return errors;
-
-    }
-
-    function buildAnswerKey(
-        text,
-        fileName = ""
-    ) {
-
-        const paperCode =
-            parsePaperCode(
-                text,
-                fileName
-            );
-
-        const maximumMark =
-            parseMaximumMark(
-                text
-            );
-
-        const {
-            answers,
-            errors: parseErrors
-        } =
-            parseAnswerRows(
-                text
-            );
-
-        const validationErrors =
-            validateAnswers(
-                answers,
-                maximumMark
-            );
-
-        const errors = [
-            ...parseErrors,
-            ...validationErrors
-        ];
-
-        const orderedQuestions =
-            [
-                ...answers.keys()
-            ].sort(
-                (a, b) =>
-                    a - b
-            );
-
-        const answerList =
+        expectedAnswers =
             orderedQuestions.map(
                 question =>
-                    answers.get(
-                        question
-                    )
-            );
-
-        const answerMap =
-            Object.fromEntries(
-                orderedQuestions.map(
-                    question => [
-                        String(question),
-                        answers.get(
-                            question
-                        )
-                    ]
-                )
+                    answers.get(question)
             );
 
         return {
-            paperCode,
-            sourceFile:
-                fileName,
             maximumMark,
             questionCount:
-                orderedQuestions.length,
-            answers:
-                answerList,
-            answerMap,
-            valid:
-                errors.length === 0,
+                expectedAnswers.length,
             errors
         };
 
     }
 
-    async function scanMarkScheme() {
+    function normalizeStudentAnswers(value) {
 
-        if (!markSchemeUrl) {
+        return String(value || "")
+            .toUpperCase()
+            .replace(/[^A-D]/g, "");
 
-            setScanStatus(
-                "no matching mark scheme found",
-                "error"
+    }
+
+    function markStudentAnswers(value) {
+
+        const studentAnswers =
+            normalizeStudentAnswers(
+                value
             );
 
-            return;
-
+        if (!expectedAnswers.length) {
+            throw new Error(
+                "the answer key is empty"
+            );
         }
 
-        markButton.disabled =
-            true;
+        if (
+            !studentAnswers.length
+        ) {
+            throw new Error(
+                "please enter your answers"
+            );
+        }
 
-        scanAnswerPreview.textContent =
-            "";
+        const expectedCount =
+            expectedAnswers.length;
 
-        scanOutput.textContent =
-            "";
+        if (
+            studentAnswers.length !==
+            expectedCount
+        ) {
+            throw new Error(
+                "expected " +
+                expectedCount +
+                " answers, but you entered " +
+                studentAnswers.length
+            );
+        }
 
-        setScanStatus(
+        let correct = 0;
+
+        for (
+            let i = 0;
+            i < expectedAnswers.length;
+            i += 1
+        ) {
+            if (
+                studentAnswers[i] ===
+                expectedAnswers[i]
+            ) {
+                correct += 1;
+            }
+        }
+
+        return {
+            correct,
+            total: expectedCount,
+            percentage:
+                (correct / expectedCount) * 100
+        };
+
+    }
+
+    async function runMarking() {
+
+        resultBox.hidden = true;
+        submitButton.disabled = true;
+
+        setStatus(
             "loading mark scheme..."
         );
 
         try {
 
-            await loadPdfJs();
-
-            const markSchemeFileName =
-                markSchemeUrl
-                    .split("/")
-                    .pop();
-
             const {
                 pageCount,
                 text
-            } =
-                await extractPdfText(
-                    markSchemeUrl
-                );
-
-            setScanStatus(
-                "extracted text from " +
-                pageCount +
-                " pages — parsing..."
+            } = await extractPdfText(
+                markSchemeUrl
             );
 
-            const result =
-                buildAnswerKey(
-                    text,
-                    markSchemeFileName
+            const parsed =
+                parseMarkScheme(
+                    text
                 );
 
-            result.pageCount =
-                pageCount;
-
-            scanAnswerPreview.textContent =
-                result.answers.length
-                    ? result.answers.join(" ")
-                    : "no answers extracted";
-
-            scanOutput.textContent =
-                JSON.stringify(
-                    result,
-                    null,
-                    2
+            if (parsed.errors.length) {
+                throw new Error(
+                    parsed.errors.join("; ")
                 );
-
-            if (result.valid) {
-
-                setScanStatus(
-                    "PASS — " +
-                    result.questionCount +
-                    "/" +
-                    (
-                        result.maximumMark ??
-                        result.questionCount
-                    ) +
-                    " answers detected",
-                    "success"
-                );
-
-            } else {
-
-                setScanStatus(
-                    "FAIL — " +
-                    result.errors.length +
-                    " validation issue(s)",
-                    "error"
-                );
-
             }
+
+            setStatus(
+                "marking..."
+            );
+
+            const marked =
+                markStudentAnswers(
+                    answerInput.value
+                );
+
+            score.textContent =
+                marked.correct +
+                " / " +
+                marked.total;
+
+            detail.textContent =
+                marked.percentage.toFixed(1) +
+                "% · " +
+                pageCount +
+                " mark-scheme page" +
+                (
+                    pageCount === 1
+                        ? ""
+                        : "s"
+                );
+
+            resultBox.hidden = false;
+
+            setStatus(
+                "paper marked",
+                "success"
+            );
 
         } catch (error) {
 
             console.error(
-                "cashewpapers: MCQ mark scheme scan failed",
+                "cashewpapers: paper marking failed",
                 error
             );
 
-            setScanStatus(
+            setStatus(
                 "ERROR — " +
                 (
                     error &&
@@ -6081,104 +6146,19 @@ function generatePdfReaderPage() {
             );
 
         } finally {
-
-            markButton.disabled =
+            submitButton.disabled =
                 false;
-
         }
 
     }
-
-    if (returnButton) {
-
-        returnButton.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                if (window.opener) {
-                    window.close();
-                } else {
-                    window.history.back();
-                }
-
-            }
-        );
-
-    }
-
-    if (scanClose) {
-
-        scanClose.addEventListener(
-            "click",
-            closeScanModal
-        );
-
-    }
-
-    if (scanModal) {
-
-        scanModal.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target ===
-                    scanModal
-                ) {
-                    closeScanModal();
-                }
-
-            }
-        );
-
-    }
-
-    if (markButton) {
-
-        markButton.addEventListener(
-            "click",
-            () => {
-
-                openScanModal();
-
-                scanPaper.textContent =
-                    markSchemeUrl
-                        ? markSchemeUrl
-                            .split("/")
-                            .pop()
-                        : "matching mark scheme";
-
-                scanMarkScheme();
-
-            }
-        );
-
-    }
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape"
-            ) {
-                closeScanModal();
-            }
-
-        }
-    );
 
     if (!fileParam) {
-
-        if (markButton) {
-            markButton.style.display =
-                "none";
-        }
-
+        paperName.textContent =
+            "no question paper was supplied.";
+        paperMeta.textContent =
+            "open this page from a question paper viewer.";
+        submitButton.disabled = true;
         return;
-
     }
 
     try {
@@ -6188,88 +6168,110 @@ function generatePdfReaderPage() {
                 fileParam
             );
 
-        questionPaperUrl =
-            new URL(
-                "../" +
-                decodedFile,
-                window.location.href
-            ).href;
-
-        /*
-           The normal PDF viewer must always be independent of the
-           MCQ scanner. Setting the iframe source happens immediately
-           in this ordinary script.
-        */
-        frame.src =
-            questionPaperUrl +
-            "#zoom=page-fit&page=1";
-
-        fullscreen.href =
-            questionPaperUrl;
-
         const markSchemeFile =
             decodedFile.replace(
-                /_qp_(\d+)\.pdf$/i,
+                /_qp_(\\d+)\\.pdf$/i,
                 "_ms_$1.pdf"
             );
 
         if (
-            markSchemeFile !==
+            markSchemeFile ===
             decodedFile
         ) {
-
-            markSchemeUrl =
-                new URL(
-                    "../" +
-                    markSchemeFile,
-                    window.location.href
-                ).href;
-
-            /*
-               Show the button as soon as a matching mark-scheme
-               filename can be derived. PDF.js is not loaded here.
-            */
-            markButton.style.display =
-                "inline-flex";
-
+            throw new Error(
+                "this paper does not have a matching mark scheme"
+            );
         }
 
-        scanPaper.textContent =
-            markSchemeFile !==
-                decodedFile
-                ? markSchemeFile
-                : "matching mark scheme";
+        markSchemeUrl =
+            new URL(
+                "../" +
+                markSchemeFile,
+                window.location.href
+            ).href;
 
-        fullscreen.addEventListener(
-            "click",
-            event => {
+        const paperFileName =
+            decodedFile
+                .split("/")
+                .pop();
 
-                event.preventDefault();
+        paperName.textContent =
+            "enter your answers for " +
+            paperFileName +
+            ".";
 
-                window.location.replace(
-                    questionPaperUrl
-                );
-
-            }
-        );
+        paperMeta.textContent =
+            "matching mark scheme: " +
+            markSchemeFile
+                .split("/")
+                .pop();
 
     } catch (error) {
 
-        console.error(
-            "cashewpapers: native PDF viewer error:",
-            error
+        setStatus(
+            "ERROR — " +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : String(error)
+            ),
+            "error"
         );
 
-        if (markButton) {
-            markButton.style.display =
-                "none";
-        }
+        submitButton.disabled = true;
 
     }
 
+    if (returnButton) {
+
+        returnButton.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+
+                const viewerUrl =
+                    new URL(
+                        "../viewer/?file=" +
+                        encodeURIComponent(
+                            decodeURIComponent(
+                                fileParam
+                            )
+                        ),
+                        window.location.href
+                    ).href;
+
+                window.location.href =
+                    viewerUrl;
+            }
+        );
+
+    }
+
+    answerInput.addEventListener(
+        "input",
+        () => {
+            resultBox.hidden = true;
+            if (
+                status.classList.contains(
+                    "success"
+                ) ||
+                status.classList.contains(
+                    "error"
+                )
+            ) {
+                setStatus("ready");
+            }
+        }
+    );
+
+    submitButton.addEventListener(
+        "click",
+        runMarking
+    );
+
 })();
             </script>
-
         `,
         1
     );
@@ -7518,6 +7520,10 @@ function generate() {
     /* Native PDF Viewer */
 
     writeFile(path.join(DIST_DIR, "viewer", "index.html"), generatePdfReaderPage());
+
+    /* Paper Marking */
+
+    writeFile(path.join(DIST_DIR, "mark", "index.html"), generateMarkingPage());
 
     /* Scheduler / calendar */
 
