@@ -2013,6 +2013,8 @@ main {
     white-space: nowrap;
     font-family: "JetBrains Mono", monospace;
     cursor: pointer;
+    font-family: "JetBrains Mono", monospace;
+    text-align: left;
     transition:
         background 0.15s ease,
         color 0.15s ease,
@@ -2060,6 +2062,41 @@ main {
         0 4px 12px rgba(255, 150, 79, 0.16);
 }
 
+.calendar-entry-more {
+    position: relative;
+}
+
+.calendar-cell.has-entry-dropdown {
+    overflow: visible;
+    z-index: 20;
+}
+
+.calendar-entry-dropdown {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: calc(100% + 4px);
+    z-index: 100;
+    display: none;
+    max-height: 210px;
+    overflow-y: auto;
+    padding: 6px;
+    background: #27292c;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+}
+
+.calendar-entry-dropdown.open {
+    display: grid;
+    gap: 4px;
+}
+
+.calendar-entry-dropdown .calendar-entry-pill {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .calendar-context-menu {
     position: fixed;
     display: none;
@@ -2081,6 +2118,7 @@ main {
     padding: 5px 7px 9px;
     color: var(--text);
     font-size: 12px;
+    font-weight: 700;
     line-height: 1.35;
     border-bottom: 1px solid var(--border);
     margin-bottom: 6px;
@@ -2233,6 +2271,12 @@ main {
     font-size: 12px;
     color: var(--primary);
     min-height: 14px;
+}
+
+.calendar-help-text {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
 }
 
 
@@ -5256,6 +5300,8 @@ function generateSchedulerPage() {
 
                 <p>plan out when you'll tackle each past paper.</p>
 
+                <p class="calendar-help-text">right click a scheduled paper to move, delete, or change its colour.</p>
+
             </div>
 
             <div
@@ -5420,6 +5466,7 @@ function generateSchedulerPage() {
 
     let selectedDateKey = null;
     let schedule = {};
+    let openEntryDropdownKey = null;
 
     async function loadSchedule() {
         const user = await getCurrentUser();
@@ -5710,6 +5757,11 @@ function generateSchedulerPage() {
             if (!event.target.closest("#calendarContextMenu")) {
                 closeCalendarContextMenu();
             }
+
+            if (!event.target.closest("[data-calendar-more]") &&
+                !event.target.closest("[data-calendar-dropdown]")) {
+                closeEntryDropdown();
+            }
         });
 
         document.addEventListener("keydown", event => {
@@ -5720,6 +5772,47 @@ function generateSchedulerPage() {
 
         window.addEventListener("resize", closeCalendarContextMenu);
         window.addEventListener("scroll", closeCalendarContextMenu, true);
+    }
+
+    function closeEntryDropdown() {
+        openEntryDropdownKey = null;
+        document
+            .querySelectorAll(".calendar-entry-dropdown.open")
+            .forEach(dropdown => dropdown.classList.remove("open"));
+
+        document
+            .querySelectorAll(".calendar-cell.has-entry-dropdown")
+            .forEach(cell => {
+                cell.classList.remove("has-entry-dropdown");
+                const button = cell.querySelector("[data-calendar-more]");
+                const dropdown = cell.querySelector("[data-calendar-dropdown]");
+                if (button) {
+                    button.setAttribute("aria-expanded", "false");
+                }
+                if (dropdown) {
+                    dropdown.setAttribute("aria-hidden", "true");
+                }
+            });
+    }
+
+    function toggleEntryDropdown(key, button) {
+        const cell = button.closest(".calendar-cell");
+        const dropdown = cell &&
+            cell.querySelector(".calendar-entry-dropdown");
+
+        if (!cell || !dropdown) {
+            return;
+        }
+
+        if (openEntryDropdownKey === key) {
+            closeEntryDropdown();
+            return;
+        }
+
+        closeEntryDropdown();
+        openEntryDropdownKey = key;
+        cell.classList.add("has-entry-dropdown");
+        dropdown.classList.add("open");
     }
 
     function renderGrid() {
@@ -5750,31 +5843,40 @@ function generateSchedulerPage() {
                 cellDate.getTime() === today.getTime();
             const entries = schedule[key] || [];
 
+            const renderEntryPill = entry => {
+                const color = normalizeCalendarColor(entry.color);
+                return (
+                    '<div class="calendar-entry-pill" ' +
+                    'data-scheduled-entry="true" ' +
+                    'data-calendar-color="' +
+                    escapeHtml(color) +
+                    '" ' +
+                    'data-event-id="' +
+                    escapeHtml(entry.id) +
+                    '">' +
+                    escapeHtml(
+                        formatScheduledEntryLabel(entry)
+                    ) +
+                    "</div>"
+                );
+            };
+
             const pills = entries
                 .slice(0, 3)
-                .map(entry => {
-                    const color = normalizeCalendarColor(entry.color);
-                    return (
-                        '<div class="calendar-entry-pill" ' +
-                        'data-scheduled-entry="true" ' +
-                        'data-calendar-color="' +
-                        escapeHtml(color) +
-                        '" ' +
-                        'data-event-id="' +
-                        escapeHtml(entry.id) +
-                        '">' +
-                        escapeHtml(
-                            formatScheduledEntryLabel(entry)
-                        ) +
-                        "</div>"
-                    );
-                })
+                .map(renderEntryPill)
                 .join("");
 
             const more = entries.length > 3
-                ? '<div class="calendar-entry-pill" data-calendar-color="default">+' +
+                ? '<button type="button" class="calendar-entry-pill calendar-entry-more" ' +
+                  'data-calendar-more="true" aria-expanded="false">+' +
                   (entries.length - 3) +
-                  " more</div>"
+                  ' more</button>'
+                : "";
+
+            const dropdown = entries.length > 3
+                ? '<div class="calendar-entry-dropdown" data-calendar-dropdown="true" aria-hidden="true">' +
+                  entries.map(renderEntryPill).join("") +
+                  "</div>"
                 : "";
 
             html +=
@@ -5787,6 +5889,7 @@ function generateSchedulerPage() {
                 "</div>" +
                 pills +
                 more +
+                dropdown +
                 "</div>";
         }
 
@@ -5795,6 +5898,37 @@ function generateSchedulerPage() {
         grid.querySelectorAll(".calendar-cell")
             .forEach(cell => {
                 cell.addEventListener("click", event => {
+                    const moreButton = event.target.closest(
+                        "[data-calendar-more]"
+                    );
+
+                    if (moreButton) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        toggleEntryDropdown(
+                            cell.dataset.date,
+                            moreButton
+                        );
+                        moreButton.setAttribute(
+                            "aria-expanded",
+                            openEntryDropdownKey === cell.dataset.date
+                                ? "true"
+                                : "false"
+                        );
+                        const dropdown = cell.querySelector(
+                            "[data-calendar-dropdown]"
+                        );
+                        if (dropdown) {
+                            dropdown.setAttribute(
+                                "aria-hidden",
+                                openEntryDropdownKey === cell.dataset.date
+                                    ? "false"
+                                    : "true"
+                            );
+                        }
+                        return;
+                    }
+
                     const entryElement =
                         event.target.closest(
                             "[data-scheduled-entry]"
@@ -5803,21 +5937,14 @@ function generateSchedulerPage() {
                     if (entryElement) {
                         const entries =
                             schedule[cell.dataset.date] || [];
-                        const elements = Array.from(
-                            cell.querySelectorAll(
-                                "[data-scheduled-entry]"
-                            )
+                        const entryId = entryElement.dataset.eventId;
+                        const entry = entries.find(
+                            item => String(item.id) === String(entryId)
                         );
-                        const entryIndex =
-                            elements.indexOf(entryElement);
 
-                        if (
-                            entryIndex >= 0 &&
-                            entries[entryIndex]
-                        ) {
-                            navigateToScheduledPaper(
-                                entries[entryIndex]
-                            );
+                        if (entry) {
+                            closeEntryDropdown();
+                            navigateToScheduledPaper(entry);
                             return;
                         }
                     }
@@ -5835,18 +5962,18 @@ function generateSchedulerPage() {
                     }
 
                     const entries = schedule[cell.dataset.date] || [];
-                    const elements = Array.from(
-                        cell.querySelectorAll("[data-scheduled-entry]")
+                    const entryId = entryElement.dataset.eventId;
+                    const entry = entries.find(
+                        item => String(item.id) === String(entryId)
                     );
-                    const entryIndex = elements.indexOf(entryElement);
 
-                    if (entryIndex < 0 || !entries[entryIndex]) {
+                    if (!entry) {
                         return;
                     }
 
                     openCalendarContextMenu(
                         event,
-                        entries[entryIndex],
+                        entry,
                         cell.dataset.date
                     );
                 });
