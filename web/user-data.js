@@ -679,7 +679,7 @@
             await client
                 .from(TABLES.calendar)
                 .select(
-                    "id,date,paper_key,paper_code,subject,paper,path,file"
+                    "id,date,paper_key,paper_code,subject,paper,path,file,color"
                 )
                 .eq(
                     "user_id",
@@ -723,7 +723,9 @@
                 questionPath:
                     row.file || "",
                 paperKey:
-                    row.paper_key || ""
+                    row.paper_key || "",
+                color:
+                    row.color || "default"
             });
 
         });
@@ -772,10 +774,11 @@
                     subject: entry.subject || "",
                     paper: entry.paper || "",
                     path: entry.path || "",
-                    file: entry.questionPath || ""
+                    file: entry.questionPath || "",
+                    color: entry.color || "default"
                 })
                 .select(
-                    "id,date,paper_key,paper_code,subject,paper,path,file"
+                    "id,date,paper_key,paper_code,subject,paper,path,file,color"
                 )
                 .single();
 
@@ -797,7 +800,9 @@
             questionPath:
                 data.file || "",
             paperKey:
-                data.paper_key || ""
+                data.paper_key || "",
+            color:
+                data.color || "default"
         };
 
         const cache =
@@ -817,6 +822,114 @@
         cache.calendar[key].push(
             { ...entryValue }
         );
+
+        writeStoredCache();
+
+        return { ...entryValue };
+    }
+
+    async function updateCalendarEvent(eventId, updates) {
+        const user = await requireUser();
+
+        const patch = {};
+
+        if (Object.prototype.hasOwnProperty.call(updates || {}, "date")) {
+            const nextDate = String(updates.date || "");
+
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(nextDate)) {
+                throw new Error("Invalid calendar date.");
+            }
+
+            patch.date = nextDate;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(updates || {}, "color")) {
+            const allowedColors = [
+                "default",
+                "orange",
+                "blue",
+                "green",
+                "purple",
+                "red",
+                "yellow"
+            ];
+            const nextColor = String(updates.color || "default").toLowerCase();
+
+            if (!allowedColors.includes(nextColor)) {
+                throw new Error("Invalid calendar colour.");
+            }
+
+            patch.color = nextColor;
+        }
+
+        if (!Object.keys(patch).length) {
+            return;
+        }
+
+        const { data, error } =
+            await client
+                .from(TABLES.calendar)
+                .update(patch)
+                .eq("user_id", user.id)
+                .eq("id", eventId)
+                .select(
+                    "id,date,paper_key,paper_code,subject,paper,path,file,color"
+                )
+                .single();
+
+        checkError(
+            error,
+            "Unable to update calendar event"
+        );
+
+        const cache = ensureCache(user);
+
+        if (!cache.calendar) {
+            cache.calendar = {};
+        }
+
+        let existing = null;
+        Object.keys(cache.calendar).forEach(dateKey => {
+            const remaining = [];
+            (cache.calendar[dateKey] || []).forEach(entry => {
+                if (String(entry.id) === String(eventId)) {
+                    existing = { ...entry };
+                } else {
+                    remaining.push(entry);
+                }
+            });
+
+            if (remaining.length) {
+                cache.calendar[dateKey] = remaining;
+            } else {
+                delete cache.calendar[dateKey];
+            }
+        });
+
+        const entryValue = {
+            id: data.id,
+            code: data.paper_code || "",
+            subject: data.subject || "",
+            paper: data.paper || "",
+            path: data.path || "",
+            questionPath: data.file || "",
+            paperKey: data.paper_key || "",
+            color: data.color || "default"
+        };
+
+        if (!existing) {
+            existing = {};
+        }
+
+        const targetDate = String(data.date);
+        if (!cache.calendar[targetDate]) {
+            cache.calendar[targetDate] = [];
+        }
+
+        cache.calendar[targetDate].push({
+            ...existing,
+            ...entryValue
+        });
 
         writeStoredCache();
 
@@ -887,6 +1000,7 @@
         deletePaperAttempt,
         getCalendarSchedule,
         addCalendarEvent,
+        updateCalendarEvent,
         deleteCalendarEvent
     };
 
