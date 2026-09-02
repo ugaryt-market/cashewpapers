@@ -3931,7 +3931,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.85</div>
+                <div class="version">Version Alpha 0.1.89</div>
 
             </section>
 
