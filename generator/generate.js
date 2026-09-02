@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.90
+    Version Alpha 0.1.91
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2406,6 +2406,146 @@ body:has(.native-pdf-page) main {
 .native-pdf-fullscreen:hover {
     background: #414346;
     border-color: var(--subdued);
+}
+
+.native-pdf-control-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.native-pdf-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.native-pdf-mark:hover {
+    background: #ffa86c;
+    border-color: #ffa86c;
+}
+
+.native-pdf-mark:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.mcq-scan-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.mcq-scan-modal.open {
+    display: flex;
+}
+
+.mcq-scan-modal-content {
+    width: min(680px, 100%);
+    max-height: min(80vh, 720px);
+    overflow-y: auto;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.mcq-scan-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.mcq-scan-title {
+    color: var(--primary);
+    font-size: 22px;
+}
+
+.mcq-scan-paper {
+    margin-top: 5px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+}
+
+.mcq-scan-close {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mcq-scan-close:hover {
+    background: #3a3c3f;
+    color: var(--text);
+}
+
+.mcq-scan-status {
+    margin-top: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #3a3c3f;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.mcq-scan-status.success {
+    border-color: var(--subdued);
+    color: var(--primary);
+}
+
+.mcq-scan-status.error {
+    border-color: #704145;
+    background: #553234;
+    color: #ffd9dc;
+}
+
+.mcq-scan-answer-preview {
+    margin-top: 12px;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.mcq-scan-output {
+    margin: 12px 0 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #242528;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 /* ---------------- EMPTY ---------------- */
@@ -5163,9 +5303,75 @@ function generatePdfReaderPage() {
                         ← return to paper selection
                     </a>
 
-                    <a class="native-pdf-fullscreen" id="nativePdfFullscreen" href="#">
-                        go to fullscreen →
-                    </a>
+                    <div class="native-pdf-control-actions">
+
+                        <button
+                            type="button"
+                            class="native-pdf-mark"
+                            id="nativePdfMark"
+                            style="display:none;"
+                        >
+                            mark paper
+                        </button>
+
+                        <a class="native-pdf-fullscreen" id="nativePdfFullscreen" href="#">
+                            go to fullscreen →
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="mcq-scan-modal"
+                    id="mcqScanModal"
+                    aria-hidden="true"
+                >
+
+                    <div class="mcq-scan-modal-content">
+
+                        <div class="mcq-scan-modal-header">
+
+                            <div>
+                                <div class="mcq-scan-title">
+                                    mark paper
+                                </div>
+
+                                <div
+                                    class="mcq-scan-paper"
+                                    id="mcqScanPaper"
+                                ></div>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="mcq-scan-close"
+                                id="mcqScanClose"
+                                aria-label="close"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                        <div
+                            class="mcq-scan-status"
+                            id="mcqScanStatus"
+                        >
+                            ready
+                        </div>
+
+                        <div
+                            class="mcq-scan-answer-preview"
+                            id="mcqScanAnswerPreview"
+                        ></div>
+
+                        <pre
+                            class="mcq-scan-output"
+                            id="mcqScanOutput"
+                        ></pre>
+
+                    </div>
 
                 </div>
 
@@ -5181,25 +5387,658 @@ function generatePdfReaderPage() {
 
             </div>
 
-            <script>
+            <script type="module">
+
+import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
 
 (function () {
 
-    const params = new URLSearchParams(window.location.search);
-    const fileParam = params.get("file");
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-    const frame = document.getElementById("nativePdfFrame");
-    const fullscreen = document.getElementById("nativePdfFullscreen");
-    const returnButton = document.getElementById("nativePdfReturn");
+    const fileParam =
+        params.get("file");
 
-    /*
-       The past paper always opens in its own tab (target="_blank"
-       from the paper card links). Returning to paper selection
-       means closing this tab so the original tab regains focus.
-       If, for whatever reason, this page was not opened as a
-       new tab (no window.opener), fall back to browser history.
-    */
-    if (returnButton) {
+    const frame =
+        document.getElementById(
+            "nativePdfFrame"
+        );
+
+    const fullscreen =
+        document.getElementById(
+            "nativePdfFullscreen"
+        );
+
+    const returnButton =
+        document.getElementById(
+            "nativePdfReturn"
+        );
+
+    const markButton =
+        document.getElementById(
+            "nativePdfMark"
+        );
+
+    const scanModal =
+        document.getElementById(
+            "mcqScanModal"
+        );
+
+    const scanClose =
+        document.getElementById(
+            "mcqScanClose"
+        );
+
+    const scanStatus =
+        document.getElementById(
+            "mcqScanStatus"
+        );
+
+    const scanPaper =
+        document.getElementById(
+            "mcqScanPaper"
+        );
+
+    const scanAnswerPreview =
+        document.getElementById(
+            "mcqScanAnswerPreview"
+        );
+
+    const scanOutput =
+        document.getElementById(
+            "mcqScanOutput"
+        );
+
+    let questionPaperUrl = "";
+    let markSchemeUrl = "";
+
+    function setScanStatus(
+        message,
+        kind = ""
+    ) {
+
+        scanStatus.textContent =
+            message;
+
+        scanStatus.className =
+            "mcq-scan-status" +
+            (kind
+                ? " " + kind
+                : "");
+
+    }
+
+    function openScanModal() {
+
+        scanModal.classList.add(
+            "open"
+        );
+
+        scanModal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+    }
+
+    function closeScanModal() {
+
+        scanModal.classList.remove(
+            "open"
+        );
+
+        scanModal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+    }
+
+    function lineText(items) {
+
+        const rows =
+            new Map();
+
+        for (
+            const item
+            of items
+        ) {
+
+            if (!item.str) {
+                continue;
+            }
+
+            const y =
+                Math.round(
+                    item.transform[5] * 10
+                ) / 10;
+
+            if (!rows.has(y)) {
+                rows.set(
+                    y,
+                    []
+                );
+            }
+
+            rows.get(y).push(item);
+
+        }
+
+        return [...rows.entries()]
+            .sort(
+                (a, b) =>
+                    b[0] - a[0]
+            )
+            .map(
+                ([, rowItems]) => {
+
+                    rowItems.sort(
+                        (a, b) =>
+                            a.transform[4] -
+                            b.transform[4]
+                    );
+
+                    return rowItems
+                        .map(
+                            item =>
+                                item.str
+                        )
+                        .join(" ")
+                        .replace(
+                            /\s+/g,
+                            " "
+                        )
+                        .trim();
+
+                }
+            )
+            .filter(Boolean)
+            .join("\n");
+
+    }
+
+    async function extractPdfText(
+        url
+    ) {
+
+        const pdf =
+            await pdfjsLib
+                .getDocument({
+                    url
+                })
+                .promise;
+
+        const pages = [];
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber += 1
+        ) {
+
+            const page =
+                await pdf.getPage(
+                    pageNumber
+                );
+
+            const content =
+                await page.getTextContent();
+
+            pages.push(
+                lineText(
+                    content.items
+                )
+            );
+
+        }
+
+        return {
+            pageCount:
+                pdf.numPages,
+            text:
+                pages.join("\n")
+        };
+
+    }
+
+    function parsePaperCode(
+        text,
+        fileName = ""
+    ) {
+
+        const headerMatch =
+            text.match(
+                /\b(\d{4})\/(\d{2})\b/
+            );
+
+        if (headerMatch) {
+            return (
+                headerMatch[1] +
+                "/" +
+                headerMatch[2]
+            );
+        }
+
+        const filenameMatch =
+            fileName.match(
+                /(\d{4})_[a-z]\d{2}_ms_(\d{2})/i
+            );
+
+        return filenameMatch
+            ? filenameMatch[1] +
+              "/" +
+              filenameMatch[2]
+            : null;
+
+    }
+
+    function parseMaximumMark(
+        text
+    ) {
+
+        const match =
+            text.match(
+                /Maximum Mark:\s*(\d+)/i
+            );
+
+        return match
+            ? Number(match[1])
+            : null;
+
+    }
+
+    function parseAnswerRows(
+        text
+    ) {
+
+        const matches =
+            [
+                ...text.matchAll(
+                    /^\s*(\d+)\s+([A-D])\s+(\d+)\s*$/gim
+                )
+            ];
+
+        const answers =
+            new Map();
+
+        const errors = [];
+
+        for (
+            const match
+            of matches
+        ) {
+
+            const question =
+                Number(match[1]);
+
+            const answer =
+                match[2].toUpperCase();
+
+            const marks =
+                Number(match[3]);
+
+            if (
+                answers.has(
+                    question
+                )
+            ) {
+
+                errors.push(
+                    "duplicate question " +
+                    question
+                );
+
+                continue;
+
+            }
+
+            if (
+                question < 1
+            ) {
+
+                errors.push(
+                    "invalid question number " +
+                    match[1]
+                );
+
+                continue;
+
+            }
+
+            if (
+                ![
+                    "A",
+                    "B",
+                    "C",
+                    "D"
+                ].includes(
+                    answer
+                )
+            ) {
+
+                errors.push(
+                    "invalid answer for question " +
+                    question +
+                    ": " +
+                    answer
+                );
+
+                continue;
+
+            }
+
+            if (
+                marks !== 1
+            ) {
+
+                errors.push(
+                    "question " +
+                    question +
+                    " has " +
+                    marks +
+                    " marks instead of 1"
+                );
+
+                continue;
+
+            }
+
+            answers.set(
+                question,
+                answer
+            );
+
+        }
+
+        return {
+            answers,
+            errors
+        };
+
+    }
+
+    function validateAnswers(
+        answers,
+        maximumMark
+    ) {
+
+        const errors = [];
+
+        const questions =
+            [
+                ...answers.keys()
+            ].sort(
+                (a, b) =>
+                    a - b
+            );
+
+        if (
+            !questions.length
+        ) {
+
+            errors.push(
+                "no MCQ answer rows were found"
+            );
+
+            return errors;
+
+        }
+
+        for (
+            let i = 0;
+            i < questions.length;
+            i += 1
+        ) {
+
+            const expected =
+                i + 1;
+
+            if (
+                questions[i] !==
+                expected
+            ) {
+
+                errors.push(
+                    "missing question " +
+                    expected
+                );
+
+            }
+
+        }
+
+        if (
+            maximumMark !==
+                null &&
+            questions.length !==
+                maximumMark
+        ) {
+
+            errors.push(
+                "found " +
+                questions.length +
+                " questions but maximum mark is " +
+                maximumMark
+            );
+
+        }
+
+        return errors;
+
+    }
+
+    function buildAnswerKey(
+        text,
+        fileName = ""
+    ) {
+
+        const paperCode =
+            parsePaperCode(
+                text,
+                fileName
+            );
+
+        const maximumMark =
+            parseMaximumMark(
+                text
+            );
+
+        const {
+            answers,
+            errors: parseErrors
+        } =
+            parseAnswerRows(
+                text
+            );
+
+        const validationErrors =
+            validateAnswers(
+                answers,
+                maximumMark
+            );
+
+        const errors = [
+            ...parseErrors,
+            ...validationErrors
+        ];
+
+        const orderedQuestions =
+            [
+                ...answers.keys()
+            ].sort(
+                (a, b) =>
+                    a - b
+            );
+
+        const answerList =
+            orderedQuestions.map(
+                question =>
+                    answers.get(
+                        question
+                    )
+            );
+
+        const answerMap =
+            Object.fromEntries(
+                orderedQuestions.map(
+                    question => [
+                        String(question),
+                        answers.get(
+                            question
+                        )
+                    ]
+                )
+            );
+
+        return {
+            paperCode,
+            sourceFile:
+                fileName,
+            maximumMark,
+            questionCount:
+                orderedQuestions.length,
+            answers:
+                answerList,
+            answerMap,
+            valid:
+                errors.length === 0,
+            errors
+        };
+
+    }
+
+    async function scanMarkScheme() {
+
+        if (
+            !markSchemeUrl
+        ) {
+
+            setScanStatus(
+                "no matching mark scheme found",
+                "error"
+            );
+
+            return;
+
+        }
+
+        markButton.disabled =
+            true;
+
+        scanAnswerPreview.textContent =
+            "";
+
+        scanOutput.textContent =
+            "";
+
+        setScanStatus(
+            "loading mark scheme..."
+        );
+
+        try {
+
+            const markSchemeFileName =
+                markSchemeUrl
+                    .split("/")
+                    .pop();
+
+            const {
+                pageCount,
+                text
+            } =
+                await extractPdfText(
+                    markSchemeUrl
+                );
+
+            setScanStatus(
+                "extracted text from " +
+                pageCount +
+                " pages — parsing..."
+            );
+
+            const result =
+                buildAnswerKey(
+                    text,
+                    markSchemeFileName
+                );
+
+            result.pageCount =
+                pageCount;
+
+            scanAnswerPreview.textContent =
+                result.answers.length
+                    ? result.answers.join(" ")
+                    : "no answers extracted";
+
+            scanOutput.textContent =
+                JSON.stringify(
+                    result,
+                    null,
+                    2
+                );
+
+            if (
+                result.valid
+            ) {
+
+                setScanStatus(
+                    "PASS — " +
+                    result.questionCount +
+                    "/" +
+                    (
+                        result.maximumMark ??
+                        result.questionCount
+                    ) +
+                    " answers detected",
+                    "success"
+                );
+
+            } else {
+
+                setScanStatus(
+                    "FAIL — " +
+                    result.errors.length +
+                    " validation issue(s)",
+                    "error"
+                );
+
+            }
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                "cashewpapers: MCQ mark scheme scan failed",
+                error
+            );
+
+            setScanStatus(
+                "ERROR — " +
+                (
+                    error.message ||
+                    String(error)
+                ),
+                "error"
+            );
+
+        } finally {
+
+            markButton.disabled =
+                false;
+
+        }
+
+    }
+
+    if (
+        returnButton
+    ) {
 
         returnButton.addEventListener(
             "click",
@@ -5207,10 +6046,16 @@ function generatePdfReaderPage() {
 
                 event.preventDefault();
 
-                if (window.opener) {
+                if (
+                    window.opener
+                ) {
+
                     window.close();
+
                 } else {
+
                     window.history.back();
+
                 }
 
             }
@@ -5218,19 +6063,128 @@ function generatePdfReaderPage() {
 
     }
 
+    if (
+        scanClose
+    ) {
+
+        scanClose.addEventListener(
+            "click",
+            closeScanModal
+        );
+
+    }
+
+    if (
+        scanModal
+    ) {
+
+        scanModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    scanModal
+                ) {
+
+                    closeScanModal();
+
+                }
+
+            }
+        );
+
+    }
+
+    if (
+        markButton
+    ) {
+
+        markButton.addEventListener(
+            "click",
+            () => {
+
+                openScanModal();
+
+                scanPaper.textContent =
+                    markSchemeUrl
+                        ? markSchemeUrl
+                            .split("/")
+                            .pop()
+                        : "matching mark scheme";
+
+                scanMarkScheme();
+
+            }
+        );
+
+    }
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeScanModal();
+
+            }
+
+        }
+    );
+
     if (!fileParam) {
         return;
     }
 
     try {
 
-        const decodedFile = decodeURIComponent(fileParam);
+        const decodedFile =
+            decodeURIComponent(
+                fileParam
+            );
 
-        const pdfUrl = new URL("../" + decodedFile, window.location.href).href;
+        questionPaperUrl =
+            new URL(
+                "../" +
+                decodedFile,
+                window.location.href
+            ).href;
 
-        frame.src = pdfUrl + "#zoom=page-fit&page=1";
+        frame.src =
+            questionPaperUrl +
+            "#zoom=page-fit&page=1";
 
-        fullscreen.href = pdfUrl;
+        fullscreen.href =
+            questionPaperUrl;
+
+        const markSchemeFile =
+            decodedFile.replace(
+                /_qp_(\d+)\.pdf$/i,
+                "_ms_$1.pdf"
+            );
+
+        if (
+            markSchemeFile !==
+            decodedFile
+        ) {
+
+            markSchemeUrl =
+                new URL(
+                    "../" +
+                    markSchemeFile,
+                    window.location.href
+                ).href;
+
+            markButton.style.display =
+                "inline-flex";
+
+        }
+
+        scanPaper.textContent =
+            markSchemeFile;
 
         fullscreen.addEventListener(
             "click",
@@ -5239,21 +6193,26 @@ function generatePdfReaderPage() {
                 event.preventDefault();
 
                 window.location.replace(
-                    pdfUrl
+                    questionPaperUrl
                 );
 
             }
         );
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
-        console.error("cashewpapers native PDF viewer error:", error);
+        console.error(
+            "cashewpapers native PDF viewer error:",
+            error
+        );
 
     }
 
 })();
 
-            </script>
+            </script>            </script>
 
         `,
 
