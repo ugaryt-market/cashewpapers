@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.93
+    Version Alpha 0.1.94
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -4116,7 +4116,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.93</div>
+                <div class="version">Version Alpha 0.1.94</div>
 
             </section>
 
@@ -5567,7 +5567,7 @@ function generatePdfReaderPage() {
                         )
                         .join(" ")
                         .replace(
-                            /\s+/g,
+                            /\\s+/g,
                             " "
                         )
                         .trim();
@@ -5575,7 +5575,7 @@ function generatePdfReaderPage() {
                 }
             )
             .filter(Boolean)
-            .join("\n");
+            .join("\\n");
 
     }
 
@@ -5656,7 +5656,7 @@ function generatePdfReaderPage() {
             pageCount:
                 pdf.numPages,
             text:
-                pages.join("\n")
+                pages.join("\\n")
         };
 
     }
@@ -5668,7 +5668,7 @@ function generatePdfReaderPage() {
 
         const headerMatch =
             text.match(
-                /\b(\d{4})\/(\d{2})\b/
+                /\\b(\\d{4})\\/(\\d{2})\\b/
             );
 
         if (headerMatch) {
@@ -5681,7 +5681,7 @@ function generatePdfReaderPage() {
 
         const filenameMatch =
             fileName.match(
-                /(\d{4})_[a-z]\d{2}_ms_(\d{2})/i
+                /(\\d{4})_[a-z]\\d{2}_ms_(\\d{2})/i
             );
 
         return filenameMatch
@@ -5698,7 +5698,7 @@ function generatePdfReaderPage() {
 
         const match =
             text.match(
-                /Maximum Mark:\s*(\d+)/i
+                /Maximum Mark:\\s*(\\d+)/i
             );
 
         return match
@@ -5714,7 +5714,7 @@ function generatePdfReaderPage() {
         const matches =
             [
                 ...text.matchAll(
-                    /^\s*(\d+)\s+([A-D])\s+(\d+)\s*$/gim
+                    /^\\s*(\\d+)\\s+([A-D])\\s+(\\d+)\\s*$/gim
                 )
             ];
 
