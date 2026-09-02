@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.92
+    Version Alpha 0.1.93
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -4116,7 +4116,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.92</div>
+                <div class="version">Version Alpha 0.1.93</div>
 
             </section>
 
@@ -5290,16 +5290,17 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 function generatePdfReaderPage() {
 
     return documentHTML(
-
         "PDF Viewer",
-
         `
-
             <div class="native-pdf-page">
 
                 <div class="native-pdf-controls">
 
-                    <a class="native-pdf-return" id="nativePdfReturn" href="#">
+                    <a
+                        class="native-pdf-return"
+                        id="nativePdfReturn"
+                        href="#"
+                    >
                         ← return to paper selection
                     </a>
 
@@ -5314,7 +5315,11 @@ function generatePdfReaderPage() {
                             mark paper
                         </button>
 
-                        <a class="native-pdf-fullscreen" id="nativePdfFullscreen" href="#">
+                        <a
+                            class="native-pdf-fullscreen"
+                            id="nativePdfFullscreen"
+                            href="#"
+                        >
                             go to fullscreen →
                         </a>
 
@@ -5333,6 +5338,7 @@ function generatePdfReaderPage() {
                         <div class="mcq-scan-modal-header">
 
                             <div>
+
                                 <div class="mcq-scan-title">
                                     mark paper
                                 </div>
@@ -5341,6 +5347,7 @@ function generatePdfReaderPage() {
                                     class="mcq-scan-paper"
                                     id="mcqScanPaper"
                                 ></div>
+
                             </div>
 
                             <button
@@ -5387,10 +5394,7 @@ function generatePdfReaderPage() {
 
             </div>
 
-            <script type="module">
-
-let pdfjsLib = null;
-
+            <script>
 (function () {
 
     const params =
@@ -5453,24 +5457,36 @@ let pdfjsLib = null;
 
     let questionPaperUrl = "";
     let markSchemeUrl = "";
+    let pdfjsLib = null;
+    let pdfjsLoadPromise = null;
 
     function setScanStatus(
         message,
         kind = ""
     ) {
 
+        if (!scanStatus) {
+            return;
+        }
+
         scanStatus.textContent =
             message;
 
         scanStatus.className =
             "mcq-scan-status" +
-            (kind
-                ? " " + kind
-                : "");
+            (
+                kind
+                    ? " " + kind
+                    : ""
+            );
 
     }
 
     function openScanModal() {
+
+        if (!scanModal) {
+            return;
+        }
 
         scanModal.classList.add(
             "open"
@@ -5484,6 +5500,10 @@ let pdfjsLib = null;
     }
 
     function closeScanModal() {
+
+        if (!scanModal) {
+            return;
+        }
 
         scanModal.classList.remove(
             "open"
@@ -5556,6 +5576,44 @@ let pdfjsLib = null;
             )
             .filter(Boolean)
             .join("\n");
+
+    }
+
+    async function loadPdfJs() {
+
+        if (pdfjsLib) {
+            return pdfjsLib;
+        }
+
+        if (!pdfjsLoadPromise) {
+
+            pdfjsLoadPromise =
+                import(
+                    "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs"
+                )
+                    .then(
+                        module => {
+
+                            module.GlobalWorkerOptions.workerSrc =
+                                "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
+
+                            pdfjsLib =
+                                module;
+
+                            return module;
+
+                        }
+                    );
+
+        }
+
+        try {
+            return await pdfjsLoadPromise;
+        } catch (error) {
+            pdfjsLoadPromise =
+                null;
+            throw error;
+        }
 
     }
 
@@ -5911,9 +5969,7 @@ let pdfjsLib = null;
 
     async function scanMarkScheme() {
 
-        if (
-            !markSchemeUrl
-        ) {
+        if (!markSchemeUrl) {
 
             setScanStatus(
                 "no matching mark scheme found",
@@ -5939,20 +5995,7 @@ let pdfjsLib = null;
 
         try {
 
-            if (!pdfjsLib) {
-
-                const pdfjsModule =
-                    await import(
-                        "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs"
-                    );
-
-                pdfjsLib =
-                    pdfjsModule;
-
-                pdfjsLib.GlobalWorkerOptions.workerSrc =
-                    "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
-
-            }
+            await loadPdfJs();
 
             const markSchemeFileName =
                 markSchemeUrl
@@ -5994,9 +6037,7 @@ let pdfjsLib = null;
                     2
                 );
 
-            if (
-                result.valid
-            ) {
+            if (result.valid) {
 
                 setScanStatus(
                     "PASS — " +
@@ -6021,9 +6062,7 @@ let pdfjsLib = null;
 
             }
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
 
             console.error(
                 "cashewpapers: MCQ mark scheme scan failed",
@@ -6033,8 +6072,10 @@ let pdfjsLib = null;
             setScanStatus(
                 "ERROR — " +
                 (
-                    error.message ||
-                    String(error)
+                    error &&
+                    error.message
+                        ? error.message
+                        : String(error)
                 ),
                 "error"
             );
@@ -6048,9 +6089,7 @@ let pdfjsLib = null;
 
     }
 
-    if (
-        returnButton
-    ) {
+    if (returnButton) {
 
         returnButton.addEventListener(
             "click",
@@ -6058,16 +6097,10 @@ let pdfjsLib = null;
 
                 event.preventDefault();
 
-                if (
-                    window.opener
-                ) {
-
+                if (window.opener) {
                     window.close();
-
                 } else {
-
                     window.history.back();
-
                 }
 
             }
@@ -6075,9 +6108,7 @@ let pdfjsLib = null;
 
     }
 
-    if (
-        scanClose
-    ) {
+    if (scanClose) {
 
         scanClose.addEventListener(
             "click",
@@ -6086,9 +6117,7 @@ let pdfjsLib = null;
 
     }
 
-    if (
-        scanModal
-    ) {
+    if (scanModal) {
 
         scanModal.addEventListener(
             "click",
@@ -6098,9 +6127,7 @@ let pdfjsLib = null;
                     event.target ===
                     scanModal
                 ) {
-
                     closeScanModal();
-
                 }
 
             }
@@ -6108,9 +6135,7 @@ let pdfjsLib = null;
 
     }
 
-    if (
-        markButton
-    ) {
+    if (markButton) {
 
         markButton.addEventListener(
             "click",
@@ -6139,16 +6164,21 @@ let pdfjsLib = null;
             if (
                 event.key === "Escape"
             ) {
-
                 closeScanModal();
-
             }
 
         }
     );
 
     if (!fileParam) {
+
+        if (markButton) {
+            markButton.style.display =
+                "none";
+        }
+
         return;
+
     }
 
     try {
@@ -6165,6 +6195,11 @@ let pdfjsLib = null;
                 window.location.href
             ).href;
 
+        /*
+           The normal PDF viewer must always be independent of the
+           MCQ scanner. Setting the iframe source happens immediately
+           in this ordinary script.
+        */
         frame.src =
             questionPaperUrl +
             "#zoom=page-fit&page=1";
@@ -6190,13 +6225,20 @@ let pdfjsLib = null;
                     window.location.href
                 ).href;
 
+            /*
+               Show the button as soon as a matching mark-scheme
+               filename can be derived. PDF.js is not loaded here.
+            */
             markButton.style.display =
                 "inline-flex";
 
         }
 
         scanPaper.textContent =
-            markSchemeFile;
+            markSchemeFile !==
+                decodedFile
+                ? markSchemeFile
+                : "matching mark scheme";
 
         fullscreen.addEventListener(
             "click",
@@ -6211,27 +6253,26 @@ let pdfjsLib = null;
             }
         );
 
-    } catch (
-        error
-    ) {
+    } catch (error) {
 
         console.error(
-            "cashewpapers native PDF viewer error:",
+            "cashewpapers: native PDF viewer error:",
             error
         );
+
+        if (markButton) {
+            markButton.style.display =
+                "none";
+        }
 
     }
 
 })();
-
             </script>
 
         `,
-
         1
-
     );
-
 }
 
 
