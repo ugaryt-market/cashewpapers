@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.89
+    Version Alpha 0.1.90
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -1906,6 +1906,7 @@ main {
 }
 
 .calendar-shell {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2060,41 +2061,6 @@ main {
     transform: translateY(-1px);
     box-shadow:
         0 4px 12px rgba(255, 150, 79, 0.16);
-}
-
-.calendar-entry-more {
-    position: relative;
-}
-
-.calendar-cell.has-entry-dropdown {
-    overflow: visible;
-    z-index: 20;
-}
-
-.calendar-entry-dropdown {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    top: calc(100% + 4px);
-    z-index: 100;
-    display: none;
-    max-height: 210px;
-    overflow-y: auto;
-    padding: 6px;
-    background: #27292c;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
-}
-
-.calendar-entry-dropdown.open {
-    display: grid;
-    gap: 4px;
-}
-
-.calendar-entry-dropdown .calendar-entry-pill {
-    width: 100%;
-    box-sizing: border-box;
 }
 
 .calendar-context-menu {
@@ -2273,10 +2239,45 @@ main {
     min-height: 14px;
 }
 
-.calendar-help-text {
-    margin-top: 6px;
-    font-size: 12px;
+.calendar-help-box {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 145px;
+    padding: 12px 13px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #2c2e31;
     color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+    box-shadow: var(--shadow);
+}
+
+.calendar-help-box strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 400;
+}
+
+@media (max-width: 1180px) {
+
+    .calendar-shell {
+        flex-wrap: wrap;
+    }
+
+    .calendar-help-box {
+        position: static;
+        transform: none;
+        width: min(100%, 420px);
+        flex-basis: 100%;
+        order: -1;
+        margin: 0 auto 2px;
+    }
+
 }
 
 
@@ -3975,7 +3976,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.89</div>
+                <div class="version">Version Alpha 0.1.90</div>
 
             </section>
 
@@ -5300,7 +5301,7 @@ function generateSchedulerPage() {
 
                 <p>plan out when you'll tackle each past paper.</p>
 
-                <p class="calendar-help-text">right click a scheduled paper to move, delete, or change its colour.</p>
+                
 
             </div>
 
@@ -5311,6 +5312,11 @@ function generateSchedulerPage() {
             ></div>
 
             <div class="calendar-shell">
+
+                <div class="calendar-help-box">
+                    <strong>calendar tip</strong>
+                    right click a scheduled paper to move, delete, or change its colour.
+                </div>
 
                 <button
                     type="button"
@@ -5466,7 +5472,6 @@ function generateSchedulerPage() {
 
     let selectedDateKey = null;
     let schedule = {};
-    let openEntryDropdownKey = null;
 
     async function loadSchedule() {
         const user = await getCurrentUser();
@@ -5758,10 +5763,6 @@ function generateSchedulerPage() {
                 closeCalendarContextMenu();
             }
 
-            if (!event.target.closest("[data-calendar-more]") &&
-                !event.target.closest("[data-calendar-dropdown]")) {
-                closeEntryDropdown();
-            }
         });
 
         document.addEventListener("keydown", event => {
@@ -5772,47 +5773,6 @@ function generateSchedulerPage() {
 
         window.addEventListener("resize", closeCalendarContextMenu);
         window.addEventListener("scroll", closeCalendarContextMenu, true);
-    }
-
-    function closeEntryDropdown() {
-        openEntryDropdownKey = null;
-        document
-            .querySelectorAll(".calendar-entry-dropdown.open")
-            .forEach(dropdown => dropdown.classList.remove("open"));
-
-        document
-            .querySelectorAll(".calendar-cell.has-entry-dropdown")
-            .forEach(cell => {
-                cell.classList.remove("has-entry-dropdown");
-                const button = cell.querySelector("[data-calendar-more]");
-                const dropdown = cell.querySelector("[data-calendar-dropdown]");
-                if (button) {
-                    button.setAttribute("aria-expanded", "false");
-                }
-                if (dropdown) {
-                    dropdown.setAttribute("aria-hidden", "true");
-                }
-            });
-    }
-
-    function toggleEntryDropdown(key, button) {
-        const cell = button.closest(".calendar-cell");
-        const dropdown = cell &&
-            cell.querySelector(".calendar-entry-dropdown");
-
-        if (!cell || !dropdown) {
-            return;
-        }
-
-        if (openEntryDropdownKey === key) {
-            closeEntryDropdown();
-            return;
-        }
-
-        closeEntryDropdown();
-        openEntryDropdownKey = key;
-        cell.classList.add("has-entry-dropdown");
-        dropdown.classList.add("open");
     }
 
     function renderGrid() {
@@ -5862,22 +5822,8 @@ function generateSchedulerPage() {
             };
 
             const pills = entries
-                .slice(0, 3)
                 .map(renderEntryPill)
                 .join("");
-
-            const more = entries.length > 3
-                ? '<button type="button" class="calendar-entry-pill calendar-entry-more" ' +
-                  'data-calendar-more="true" aria-expanded="false">+' +
-                  (entries.length - 3) +
-                  ' more</button>'
-                : "";
-
-            const dropdown = entries.length > 3
-                ? '<div class="calendar-entry-dropdown" data-calendar-dropdown="true" aria-hidden="true">' +
-                  entries.map(renderEntryPill).join("") +
-                  "</div>"
-                : "";
 
             html +=
                 '<div class="calendar-cell' +
@@ -5888,8 +5834,6 @@ function generateSchedulerPage() {
                 cellDate.getDate() +
                 "</div>" +
                 pills +
-                more +
-                dropdown +
                 "</div>";
         }
 
@@ -5898,37 +5842,6 @@ function generateSchedulerPage() {
         grid.querySelectorAll(".calendar-cell")
             .forEach(cell => {
                 cell.addEventListener("click", event => {
-                    const moreButton = event.target.closest(
-                        "[data-calendar-more]"
-                    );
-
-                    if (moreButton) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        toggleEntryDropdown(
-                            cell.dataset.date,
-                            moreButton
-                        );
-                        moreButton.setAttribute(
-                            "aria-expanded",
-                            openEntryDropdownKey === cell.dataset.date
-                                ? "true"
-                                : "false"
-                        );
-                        const dropdown = cell.querySelector(
-                            "[data-calendar-dropdown]"
-                        );
-                        if (dropdown) {
-                            dropdown.setAttribute(
-                                "aria-hidden",
-                                openEntryDropdownKey === cell.dataset.date
-                                    ? "false"
-                                    : "true"
-                            );
-                        }
-                        return;
-                    }
-
                     const entryElement =
                         event.target.closest(
                             "[data-scheduled-entry]"
@@ -5943,7 +5856,6 @@ function generateSchedulerPage() {
                         );
 
                         if (entry) {
-                            closeEntryDropdown();
                             navigateToScheduledPaper(entry);
                             return;
                         }
