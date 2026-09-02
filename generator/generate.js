@@ -13,7 +13,7 @@ const {
 
 /*
     Cashew Papers Static Site Generator
-    Version Alpha 0.1.88
+    Version Alpha 0.1.89
 */
 
 const ROOT = path.resolve(__dirname, "..");
@@ -2001,10 +2001,11 @@ main {
 }
 
 .calendar-entry-pill {
+    --calendar-entry-color: #3a3c3f;
     font-size: 11px;
     padding: 3px 6px;
     border-radius: 6px;
-    background: #3a3c3f;
+    background: var(--calendar-entry-color);
     color: var(--text);
     border: 1px solid transparent;
     overflow: hidden;
@@ -2016,7 +2017,38 @@ main {
         background 0.15s ease,
         color 0.15s ease,
         border-color 0.15s ease,
-        transform 0.15s ease;
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.calendar-entry-pill[data-calendar-color="orange"] {
+    --calendar-entry-color: #8f4e25;
+    color: #ffe4cf;
+}
+
+.calendar-entry-pill[data-calendar-color="blue"] {
+    --calendar-entry-color: #34577c;
+    color: #d9eaff;
+}
+
+.calendar-entry-pill[data-calendar-color="green"] {
+    --calendar-entry-color: #35654d;
+    color: #d7f5e5;
+}
+
+.calendar-entry-pill[data-calendar-color="purple"] {
+    --calendar-entry-color: #5d467c;
+    color: #eadfff;
+}
+
+.calendar-entry-pill[data-calendar-color="red"] {
+    --calendar-entry-color: #7f3f43;
+    color: #ffd9dc;
+}
+
+.calendar-entry-pill[data-calendar-color="yellow"] {
+    --calendar-entry-color: #776027;
+    color: #fff0bb;
 }
 
 .calendar-entry-pill:hover {
@@ -2027,6 +2059,124 @@ main {
     box-shadow:
         0 4px 12px rgba(255, 150, 79, 0.16);
 }
+
+.calendar-context-menu {
+    position: fixed;
+    display: none;
+    width: 240px;
+    max-width: calc(100vw - 20px);
+    padding: 10px;
+    background: #27292c;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    z-index: 900;
+}
+
+.calendar-context-menu.open {
+    display: block;
+}
+
+.calendar-context-title {
+    padding: 5px 7px 9px;
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.35;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+}
+
+.calendar-context-action {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.calendar-context-action:hover {
+    background: #3a3c3f;
+    border-color: var(--border);
+}
+
+.calendar-context-delete:hover {
+    background: #553234;
+    color: #ffd9dc;
+    border-color: #704145;
+}
+
+.calendar-context-move {
+    display: grid;
+    gap: 7px;
+    padding: 7px 0;
+}
+
+.calendar-context-move label {
+    padding: 0 7px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.calendar-context-move-row {
+    display: flex;
+    gap: 6px;
+}
+
+.calendar-context-date {
+    min-width: 0;
+    flex: 1;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #3a3c3f;
+    color: var(--text);
+}
+
+.calendar-context-confirm {
+    width: auto;
+    white-space: nowrap;
+    background: var(--primary);
+    color: white;
+}
+
+.calendar-context-confirm:hover {
+    background: #ffa86c;
+    color: white;
+}
+
+.calendar-context-colours {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 7px;
+}
+
+.calendar-context-colour {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+}
+
+.calendar-context-colour:hover {
+    transform: translateY(-1px);
+    border-color: white;
+}
+
+.calendar-context-colour.default { background: #3a3c3f; }
+.calendar-context-colour.orange { background: #8f4e25; }
+.calendar-context-colour.blue { background: #34577c; }
+.calendar-context-colour.green { background: #35654d; }
+.calendar-context-colour.purple { background: #5d467c; }
+.calendar-context-colour.red { background: #7f3f43; }
+.calendar-context-colour.yellow { background: #776027; }
 
 .scheduled-paper-link {
     color: var(--text);
@@ -5146,6 +5296,59 @@ function generateSchedulerPage() {
 
             </div>
 
+            <div
+                class="calendar-context-menu"
+                id="calendarContextMenu"
+                role="menu"
+                aria-hidden="true"
+            >
+                <div class="calendar-context-title" id="calendarContextTitle">paper</div>
+
+                <button
+                    type="button"
+                    class="calendar-context-action calendar-context-delete"
+                    id="calendarContextDelete"
+                >
+                    delete
+                </button>
+
+                <div class="calendar-context-move">
+                    <label for="calendarContextDate">move to date</label>
+                    <div class="calendar-context-move-row">
+                        <input
+                            type="date"
+                            id="calendarContextDate"
+                            class="calendar-context-date"
+                        >
+                        <button
+                            type="button"
+                            class="calendar-context-action calendar-context-confirm"
+                            id="calendarContextMove"
+                        >
+                            move
+                        </button>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="calendar-context-action"
+                    id="calendarContextColourLabel"
+                >
+                    change colour
+                </button>
+
+                <div class="calendar-context-colours" id="calendarContextColours">
+                    <button type="button" class="calendar-context-colour default" data-color="default" aria-label="default"></button>
+                    <button type="button" class="calendar-context-colour orange" data-color="orange" aria-label="orange"></button>
+                    <button type="button" class="calendar-context-colour blue" data-color="blue" aria-label="blue"></button>
+                    <button type="button" class="calendar-context-colour green" data-color="green" aria-label="green"></button>
+                    <button type="button" class="calendar-context-colour purple" data-color="purple" aria-label="purple"></button>
+                    <button type="button" class="calendar-context-colour red" data-color="red" aria-label="red"></button>
+                    <button type="button" class="calendar-context-colour yellow" data-color="yellow" aria-label="yellow"></button>
+                </div>
+            </div>
+
             <div class="calendar-day-modal" id="calendarDayModal">
 
                 <div class="calendar-day-modal-content">
@@ -5342,6 +5545,183 @@ function generateSchedulerPage() {
         }
     }
 
+    const calendarColours = [
+        "default",
+        "orange",
+        "blue",
+        "green",
+        "purple",
+        "red",
+        "yellow"
+    ];
+
+    let contextEntry = null;
+    let contextSourceDate = null;
+
+    function normalizeCalendarColor(value) {
+        const normalized = String(value || "default").toLowerCase();
+        return calendarColours.includes(normalized)
+            ? normalized
+            : "default";
+    }
+
+    function closeCalendarContextMenu() {
+        const menu = document.getElementById("calendarContextMenu");
+        if (!menu) {
+            return;
+        }
+        menu.classList.remove("open");
+        menu.setAttribute("aria-hidden", "true");
+        contextEntry = null;
+        contextSourceDate = null;
+    }
+
+    function openCalendarContextMenu(event, entry, dateKeyValue) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const menu = document.getElementById("calendarContextMenu");
+        const title = document.getElementById("calendarContextTitle");
+        const dateInput = document.getElementById("calendarContextDate");
+
+        contextEntry = entry;
+        contextSourceDate = dateKeyValue;
+
+        title.textContent = formatScheduledEntryLabel(entry);
+        dateInput.value = dateKeyValue;
+
+        menu.classList.add("open");
+        menu.setAttribute("aria-hidden", "false");
+
+        const menuWidth = menu.offsetWidth || 240;
+        const menuHeight = menu.offsetHeight || 260;
+        const margin = 10;
+        const left = Math.min(
+            event.clientX,
+            window.innerWidth - menuWidth - margin
+        );
+        const top = Math.min(
+            event.clientY,
+            window.innerHeight - menuHeight - margin
+        );
+
+        menu.style.left = Math.max(margin, left) + "px";
+        menu.style.top = Math.max(margin, top) + "px";
+    }
+
+    async function deleteContextEntry() {
+        if (!contextEntry) {
+            return;
+        }
+
+        const entryId = contextEntry.id;
+        closeCalendarContextMenu();
+
+        try {
+            await CashewUserData.deleteCalendarEvent(entryId);
+            await refreshSchedule();
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to delete calendar event",
+                error
+            );
+        }
+    }
+
+    async function moveContextEntry() {
+        if (!contextEntry) {
+            return;
+        }
+
+        const dateInput = document.getElementById("calendarContextDate");
+        const nextDate = String(dateInput.value || "");
+
+        if (!nextDate || nextDate === contextSourceDate) {
+            closeCalendarContextMenu();
+            return;
+        }
+
+        const entryId = contextEntry.id;
+        closeCalendarContextMenu();
+
+        try {
+            await CashewUserData.updateCalendarEvent(
+                entryId,
+                { date: nextDate }
+            );
+            await refreshSchedule();
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to move calendar event",
+                error
+            );
+        }
+    }
+
+    async function setContextEntryColor(color) {
+        if (!contextEntry) {
+            return;
+        }
+
+        const normalized = normalizeCalendarColor(color);
+        const entryId = contextEntry.id;
+        closeCalendarContextMenu();
+
+        try {
+            await CashewUserData.updateCalendarEvent(
+                entryId,
+                { color: normalized }
+            );
+            await refreshSchedule();
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to colour calendar event",
+                error
+            );
+        }
+    }
+
+    function initializeCalendarContextMenu() {
+        document
+            .getElementById("calendarContextDelete")
+            .addEventListener("click", deleteContextEntry);
+
+        document
+            .getElementById("calendarContextMove")
+            .addEventListener("click", moveContextEntry);
+
+        document
+            .getElementById("calendarContextColours")
+            .addEventListener("click", event => {
+                const button = event.target.closest("[data-color]");
+                if (!button) {
+                    return;
+                }
+                setContextEntryColor(button.dataset.color);
+            });
+
+        document
+            .getElementById("calendarContextMenu")
+            .addEventListener("contextmenu", event => {
+                event.preventDefault();
+            });
+
+        document.addEventListener("click", event => {
+            if (!event.target.closest("#calendarContextMenu")) {
+                closeCalendarContextMenu();
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                closeCalendarContextMenu();
+            }
+        });
+
+        window.addEventListener("resize", closeCalendarContextMenu);
+        window.addEventListener("scroll", closeCalendarContextMenu, true);
+    }
+
     function renderGrid() {
         const grid = document.getElementById("calendarGrid");
         const title = document.getElementById("calendarMonthTitle");
@@ -5372,18 +5752,27 @@ function generateSchedulerPage() {
 
             const pills = entries
                 .slice(0, 3)
-                .map(entry =>
-                    '<div class="calendar-entry-pill" ' +
-                    'data-scheduled-entry="true">' +
-                    escapeHtml(
-                        formatScheduledEntryLabel(entry)
-                    ) +
-                    "</div>"
-                )
+                .map(entry => {
+                    const color = normalizeCalendarColor(entry.color);
+                    return (
+                        '<div class="calendar-entry-pill" ' +
+                        'data-scheduled-entry="true" ' +
+                        'data-calendar-color="' +
+                        escapeHtml(color) +
+                        '" ' +
+                        'data-event-id="' +
+                        escapeHtml(entry.id) +
+                        '">' +
+                        escapeHtml(
+                            formatScheduledEntryLabel(entry)
+                        ) +
+                        "</div>"
+                    );
+                })
                 .join("");
 
             const more = entries.length > 3
-                ? '<div class="calendar-entry-pill">+' +
+                ? '<div class="calendar-entry-pill" data-calendar-color="default">+' +
                   (entries.length - 3) +
                   " more</div>"
                 : "";
@@ -5434,6 +5823,32 @@ function generateSchedulerPage() {
                     }
 
                     openDayModal(cell.dataset.date);
+                });
+            });
+
+        grid.querySelectorAll("[data-scheduled-entry]")
+            .forEach(entryElement => {
+                entryElement.addEventListener("contextmenu", event => {
+                    const cell = entryElement.closest(".calendar-cell");
+                    if (!cell) {
+                        return;
+                    }
+
+                    const entries = schedule[cell.dataset.date] || [];
+                    const elements = Array.from(
+                        cell.querySelectorAll("[data-scheduled-entry]")
+                    );
+                    const entryIndex = elements.indexOf(entryElement);
+
+                    if (entryIndex < 0 || !entries[entryIndex]) {
+                        return;
+                    }
+
+                    openCalendarContextMenu(
+                        event,
+                        entries[entryIndex],
+                        cell.dataset.date
+                    );
                 });
             });
     }
@@ -5727,6 +6142,7 @@ function generateSchedulerPage() {
         }
     );
 
+    initializeCalendarContextMenu();
     renderDayLabels();
     renderBanner();
 
