@@ -2674,6 +2674,112 @@ body:has(.native-pdf-page) main {
     margin-bottom: 8px;
 }
 
+.mark-answer-entry {
+    width: 100%;
+}
+
+.mark-answer-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.mark-answer-mode-toggle {
+    display: flex;
+    gap: 5px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #242528;
+}
+
+.mark-answer-mode-button {
+    height: 32px;
+    padding: 0 11px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.mark-answer-mode-button:hover {
+    color: var(--text);
+    background: #3a3c3f;
+}
+
+.mark-answer-mode-button.active {
+    background: var(--primary);
+    color: white;
+}
+
+.mark-question-grid {
+    display: grid;
+    gap: 9px;
+}
+
+.mark-question {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #242528;
+}
+
+.mark-question-number {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.mark-question-options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.mark-answer-option {
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #3a3c3f;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.mark-answer-option:hover {
+    border-color: var(--subdued);
+    background: #414346;
+}
+
+.mark-answer-option.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.mark-answer-option.selected:hover {
+    background: #ffa86c;
+    border-color: #ffa86c;
+}
+
+.mark-paste-panel {
+    width: 100%;
+}
+
 .mark-answer-input {
     width: 100%;
     min-height: 170px;
@@ -5925,26 +6031,58 @@ function generateMarkingPage() {
                                 loading paper...
                             </div>
 
-                            <label
-                                class="mark-answer-label"
-                                for="markAnswerInput"
-                            >
-                                your answers
-                            </label>
+                            <div class="mark-answer-entry">
 
-                            <textarea
-                                id="markAnswerInput"
-                                class="mark-answer-input"
-                                spellcheck="false"
-                                autocomplete="off"
-                                autocapitalize="characters"
-                                placeholder="ABCDABCD..."
-                                rows="7"
-                            ></textarea>
+    <div class="mark-answer-entry-header">
+        <div class="mark-answer-label">
+            your answers
+        </div>
 
-                            <div class="mark-answer-help">
-                                enter one answer per question using A, B, C, or D. spaces and line breaks are ignored.
-                            </div>
+        <div class="mark-answer-mode-toggle">
+            <button
+                type="button"
+                class="mark-answer-mode-button active"
+                id="markGuiModeButton"
+            >
+                questions
+            </button>
+
+            <button
+                type="button"
+                class="mark-answer-mode-button"
+                id="markPasteModeButton"
+            >
+                paste answers
+            </button>
+        </div>
+    </div>
+
+    <div
+        class="mark-question-grid"
+        id="markQuestionGrid"
+    ></div>
+
+    <div
+        class="mark-paste-panel"
+        id="markPastePanel"
+        hidden
+    >
+        <textarea
+            id="markAnswerInput"
+            class="mark-answer-input"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="characters"
+            placeholder="ABCDABCD..."
+            rows="7"
+        ></textarea>
+
+        <div class="mark-answer-help">
+            enter one answer per question using A, B, C, or D. spaces and line breaks are ignored.
+        </div>
+    </div>
+
+</div>
 
                             <button
                                 type="button"
@@ -6015,11 +6153,31 @@ function generateMarkingPage() {
         params.get("file");
 
     const answerInput =
-        document.getElementById(
-            "markAnswerInput"
-        );
+    document.getElementById(
+        "markAnswerInput"
+    );
 
-    const submitButton =
+const questionGrid =
+    document.getElementById(
+        "markQuestionGrid"
+    );
+
+const guiModeButton =
+    document.getElementById(
+        "markGuiModeButton"
+    );
+
+const pasteModeButton =
+    document.getElementById(
+        "markPasteModeButton"
+    );
+
+const pastePanel =
+    document.getElementById(
+        "markPastePanel"
+    );
+
+const submitButton =
         document.getElementById(
             "markSubmit"
         );
@@ -6309,6 +6467,239 @@ function generateMarkingPage() {
 
     }
 
+    function buildQuestionGrid() {
+
+    if (!questionGrid) {
+        return;
+    }
+
+    questionGrid.innerHTML = "";
+
+    for (
+        let i = 0;
+        i < expectedAnswers.length;
+        i += 1
+    ) {
+
+        const question =
+            document.createElement("div");
+
+        question.className =
+            "mark-question";
+
+        const number =
+            document.createElement("div");
+
+        number.className =
+            "mark-question-number";
+
+        number.textContent =
+            "question " + (i + 1);
+
+        const options =
+            document.createElement("div");
+
+        options.className =
+            "mark-question-options";
+
+        ["A", "B", "C", "D"].forEach(
+            answer => {
+
+                const button =
+                    document.createElement("button");
+
+                button.type = "button";
+
+                button.className =
+                    "mark-answer-option";
+
+                button.dataset.question =
+                    String(i);
+
+                button.dataset.answer =
+                    answer;
+
+                button.textContent =
+                    answer;
+
+                button.setAttribute(
+                    "aria-pressed",
+                    "false"
+                );
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const buttons =
+                            options.querySelectorAll(
+                                ".mark-answer-option"
+                            );
+
+                        buttons.forEach(
+                            other => {
+
+                                const selected =
+                                    other === button;
+
+                                other.classList.toggle(
+                                    "selected",
+                                    selected
+                                );
+
+                                other.setAttribute(
+                                    "aria-pressed",
+                                    selected
+                                        ? "true"
+                                        : "false"
+                                );
+                            }
+                        );
+
+                        const answers =
+                            normalizeStudentAnswers(
+                                answerInput.value
+                            );
+
+                        const updated =
+                            answers.split("");
+
+                        updated[i] =
+                            answer;
+
+                        answerInput.value =
+                            updated.join("");
+
+                        resultBox.hidden = true;
+
+                        if (answerReview) {
+                            answerReview.innerHTML = "";
+                        }
+
+                        if (
+                            status.classList.contains(
+                                "success"
+                            ) ||
+                            status.classList.contains(
+                                "error"
+                            )
+                        ) {
+                            setStatus("ready");
+                        }
+                    }
+                );
+
+                options.appendChild(
+                    button
+                );
+
+            }
+        );
+
+        question.append(
+            number,
+            options
+        );
+
+        questionGrid.appendChild(
+            question
+        );
+    }
+}
+
+function syncQuestionGridFromAnswers() {
+
+    if (!questionGrid) {
+        return;
+    }
+
+    const answers =
+        normalizeStudentAnswers(
+            answerInput.value
+        );
+
+    const buttons =
+        questionGrid.querySelectorAll(
+            ".mark-answer-option"
+        );
+
+    buttons.forEach(button => {
+
+        const questionIndex =
+            Number(
+                button.dataset.question
+            );
+
+        const selected =
+            answers[questionIndex] ===
+            button.dataset.answer;
+
+        button.classList.toggle(
+            "selected",
+            selected
+        );
+
+        button.setAttribute(
+            "aria-pressed",
+            selected
+                ? "true"
+                : "false"
+        );
+    });
+}
+
+function setAnswerMode(mode) {
+
+    const guiMode =
+        mode === "gui";
+
+    if (questionGrid) {
+        questionGrid.hidden =
+            !guiMode;
+    }
+
+    if (pastePanel) {
+        pastePanel.hidden =
+            guiMode;
+    }
+
+    if (guiModeButton) {
+        guiModeButton.classList.toggle(
+            "active",
+            guiMode
+        );
+    }
+
+    if (pasteModeButton) {
+        pasteModeButton.classList.toggle(
+            "active",
+            !guiMode
+        );
+    }
+
+    if (guiMode) {
+        syncQuestionGridFromAnswers();
+    }
+}
+
+if (guiModeButton) {
+    guiModeButton.addEventListener(
+        "click",
+        () => {
+            setAnswerMode("gui");
+        }
+    );
+}
+
+if (pasteModeButton) {
+    pasteModeButton.addEventListener(
+        "click",
+        () => {
+            setAnswerMode("paste");
+        }
+    );
+}
+
     function normalizeStudentAnswers(value) {
 
         return String(value || "")
@@ -6482,41 +6873,72 @@ function generateMarkingPage() {
 
     async function runMarking() {
 
-        resultBox.hidden = true;
-        submitButton.disabled = true;
+    resultBox.hidden = true;
+    submitButton.disabled = true;
 
-        setStatus(
-            "loading mark scheme..."
+    setStatus(
+        "marking..."
+    );
+
+    try {
+
+        if (!expectedAnswers.length) {
+            throw new Error(
+                "the answer key is empty"
+            );
+        }
+
+        const marked =
+            markStudentAnswers(
+                answerInput.value
+            );
+
+        score.textContent =
+            marked.correct +
+            " / " +
+            marked.total;
+
+        detail.textContent =
+            marked.percentage.toFixed(1) +
+            "%";
+
+        renderAnswerReview(
+            marked.studentAnswers
         );
 
-        try {
+        resultBox.hidden = false;
 
-            const {
-                pageCount,
-                text
-            } = await extractPdfText(
-                markSchemeUrl
-            );
+        setStatus(
+            "paper marked",
+            "success"
+        );
 
-            const parsed =
-                parseMarkScheme(
-                    text
-                );
+    } catch (error) {
 
-            if (parsed.errors.length) {
-                throw new Error(
-                    parsed.errors.join("; ")
-                );
-            }
+        console.error(
+            "cashewpapers: paper marking failed",
+            error
+        );
 
-            setStatus(
-                "marking..."
-            );
+        setStatus(
+            "ERROR — " +
+            (
+                error &&
+                error.message
+                    ? error.message
+                    : String(error)
+            ),
+            "error"
+        );
 
-            const marked =
-                markStudentAnswers(
-                    answerInput.value
-                );
+    } finally {
+
+        submitButton.disabled =
+            false;
+
+    }
+
+}
 
             score.textContent =
                 marked.correct +
@@ -6630,6 +7052,33 @@ function generateMarkingPage() {
                 "#navpanes=0&zoom=page-fit&page=1";
         }
 
+        setStatus(
+    "loading mark scheme..."
+);
+
+const {
+    text
+} = await extractPdfText(
+    markSchemeUrl
+);
+
+const parsed =
+    parseMarkScheme(
+        text
+    );
+
+if (parsed.errors.length) {
+    throw new Error(
+        parsed.errors.join("; ")
+    );
+}
+
+buildQuestionGrid();
+
+setStatus(
+    "ready"
+);
+
         const paperFileName =
             decodedFile
                 .split("/")
@@ -6689,26 +7138,31 @@ function generateMarkingPage() {
     }
 
     answerInput.addEventListener(
-        "input",
-        () => {
-            resultBox.hidden = true;
+    "input",
+    () => {
 
-            if (answerReview) {
-                answerReview.innerHTML = "";
-            }
+        resultBox.hidden =
+            true;
 
-            if (
-                status.classList.contains(
-                    "success"
-                ) ||
-                status.classList.contains(
-                    "error"
-                )
-            ) {
-                setStatus("ready");
-            }
+        if (answerReview) {
+            answerReview.innerHTML =
+                "";
         }
-    );
+
+        syncQuestionGridFromAnswers();
+
+        if (
+            status.classList.contains(
+                "success"
+            ) ||
+            status.classList.contains(
+                "error"
+            )
+        ) {
+            setStatus("ready");
+        }
+    }
+);
 
     submitButton.addEventListener(
         "click",
