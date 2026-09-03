@@ -39,7 +39,6 @@ const CATEGORY_ICON_FILES = {
     statsmech: "stats.svg",
     written: "written.svg",
     practical: "practical.svg"
-    theory: "written.svg"
 };
 
 const IMAGE_ASSETS = [
@@ -77,6 +76,10 @@ const IMAGE_ASSETS = [
         papers/<subjectKey>/<categoryKey>/<year>/<session>/file.pdf
 
     Each entry is: [categoryKey, displayName, fallbackIcon, breadcrumbLabel]
+
+    Subjects deliberately left OUT of this map (e.g. Business) skip
+    the category level entirely and go straight from the subject
+    page into the year grid.
     ------------------------------------------------------------
 */
 
@@ -93,7 +96,7 @@ const SUBJECT_CATEGORIES = {
     ],
 
     chemistry: [
-        ["written", "written", "📝", "written"],
+        ["written", "Written", "📝", "written"],
         ["practical", "Practical", "🧪", "practical"]
     ],
 
@@ -103,9 +106,11 @@ const SUBJECT_CATEGORIES = {
     ],
 
     /*
-       Computer Science (9618)
-       papers/computerscience/theory/<year>/<session>/...
-       papers/computerscience/programming/<year>/<session>/...
+        Computer Science (9618): Papers 1 & 3 are the written theory
+        papers (Theory Fundamentals / Advanced Theory), Papers 2 & 4
+        are the programming/problem-solving papers (Fundamental
+        Problem-solving & Programming / Practical on-computer
+        programming).
     */
     computerscience: [
         ["theory", "Theory", "📘", "theory"],
@@ -113,39 +118,35 @@ const SUBJECT_CATEGORIES = {
     ],
 
     /*
-       Psychology (9990)
-       papers/psychology/approachresearch/<year>/<session>/...
-       papers/psychology/specialist/<year>/<session>/...
+        Psychology (9990): Papers 1 & 2 (Approaches, Issues and
+        Debates / Research Methods) form the general "Approaches &
+        Research" component, while Papers 3 & 4 are the Specialist
+        Options component (Specialist Options: Approaches, Issues
+        and Debates / Specialist Options: Application and Research
+        Methods).
     */
     psychology: [
-        [
-            "approachresearch",
-            "Approaches & research",
-            "🧠",
-            "approaches & research"
-        ],
-        [
-            "specialist",
-            "Specialist options",
-            "🔬",
-            "specialist"
-        ]
+        ["approaches", "Approaches & Research", "🧠", "approaches & research"],
+        ["specialist", "Specialist Options", "🔬", "specialist"]
     ],
 
     /*
-       Economics (9708)
-       papers/economics/mcq/<year>/<session>/...
-       papers/economics/responses/<year>/<session>/...
+        Economics (9708): Papers 1 & 3 are the Multiple Choice
+        papers (AS / A Level), Papers 2 & 4 are the Data Response
+        and Essays papers.
     */
     economics: [
-        ["mcq", "MCQ", "✓", "mcq"],
-        [
-            "responses",
-            "Data Response & essays",
-            "📄",
-            "responses"
-        ]
+        ["mcq", "Multiple Choice", "🔢", "mcq"],
+        ["responses", "Data Response & Essays", "📝", "responses"]
     ]
+
+    /*
+        Business (9609) is intentionally NOT listed here. All four
+        of its papers (Short Answer and Essay, Data Response,
+        Business Strategy, Business Strategy Essay) are exposed
+        directly under the subject's year grid, with no extra
+        category level in between.
+    */
 
 };
 
@@ -560,9 +561,11 @@ function buildPaperSearchIndex(database) {
 /*
     Populates PAPER_SEARCH_INDEX for every category of a categorized
     subject (mathematics' pure/statsmech, the sciences' written/practical,
-    or any future entry added to SUBJECT_CATEGORIES). Exactly the same
-    algorithm as the original mathematics-only version, just parameterized
-    on subjectKey.
+    computer science's theory/programming, psychology's
+    approaches/specialist, economics' mcq/responses, or any future
+    entry added to SUBJECT_CATEGORIES). Exactly the same algorithm as
+    the original mathematics-only version, just parameterized on
+    subjectKey.
 */
 function addCategorizedSearchIndex(subjectKey, subjectName) {
 
@@ -4665,9 +4668,11 @@ applySubjectFilter();
    SUBJECT PAGE
 
    Any subject listed in SUBJECT_CATEGORIES (mathematics,
-   physics, chemistry, biology, ...) gets a component-choice
-   page here, generated the exact same way regardless of which
-   subject it is or what its categories are called.
+   physics, chemistry, biology, computer science, psychology,
+   economics, ...) gets a component-choice page here, generated
+   the exact same way regardless of which subject it is or what
+   its categories are called. Subjects NOT listed there (e.g.
+   business) skip straight to the year grid.
    ============================================================ */
 
 function generateSubjectPage(subjectKey, data) {
@@ -4885,7 +4890,8 @@ function breadcrumbHTML(items) {
    CATEGORY PAGE
 
    Generic for any categorized subject: renders the year grid
-   for one component (e.g. mathematics/pure, physics/practical).
+   for one component (e.g. mathematics/pure, physics/practical,
+   computerscience/theory, psychology/specialist, economics/mcq).
    ============================================================ */
 
 function generateCategoryPage(subjectKey, subject, categoryKey, years) {
@@ -5098,7 +5104,7 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
                             { label: String(year), current: true }
                         ])
                         : breadcrumbHTML([
-                            { label: "subjects", href: "../../" },
+                            { label: "subjects", href: "../../../" },
                             { label: subjectShortLabel(subjectKey, subject), href: "../" },
                             { label: String(year), current: true }
                         ])
@@ -7686,7 +7692,8 @@ function generateSchedulerPage() {
    category of one subject, writes its pages, and adds its
    papers to the search index. This is exactly the algorithm
    the original generator used only for mathematics, now
-   applied to any subject in SUBJECT_CATEGORIES.
+   applied to any subject in SUBJECT_CATEGORIES (including
+   computerscience, psychology, and economics).
    ============================================================ */
 
 function buildCategoryYears(subjectKey, categoryKey) {
@@ -7797,10 +7804,7 @@ function writeCategorizedSubjectPages(subjectKey, data) {
 
                     PAPER_SEARCH_INDEX[paper.code.toLowerCase()] = {
                         path: `${subjectKey}/${categoryKey}/${year}/${slug}/#paper-${paper.code}`,
-                        code: paper.code,
-                        subject: data.subject.name,
-                        paper: paper.paper,
-                        questionPath: paper.question || ""
+                        code: paper.code
                     };
 
                 }
@@ -7900,12 +7904,7 @@ function generate() {
     PAPER_SEARCH_INDEX = buildPaperSearchIndex(database);
 
     for (const subjectKey of Object.keys(SUBJECT_CATEGORIES)) {
-        if (subjects[subjectKey]) {
-            addCategorizedSearchIndex(
-                subjectKey,
-                subjects[subjectKey].name
-            );
-        }
+        addCategorizedSearchIndex(subjectKey, subjects[subjectKey].name);
     }
 
     if (fs.existsSync(DIST_DIR)) {
@@ -8001,7 +8000,8 @@ function generate() {
             generateSubjectPage(subjectKey, data)
         );
 
-        /* Categorized subjects (mathematics, sciences, ...) */
+        /* Categorized subjects (mathematics, sciences, computer
+           science, psychology, economics, ...) */
 
         if (hasCategories(subjectKey)) {
 
@@ -8009,7 +8009,8 @@ function generate() {
 
         }
 
-        /* Normal subjects */
+        /* Uncategorized subjects (business, ...) go straight
+           from the subject page into the year grid */
 
         else {
 
