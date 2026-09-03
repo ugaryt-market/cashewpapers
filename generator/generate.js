@@ -6328,7 +6328,7 @@ function generateMarkingPage() {
                 "../" +
                 decodedFile,
                 window.location.href
-            ).href;
+            ).href; + "#sidenavCollapsed=true";
 
         if (pdfFrame) {
             pdfFrame.src =
