@@ -2551,7 +2551,7 @@ body:has(.native-pdf-page) main {
 /* ---------------- PAPER MARKING PAGE ---------------- */
 
 .mark-page {
-    width: min(720px, 100%);
+    width: min(1400px, 100%);
     margin: 0 auto;
 }
 
@@ -2559,12 +2559,51 @@ body:has(.native-pdf-page) main {
     margin-bottom: 22px;
 }
 
-.mark-card {
+.mark-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: stretch;
+    min-height: 650px;
+    height: calc(100dvh - 230px);
+}
+
+.mark-panel {
+    min-width: 0;
+    min-height: 0;
+}
+
+.mark-controls-panel {
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.mark-card,
+.mark-pdf-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 18px;
-    padding: 24px;
     box-shadow: var(--shadow);
+}
+
+.mark-card {
+    padding: 24px;
+}
+
+.mark-pdf-card {
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.mark-pdf-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 650px;
+    border: none;
+    background: #242528;
 }
 
 .mark-paper-meta {
@@ -2673,6 +2712,30 @@ body:has(.native-pdf-page) main {
     margin-top: 7px;
     color: var(--muted);
     font-size: 13px;
+}
+
+@media (max-width: 900px) {
+
+    .mark-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 0;
+    }
+
+    .mark-controls-panel {
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    .mark-pdf-card {
+        height: 70vh;
+        min-height: 520px;
+    }
+
+    .mark-pdf-frame {
+        min-height: 520px;
+    }
+
 }
 
 @media (max-width: 700px) {
@@ -5675,55 +5738,76 @@ function generateMarkingPage() {
 
                 </div>
 
-                <div class="mark-card">
+                <div class="mark-layout">
 
-                    <div class="mark-paper-meta" id="markPaperMeta">
-                        loading paper...
+                    <div class="mark-panel mark-controls-panel">
+
+                        <div class="mark-card">
+
+                            <div class="mark-paper-meta" id="markPaperMeta">
+                                loading paper...
+                            </div>
+
+                            <label
+                                class="mark-answer-label"
+                                for="markAnswerInput"
+                            >
+                                your answers
+                            </label>
+
+                            <textarea
+                                id="markAnswerInput"
+                                class="mark-answer-input"
+                                spellcheck="false"
+                                autocomplete="off"
+                                autocapitalize="characters"
+                                placeholder="ABCDABCD..."
+                                rows="7"
+                            ></textarea>
+
+                            <div class="mark-answer-help">
+                                enter one answer per question using A, B, C, or D. spaces and line breaks are ignored.
+                            </div>
+
+                            <button
+                                type="button"
+                                class="mark-submit"
+                                id="markSubmit"
+                            >
+                                mark paper
+                            </button>
+
+                            <div
+                                class="mark-status"
+                                id="markStatus"
+                            >
+                                ready
+                            </div>
+
+                            <div
+                                class="mark-result"
+                                id="markResult"
+                                hidden
+                            >
+                                <div class="mark-result-score" id="markScore"></div>
+                                <div class="mark-result-detail" id="markDetail"></div>
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <label
-                        class="mark-answer-label"
-                        for="markAnswerInput"
-                    >
-                        your answers
-                    </label>
+                    <div class="mark-panel mark-pdf-panel">
 
-                    <textarea
-                        id="markAnswerInput"
-                        class="mark-answer-input"
-                        spellcheck="false"
-                        autocomplete="off"
-                        autocapitalize="characters"
-                        placeholder="ABCDABCD..."
-                        rows="7"
-                    ></textarea>
+                        <div class="mark-pdf-card">
+                            <iframe
+                                id="markPdfFrame"
+                                class="mark-pdf-frame"
+                                title="question paper"
+                                src="about:blank"
+                            ></iframe>
+                        </div>
 
-                    <div class="mark-answer-help">
-                        enter one answer per question using A, B, C, or D. spaces and line breaks are ignored.
-                    </div>
-
-                    <button
-                        type="button"
-                        class="mark-submit"
-                        id="markSubmit"
-                    >
-                        mark paper
-                    </button>
-
-                    <div
-                        class="mark-status"
-                        id="markStatus"
-                    >
-                        ready
-                    </div>
-
-                    <div
-                        class="mark-result"
-                        id="markResult"
-                        hidden
-                    >
-                        <div class="mark-result-score" id="markScore"></div>
-                        <div class="mark-result-detail" id="markDetail"></div>
                     </div>
 
                 </div>
@@ -5784,6 +5868,11 @@ function generateMarkingPage() {
     const returnButton =
         document.getElementById(
             "markReturn"
+        );
+
+    const pdfFrame =
+        document.getElementById(
+            "markPdfFrame"
         );
 
     let pdfjsLib = null;
@@ -6233,6 +6322,19 @@ function generateMarkingPage() {
                 markSchemeFile,
                 window.location.href
             ).href;
+
+        const questionPaperUrl =
+            new URL(
+                "../" +
+                decodedFile,
+                window.location.href
+            ).href;
+
+        if (pdfFrame) {
+            pdfFrame.src =
+                questionPaperUrl +
+                "#zoom=page-fit&page=1";
+        }
 
         const paperFileName =
             decodedFile
