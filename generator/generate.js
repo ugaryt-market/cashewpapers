@@ -29,7 +29,7 @@ const SUBJECT_ICON_FILES = {
     biology: "18.svg",
     chemistry: "19.svg",
     economics: "20.svg",
-    "computer-science": "21.svg",
+    computerscience: "21.svg",
     psychology: "22.svg",
     business: "23.svg"
 };
