@@ -6940,51 +6940,6 @@ if (pasteModeButton) {
 
 }
 
-            score.textContent =
-                marked.correct +
-                " / " +
-                marked.total;
-
-            detail.textContent =
-                marked.percentage.toFixed(1) +
-                "%";
-
-            renderAnswerReview(
-                marked.studentAnswers
-            );
-
-            resultBox.hidden = false;
-
-            setStatus(
-                "paper marked",
-                "success"
-            );
-
-        } catch (error) {
-
-            console.error(
-                "cashewpapers: paper marking failed",
-                error
-            );
-
-            setStatus(
-                "ERROR — " +
-                (
-                    error &&
-                    error.message
-                        ? error.message
-                        : String(error)
-                ),
-                "error"
-            );
-
-        } finally {
-            submitButton.disabled =
-                false;
-        }
-
-    }
-
     if (!fileParam) {
         paperName.textContent =
             "no question paper was supplied.";
