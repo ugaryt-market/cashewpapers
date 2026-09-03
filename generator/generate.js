@@ -29,7 +29,7 @@ const SUBJECT_ICON_FILES = {
     biology: "18.svg",
     chemistry: "19.svg",
     economics: "20.svg",
-    computer-science: "21.svg",
+    "computer-science": "21.svg",
     psychology: "22.svg",
     business: "23.svg"
 };
@@ -112,10 +112,10 @@ const SUBJECT_CATEGORIES = {
         Problem-solving & Programming / Practical on-computer
         programming).
     */
-    computer-science: [
-        ["theory", "Theory", "📘", "theory"],
-        ["programming", "Programming", "💻", "programming"]
-    ],
+    "computer-science": [
+    ["theory", "Theory", "📘", "theory"],
+    ["programming", "Programming", "💻", "programming"]
+],
 
     /*
         Psychology (9990): Papers 1 & 2 (Approaches, Issues and
