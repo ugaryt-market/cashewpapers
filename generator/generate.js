@@ -6142,8 +6142,7 @@ function generateMarkingPage() {
             </div>
 
             <script>
-(function () {
-
+(async function () {
     const params =
         new URLSearchParams(
             window.location.search
