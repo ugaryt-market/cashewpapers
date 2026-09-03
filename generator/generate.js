@@ -92,7 +92,7 @@ const SUBJECT_CATEGORIES = {
     ],
 
     chemistry: [
-        ["written", "Written", "📝", "written"],
+        ["written", "written", "📝", "written"],
         ["practical", "Practical", "🧪", "practical"]
     ],
 
@@ -107,8 +107,8 @@ const SUBJECT_CATEGORIES = {
        papers/computerscience/programming/<year>/<session>/...
     */
     computerscience: [
-        ["theory", "Theory (Papers 1 & 3)", "📘", "theory"],
-        ["programming", "Programming (Papers 2 & 4)", "💻", "programming"]
+        ["theory", "Theory", "📘", "theory"],
+        ["programming", "Programming", "💻", "programming"]
     ],
 
     /*
@@ -119,13 +119,13 @@ const SUBJECT_CATEGORIES = {
     psychology: [
         [
             "approachresearch",
-            "Approaches & Research (Papers 1 & 2)",
+            "Approaches & research",
             "🧠",
             "approaches & research"
         ],
         [
             "specialist",
-            "Specialist Options (Papers 3 & 4)",
+            "Specialist options",
             "🔬",
             "specialist"
         ]
@@ -137,10 +137,10 @@ const SUBJECT_CATEGORIES = {
        papers/economics/responses/<year>/<session>/...
     */
     economics: [
-        ["mcq", "Multiple Choice (Papers 1 & 3)", "✓", "multiple choice"],
+        ["mcq", "MCQ", "✓", "mcq"],
         [
             "responses",
-            "Data Response & Essays (Papers 2 & 4)",
+            "Data Response & essays",
             "📄",
             "responses"
         ]
