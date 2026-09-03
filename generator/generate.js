@@ -99,6 +99,51 @@ const SUBJECT_CATEGORIES = {
     biology: [
         ["written", "Written", "📝", "written"],
         ["practical", "Practical", "🧪", "practical"]
+    ],
+
+    /*
+       Computer Science (9618)
+       papers/computerscience/theory/<year>/<session>/...
+       papers/computerscience/programming/<year>/<session>/...
+    */
+    computerscience: [
+        ["theory", "Theory (Papers 1 & 3)", "📘", "theory"],
+        ["programming", "Programming (Papers 2 & 4)", "💻", "programming"]
+    ],
+
+    /*
+       Psychology (9990)
+       papers/psychology/approachresearch/<year>/<session>/...
+       papers/psychology/specialist/<year>/<session>/...
+    */
+    psychology: [
+        [
+            "approachresearch",
+            "Approaches & Research (Papers 1 & 2)",
+            "🧠",
+            "approaches & research"
+        ],
+        [
+            "specialist",
+            "Specialist Options (Papers 3 & 4)",
+            "🔬",
+            "specialist"
+        ]
+    ],
+
+    /*
+       Economics (9708)
+       papers/economics/mcq/<year>/<session>/...
+       papers/economics/responses/<year>/<session>/...
+    */
+    economics: [
+        ["mcq", "Multiple Choice (Papers 1 & 3)", "✓", "multiple choice"],
+        [
+            "responses",
+            "Data Response & Essays (Papers 2 & 4)",
+            "📄",
+            "responses"
+        ]
     ]
 
 };
@@ -7751,7 +7796,10 @@ function writeCategorizedSubjectPages(subjectKey, data) {
 
                     PAPER_SEARCH_INDEX[paper.code.toLowerCase()] = {
                         path: `${subjectKey}/${categoryKey}/${year}/${slug}/#paper-${paper.code}`,
-                        code: paper.code
+                        code: paper.code,
+                        subject: data.subject.name,
+                        paper: paper.paper,
+                        questionPath: paper.question || ""
                     };
 
                 }
@@ -7851,7 +7899,12 @@ function generate() {
     PAPER_SEARCH_INDEX = buildPaperSearchIndex(database);
 
     for (const subjectKey of Object.keys(SUBJECT_CATEGORIES)) {
-        addCategorizedSearchIndex(subjectKey, subjects[subjectKey].name);
+        if (subjects[subjectKey]) {
+            addCategorizedSearchIndex(
+                subjectKey,
+                subjects[subjectKey].name
+            );
+        }
     }
 
     if (fs.existsSync(DIST_DIR)) {
