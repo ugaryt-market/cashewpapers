@@ -2717,7 +2717,7 @@ body:has(.native-pdf-page) main {
 .mark-result {
     position: relative;
     margin-top: 14px;
-    padding: 36px 20px 20px;
+    padding: 36px 20px 18px;
     border: 1px solid var(--subdued);
     border-radius: 14px;
     background: #3a3127;
@@ -2747,6 +2747,96 @@ body:has(.native-pdf-page) main {
     margin-top: 7px;
     color: var(--muted);
     font-size: 13px;
+}
+
+.mark-answer-review {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(147, 107, 60, 0.45);
+    text-align: left;
+}
+
+.mark-answer-review-title {
+    margin-bottom: 9px;
+    color: var(--text);
+    font-size: 12px;
+    letter-spacing: 0.2px;
+}
+
+.mark-answer-review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: #646669 #3a3127;
+}
+
+.mark-answer-review-grid::-webkit-scrollbar {
+    width: 7px;
+}
+
+.mark-answer-review-grid::-webkit-scrollbar-track {
+    background: #3a3127;
+}
+
+.mark-answer-review-grid::-webkit-scrollbar-thumb {
+    background: #646669;
+    border-radius: 999px;
+}
+
+.mark-answer-review-item {
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 9px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #2c2e31;
+    min-width: 0;
+}
+
+.mark-answer-review-item.correct {
+    border-color: #4d6958;
+    background: #2d3a33;
+}
+
+.mark-answer-review-item.incorrect {
+    border-color: #704145;
+    background: #3b292b;
+}
+
+.mark-answer-review-number {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+}
+
+.mark-answer-review-answer {
+    min-width: 0;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.mark-answer-review-item.correct .mark-answer-review-answer {
+    color: #cfe7d8;
+}
+
+.mark-answer-review-item.incorrect .mark-answer-review-answer {
+    color: #ffd9dc;
+}
+
+@media (max-width: 600px) {
+
+    .mark-answer-review-grid {
+        grid-template-columns: 1fr;
+    }
+
 }
 
 @media (max-width: 900px) {
@@ -5824,8 +5914,20 @@ function generateMarkingPage() {
                                 id="markResult"
                                 hidden
                             >
-                                <div class="mark-result-score" id="markScore"></div>
-                                <div class="mark-result-detail" id="markDetail"></div>
+                                <div
+                                    class="mark-result-score"
+                                    id="markScore"
+                                ></div>
+
+                                <div
+                                    class="mark-result-detail"
+                                    id="markDetail"
+                                ></div>
+
+                                <div
+                                    class="mark-answer-review"
+                                    id="markAnswerReview"
+                                ></div>
                             </div>
 
                         </div>
@@ -5888,6 +5990,11 @@ function generateMarkingPage() {
     const detail =
         document.getElementById(
             "markDetail"
+        );
+
+    const answerReview =
+        document.getElementById(
+            "markAnswerReview"
         );
 
     const paperName =
@@ -6210,11 +6317,114 @@ function generateMarkingPage() {
         }
 
         return {
+            studentAnswers,
+            correctAnswers: expectedAnswers,
             correct,
             total: expectedCount,
             percentage:
                 (correct / expectedCount) * 100
         };
+
+    }
+
+    function renderAnswerReview(
+        studentAnswers
+    ) {
+
+        if (!answerReview) {
+            return;
+        }
+
+        answerReview.innerHTML = "";
+
+        const title =
+            document.createElement(
+                "div"
+            );
+
+        title.className =
+            "mark-answer-review-title";
+
+        title.textContent =
+            "answer review";
+
+        const grid =
+            document.createElement(
+                "div"
+            );
+
+        grid.className =
+            "mark-answer-review-grid";
+
+        for (
+            let i = 0;
+            i < expectedAnswers.length;
+            i += 1
+        ) {
+
+            const studentAnswer =
+                studentAnswers[i];
+
+            const correctAnswer =
+                expectedAnswers[i];
+
+            const isCorrect =
+                studentAnswer ===
+                correctAnswer;
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "mark-answer-review-item " +
+                (
+                    isCorrect
+                        ? "correct"
+                        : "incorrect"
+                );
+
+            const number =
+                document.createElement(
+                    "div"
+                );
+
+            number.className =
+                "mark-answer-review-number";
+
+            number.textContent =
+                "Q" + (i + 1);
+
+            const answer =
+                document.createElement(
+                    "div"
+                );
+
+            answer.className =
+                "mark-answer-review-answer";
+
+            answer.textContent =
+                isCorrect
+                    ? "✓ " + studentAnswer
+                    : "✗ " +
+                        studentAnswer +
+                        " → " +
+                        correctAnswer;
+
+            item.append(
+                number,
+                answer
+            );
+
+            grid.appendChild(item);
+
+        }
+
+        answerReview.append(
+            title,
+            grid
+        );
 
     }
 
@@ -6263,14 +6473,11 @@ function generateMarkingPage() {
 
             detail.textContent =
                 marked.percentage.toFixed(1) +
-                "% · " +
-                pageCount +
-                " mark-scheme page" +
-                (
-                    pageCount === 1
-                        ? ""
-                        : "s"
-                );
+                "%";
+
+            renderAnswerReview(
+                marked.studentAnswers
+            );
 
             resultBox.hidden = false;
 
@@ -6433,6 +6640,11 @@ function generateMarkingPage() {
         "input",
         () => {
             resultBox.hidden = true;
+
+            if (answerReview) {
+                answerReview.innerHTML = "";
+            }
+
             if (
                 status.classList.contains(
                     "success"
