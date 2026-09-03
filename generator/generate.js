@@ -2552,11 +2552,15 @@ body:has(.native-pdf-page) main {
 
 .mark-page {
     width: min(1400px, 100%);
-    margin: 0 auto;
+    margin: -30px auto 0;
 }
 
 .mark-page-header {
     margin-bottom: 22px;
+}
+
+.mark-page-header .native-pdf-return {
+    margin-bottom: 30px;
 }
 
 .mark-layout {
@@ -2672,14 +2676,31 @@ body:has(.native-pdf-page) main {
 }
 
 .mark-status {
-    margin-top: 12px;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
+    position: relative;
+    margin-top: 14px;
+    padding: 32px 14px 12px;
+    border: 1px solid #4b4d50;
     border-radius: 10px;
-    background: #3a3c3f;
+    background: #242528;
     color: var(--text);
+    font-family: "JetBrains Mono", monospace;
     font-size: 13px;
     line-height: 1.4;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.mark-status::before {
+    content: "output";
+    position: absolute;
+    top: 9px;
+    left: 12px;
+    color: var(--muted);
+    font-family: "Questrial", Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    text-transform: lowercase;
 }
 
 .mark-status.success {
@@ -2689,17 +2710,31 @@ body:has(.native-pdf-page) main {
 
 .mark-status.error {
     border-color: #704145;
-    background: #553234;
+    background: #3b292b;
     color: #ffd9dc;
 }
 
 .mark-result {
+    position: relative;
     margin-top: 14px;
-    padding: 20px;
+    padding: 36px 20px 20px;
     border: 1px solid var(--subdued);
     border-radius: 14px;
     background: #3a3127;
     text-align: center;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03),
+        0 10px 22px rgba(0, 0, 0, 0.14);
+}
+
+.mark-result::before {
+    content: "result";
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    color: var(--subdued);
+    font-size: 11px;
+    letter-spacing: 0.4px;
 }
 
 .mark-result-score {
@@ -6328,12 +6363,12 @@ function generateMarkingPage() {
                 "../" +
                 decodedFile,
                 window.location.href
-            ).href; + "#sidenavCollapsed=true";
+            ).href;
 
         if (pdfFrame) {
             pdfFrame.src =
                 questionPaperUrl +
-                "#zoom=page-fit&page=1";
+                "#navpanes=0&zoom=page-fit&page=1";
         }
 
         const paperFileName =
