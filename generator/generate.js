@@ -2721,6 +2721,11 @@ body:has(.native-pdf-page) main {
     gap: 9px;
 }
 
+.mark-question-grid[hidden],
+.mark-paste-panel[hidden] {
+    display: none !important;
+}
+
 .mark-question {
     display: grid;
     grid-template-columns: 82px minmax(0, 1fr);
@@ -6044,7 +6049,7 @@ function generateMarkingPage() {
                 class="mark-answer-mode-button active"
                 id="markGuiModeButton"
             >
-                questions
+                answer as an mcq
             </button>
 
             <button
@@ -6052,7 +6057,7 @@ function generateMarkingPage() {
                 class="mark-answer-mode-button"
                 id="markPasteModeButton"
             >
-                paste answers
+                answer with raw text
             </button>
         </div>
     </div>
