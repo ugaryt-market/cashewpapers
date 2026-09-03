@@ -5591,8 +5591,12 @@ function generatePdfReaderPage() {
             "click",
             event => {
                 event.preventDefault();
-                window.location.href =
-                    markPageUrl;
+
+                window.open(
+                    markPageUrl,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
             }
         );
 
@@ -7622,4 +7626,3 @@ function generate() {
    ============================================================ */
 
 generate();
-
