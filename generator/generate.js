@@ -39,6 +39,7 @@ const CATEGORY_ICON_FILES = {
     statsmech: "stats.svg",
     written: "written.svg",
     practical: "practical.svg"
+    theory: "written.svg"
 };
 
 const IMAGE_ASSETS = [
