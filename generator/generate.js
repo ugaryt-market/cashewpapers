@@ -38,7 +38,9 @@ const CATEGORY_ICON_FILES = {
     pure: "pure.svg",
     statsmech: "stats.svg",
     written: "written.svg",
-    practical: "practical.svg"
+    practical: "practical.svg",
+    theory: "stackofbooks.svg",
+    programming: "21.svg"
 };
 
 const IMAGE_ASSETS = [
