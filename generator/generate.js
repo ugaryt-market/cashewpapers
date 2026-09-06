@@ -5099,7 +5099,7 @@ function generateGuidePage() {
 
                 <section class="guide-hero">
                     <div class="guide-eyebrow">cashewpapers / guide</div>
-                    <h1>your papers,<br><span>made usable.</span></h1>
+                    <h1>by students,<br><span>for students.</span></h1>
                     <p>
                         find the right paper, work through it, mark it,
                         and keep a record of your progress — without
