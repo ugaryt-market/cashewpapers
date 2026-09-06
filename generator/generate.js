@@ -1110,15 +1110,13 @@ nav {
     background: #3a3c3f;
     color: var(--text);
     border: 1px solid var(--border);
-    border-left: 2px solid var(--primary);
 }
 
 .nav-guide-button:hover {
     background: #414346;
     color: white;
     opacity: 1;
-    border-color: var(--subdued);
-    border-left-color: var(--primary);
+    border-color: #56595d;
 }
 
 .logo {
@@ -5274,13 +5272,13 @@ function generateGuidePage() {
                         <h2>ready when you are.</h2>
                         <p>pick a subject and start with the paper in front of you.</p>
                     </div>
-                    <a href="index.html">browse subjects →</a>
+                    <a href="../index.html">browse subjects →</a>
                 </section>
 
             </div>
         `,
 
-        0
+        1
     );
 }
 
