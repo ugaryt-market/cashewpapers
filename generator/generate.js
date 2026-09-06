@@ -1106,6 +1106,21 @@ nav {
     border-color: var(--subdued);
 }
 
+.nav-guide-button {
+    background: #3a3c3f;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--primary);
+}
+
+.nav-guide-button:hover {
+    background: #414346;
+    color: white;
+    opacity: 1;
+    border-color: var(--subdued);
+    border-left-color: var(--primary);
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -3158,6 +3173,288 @@ footer {
     justify-content: flex-start;
 }
 
+/* ---------------- GUIDE ---------------- */
+
+.guide-page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-bottom: 30px;
+}
+
+.guide-hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 390px;
+    padding: 42px 46px;
+    border: 1px solid #42454a;
+    background:
+        radial-gradient(circle at 85% 12%, rgba(255, 150, 79, 0.15), transparent 30%),
+        linear-gradient(135deg, #1e2024 0%, #15171a 100%);
+    box-shadow: var(--shadow);
+}
+
+.guide-hero::after {
+    content: "";
+    position: absolute;
+    right: -90px;
+    bottom: -130px;
+    width: 390px;
+    height: 390px;
+    border: 1px solid rgba(255, 150, 79, 0.22);
+    border-radius: 50%;
+    box-shadow: 0 0 0 42px rgba(255, 150, 79, 0.035), 0 0 0 84px rgba(255, 150, 79, 0.02);
+}
+
+.guide-eyebrow {
+    position: relative;
+    z-index: 1;
+    color: var(--primary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+}
+
+.guide-hero h1 {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin-top: 24px;
+    color: #f0f0eb;
+    font-size: clamp(46px, 6vw, 82px);
+    font-weight: 400;
+    letter-spacing: -4px;
+    line-height: 0.98;
+}
+
+.guide-hero h1 span {
+    color: #a9aba8;
+}
+
+.guide-hero p {
+    position: relative;
+    z-index: 1;
+    max-width: 560px;
+    margin-top: 24px;
+    color: #aeb0ad;
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.guide-jump-links {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.guide-jump-links a {
+    padding: 8px 12px;
+    border: 1px solid #44474b;
+    border-radius: 999px;
+    color: var(--text);
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.guide-jump-links a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.guide-section {
+    scroll-margin-top: 28px;
+    margin-top: 20px;
+    padding: 38px 42px;
+    border: 1px solid var(--border);
+    background: #292b2e;
+}
+
+.guide-section-heading {
+    display: grid;
+    grid-template-columns: 86px 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 30px;
+}
+
+.guide-number {
+    color: var(--primary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    padding-top: 7px;
+}
+
+.guide-section h2 {
+    color: #f0f0eb;
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 400;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+.guide-section-heading p {
+    max-width: 650px;
+    margin-top: 12px;
+    color: #9b9da0;
+    line-height: 1.55;
+}
+
+.guide-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.guide-card {
+    min-height: 190px;
+    padding: 24px;
+    border: 1px solid #3f4246;
+    background: #1d1f22;
+}
+
+.guide-card-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid rgba(255, 150, 79, 0.45);
+    border-radius: 9px;
+    color: var(--primary);
+    font-size: 17px;
+}
+
+.guide-card h3 {
+    margin-top: 18px;
+    color: #ecece7;
+    font-size: 21px;
+    font-weight: 400;
+    letter-spacing: -0.8px;
+}
+
+.guide-card p {
+    margin-top: 9px;
+    color: #999b9e;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.guide-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    padding: 22px 24px;
+    border: 1px solid #45484c;
+    background: #202225;
+    color: #c2c3bf;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+}
+
+.guide-path strong {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.guide-path-arrow {
+    color: #686a6d;
+}
+
+.guide-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 28px;
+    margin-top: 22px;
+    list-style: none;
+}
+
+.guide-list li {
+    position: relative;
+    padding-left: 20px;
+    color: #a7a8a6;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.guide-list li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+}
+
+.guide-callout {
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-left: 2px solid var(--primary);
+    background: #302b27;
+    color: #bcbcb6;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.guide-start {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 20px;
+    padding: 32px 38px;
+    border: 1px solid var(--subdued);
+    background: linear-gradient(110deg, #352d26, #242629);
+}
+
+.guide-start h2 {
+    color: #f0f0eb;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -1px;
+}
+
+.guide-start p {
+    margin-top: 7px;
+    color: #a5a49f;
+    font-size: 14px;
+}
+
+.guide-start a {
+    flex: none;
+    padding: 11px 15px;
+    border-radius: 9px;
+    background: var(--primary);
+    color: white;
+    font-size: 14px;
+}
+
+.guide-start a:hover {
+    background: #ffa86c;
+}
+
+@media (max-width: 700px) {
+    .guide-hero,
+    .guide-section {
+        padding: 28px 24px;
+    }
+
+    .guide-section-heading,
+    .guide-card-grid,
+    .guide-list {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-section-heading {
+        gap: 8px;
+    }
+
+    .guide-start {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 28px 24px;
+    }
+}
+
 .home-page .subject-card h2 {
     margin-top: 11px;
     font-size: 20px;
@@ -3476,6 +3773,14 @@ function documentHTML(title, body, depth = 0) {
                 title="my calendar"
             >
                 my calendar
+            </a>
+
+            <a
+                href="${prefix}guide/"
+                class="nav-account nav-guide-button"
+                title="guide"
+            >
+                guide
             </a>
 
             <a id="authNav" href="${prefix}login/" class="nav-account">
@@ -4770,6 +5075,209 @@ applySubjectFilter();
 
 </script>
 
+        `,
+
+        0
+    );
+}
+
+
+/* ============================================================
+   GUIDE PAGE
+
+   This is intentionally a first-run orientation rather than a
+   replacement for the paper browser. It documents the existing
+   site workflows in one place and uses only the shared page shell,
+   so search, authentication, and the calendar remain available.
+   ============================================================ */
+
+function generateGuidePage() {
+
+    return documentHTML(
+        "Guide",
+
+        `
+            <div class="guide-page">
+
+                <section class="guide-hero">
+                    <div class="guide-eyebrow">cashewpapers / guide</div>
+                    <h1>your papers,<br><span>made usable.</span></h1>
+                    <p>
+                        find the right paper, work through it, mark it,
+                        and keep a record of your progress — without
+                        losing your place.
+                    </p>
+                    <nav class="guide-jump-links" aria-label="guide sections">
+                        <a href="#find">find papers</a>
+                        <a href="#study">study tools</a>
+                        <a href="#track">track progress</a>
+                        <a href="#account">your account</a>
+                    </nav>
+                </section>
+
+                <section class="guide-section" id="find">
+                    <div class="guide-section-heading">
+                        <div class="guide-number">01 / explore</div>
+                        <div>
+                            <h2>find exactly what you need.</h2>
+                            <p>
+                                start from a subject or jump directly to a
+                                paper when you already know its code.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-path" aria-label="paper browsing path">
+                        <strong>subject</strong>
+                        <span class="guide-path-arrow">→</span>
+                        <span>component, when applicable</span>
+                        <span class="guide-path-arrow">→</span>
+                        <span>year</span>
+                        <span class="guide-path-arrow">→</span>
+                        <span>exam session</span>
+                        <span class="guide-path-arrow">→</span>
+                        <strong>paper</strong>
+                    </div>
+
+                    <div class="guide-card-grid" style="margin-top: 14px;">
+                        <article class="guide-card">
+                            <div class="guide-card-icon">⌕</div>
+                            <h3>search by paper code</h3>
+                            <p>
+                                use the search bar in the header on any page.
+                                enter a code such as 9709_s23_qp_12 to open and
+                                highlight that paper immediately.
+                            </p>
+                        </article>
+                        <article class="guide-card">
+                            <div class="guide-card-icon">▦</div>
+                            <h3>browse in context</h3>
+                            <p>
+                                subject pages keep related papers together.
+                                subjects with components, such as maths or the
+                                sciences, show that extra choice before years.
+                            </p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="guide-section" id="study">
+                    <div class="guide-section-heading">
+                        <div class="guide-number">02 / practise</div>
+                        <div>
+                            <h2>turn papers into practice.</h2>
+                            <p>
+                                every paper card puts the resources and study
+                                actions you need next to one another.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-card-grid">
+                        <article class="guide-card">
+                            <div class="guide-card-icon">↗</div>
+                            <h3>open a paper</h3>
+                            <p>
+                                launch the question paper in the built-in reader,
+                                where you can focus on the document without
+                                leaving cashewpapers.
+                            </p>
+                        </article>
+                        <article class="guide-card">
+                            <div class="guide-card-icon">✓</div>
+                            <h3>mark your answers</h3>
+                            <p>
+                                use the marking tool for supported papers. submit
+                                your answers, review the result, and compare your
+                                work question by question.
+                            </p>
+                        </article>
+                        <article class="guide-card">
+                            <div class="guide-card-icon">≡</div>
+                            <h3>use every document</h3>
+                            <p>
+                                paper cards surface the question paper, mark
+                                scheme, examiner report, and insert whenever
+                                those files are available.
+                            </p>
+                        </article>
+                        <article class="guide-card">
+                            <div class="guide-card-icon">□</div>
+                            <h3>keep your place</h3>
+                            <p>
+                                mark a paper complete from its card. your status
+                                and saved attempts stay connected to your account.
+                            </p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="guide-section" id="track">
+                    <div class="guide-section-heading">
+                        <div class="guide-number">03 / organise</div>
+                        <div>
+                            <h2>make the work visible.</h2>
+                            <p>
+                                cashewpapers pairs the paper archive with a
+                                lightweight way to plan and measure your revision.
+                            </p>
+                        </div>
+                    </div>
+
+                    <ul class="guide-list">
+                        <li>open <strong>my calendar</strong> to schedule a paper for a day.</li>
+                        <li>use a paper card’s calendar action to add that exact paper to your plan.</li>
+                        <li>toggle completion after you finish a paper to update its progress state.</li>
+                        <li>return to a subject page to see your work accumulate across its papers.</li>
+                    </ul>
+
+                    <div class="guide-callout">
+                        the calendar and completion history are personal features:
+                        sign in first if you want them to persist between visits.
+                    </div>
+                </section>
+
+                <section class="guide-section" id="account">
+                    <div class="guide-section-heading">
+                        <div class="guide-number">04 / personalise</div>
+                        <div>
+                            <h2>make it yours.</h2>
+                            <p>
+                                create an account to retain your selected subjects,
+                                paper completion states, attempts, and planned work.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-card-grid">
+                        <article class="guide-card">
+                            <div class="guide-card-icon">◎</div>
+                            <h3>choose your subjects</h3>
+                            <p>
+                                select the subjects you take so the home page can
+                                focus on the papers that matter to you.
+                            </p>
+                        </article>
+                        <article class="guide-card">
+                            <div class="guide-card-icon">↺</div>
+                            <h3>come back seamlessly</h3>
+                            <p>
+                                your account carries your completion and attempt
+                                data across sessions, so revision has continuity.
+                            </p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="guide-start">
+                    <div>
+                        <h2>ready when you are.</h2>
+                        <p>pick a subject and start with the paper in front of you.</p>
+                    </div>
+                    <a href="index.html">browse subjects →</a>
+                </section>
+
+            </div>
         `,
 
         0
@@ -8357,6 +8865,13 @@ function generate() {
     /* Home */
 
     writeFile(path.join(DIST_DIR, "index.html"), generateHome(subjects));
+
+    /* New-user guide */
+
+    writeFile(
+        path.join(DIST_DIR, "guide", "index.html"),
+        generateGuidePage()
+    );
 
     /* Subject selection */
 
