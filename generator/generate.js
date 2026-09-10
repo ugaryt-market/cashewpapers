@@ -3312,6 +3312,227 @@ footer {
     background: #1d1f22;
 }
 
+.guide-card h3 {
+    margin-top: 18px;
+}
+
+.guide-example {
+    margin-top: 20px;
+    padding: 14px;
+    border: 1px solid #383b3f;
+    background: #191b1e;
+}
+
+.guide-example-row,
+.guide-example-meta,
+.guide-example-attempt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.guide-example-row {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: #aeb0ad;
+}
+
+.guide-example-status {
+    color: var(--primary);
+}
+
+.guide-example-progress {
+    height: 6px;
+    margin-top: 12px;
+    background: #303236;
+    border: 1px solid #3b3e42;
+}
+
+.guide-example-progress-fill {
+    height: 100%;
+    background: var(--primary);
+}
+
+.guide-example-meta {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.guide-example-attempt {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #34373b;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.guide-example-attempt span {
+    color: var(--text);
+}
+
+
+.guide-calendar-head {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    text-align: center;
+}
+
+.guide-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.guide-calendar-day {
+    min-height: 63px;
+    padding: 6px;
+    border: 1px solid #34373b;
+    background: #202226;
+    overflow: hidden;
+}
+
+.guide-calendar-day > span {
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+}
+
+.guide-calendar-pill {
+    margin-top: 7px;
+    padding: 3px 4px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.guide-calendar-pill[data-guide-color="orange"] {
+    background: #8f4e25;
+    color: #ffe4cf;
+}
+
+.guide-calendar-pill[data-guide-color="blue"] {
+    background: #34577c;
+    color: #d9eaff;
+}
+
+.guide-calendar-pill[data-guide-color="green"] {
+    background: #35654d;
+    color: #d7f5e5;
+}
+
+
+.guide-mcq-question {
+    display: grid;
+    gap: 10px;
+}
+
+.guide-mcq-question > span {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+}
+
+.guide-mcq-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
+
+.guide-mcq-options span {
+    padding: 7px 4px;
+    border: 1px solid #3b3e42;
+    background: #2b2d30;
+    color: var(--muted);
+    font-size: 11px;
+    text-align: center;
+}
+
+.guide-mcq-options span.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.guide-mcq-result {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #34373b;
+    color: var(--primary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+}
+
+
+.guide-search-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 10px;
+    border: 1px solid #3b3e42;
+    background: #242629;
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+}
+
+.guide-search-button {
+    color: var(--primary);
+    font-size: 14px;
+}
+
+.guide-search-result {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 7px;
+    padding: 8px 10px;
+    border: 1px solid #34373b;
+    background: #202226;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.guide-search-result span:last-child {
+    color: var(--primary);
+}
+
+
+.guide-account-example {
+    display: grid;
+    gap: 7px;
+}
+
+.guide-account-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 9px;
+    border: 1px solid #34373b;
+    background: #202226;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+}
+
+.guide-account-item strong {
+    color: var(--primary);
+    font-weight: 400;
+}
+
 .guide-card-icon {
     display: grid;
     width: 34px;
@@ -3445,6 +3666,20 @@ footer {
     .guide-section-heading {
         gap: 8px;
     }
+
+    .guide-calendar-days,
+.guide-calendar-head {
+    gap: 3px;
+}
+
+.guide-calendar-day {
+    min-height: 58px;
+    padding: 4px;
+}
+
+.guide-calendar-pill {
+    font-size: 7px;
+}
 
     .guide-start {
         align-items: flex-start;
@@ -5098,181 +5333,365 @@ function generateGuidePage() {
             <div class="guide-page">
 
                 <section class="guide-hero">
-                    <div class="guide-eyebrow">cashewpapers / guide</div>
-                    <h1>by students,<br><span>for students.</span></h1>
+
+                    <div class="guide-eyebrow">
+                        cashewpapers / guide
+                    </div>
+
+                    <h1>
+                        by students,<br>
+                        <span>for students.</span>
+                    </h1>
+
                     <p>
-                        find the right paper, work through it, mark it,
-                        and keep a record of your progress — without
-                        losing your place.
+                        everything you need to practise, organise,
+                        and keep track of your revision — all in one place.
                     </p>
-                    <nav class="guide-jump-links" aria-label="guide sections">
-                        <a href="#find">find papers</a>
-                        <a href="#study">study tools</a>
-                        <a href="#track">track progress</a>
-                        <a href="#account">your account</a>
-                    </nav>
+
                 </section>
 
-                <section class="guide-section" id="find">
+
+                <section class="guide-section" id="guide-features">
+
                     <div class="guide-section-heading">
-                        <div class="guide-number">01 / explore</div>
-                        <div>
-                            <h2>find exactly what you need.</h2>
-                            <p>
-                                start from a subject or jump directly to a
-                                paper when you already know its code.
-                            </p>
+
+                        <div class="guide-number">
+                            01 / simplify
                         </div>
-                    </div>
 
-                    <div class="guide-path" aria-label="paper browsing path">
-                        <strong>subject</strong>
-                        <span class="guide-path-arrow">→</span>
-                        <span>component, when applicable</span>
-                        <span class="guide-path-arrow">→</span>
-                        <span>year</span>
-                        <span class="guide-path-arrow">→</span>
-                        <span>exam session</span>
-                        <span class="guide-path-arrow">→</span>
-                        <strong>paper</strong>
-                    </div>
-
-                    <div class="guide-card-grid" style="margin-top: 14px;">
-                        <article class="guide-card">
-                            <div class="guide-card-icon">⌕</div>
-                            <h3>search by paper code</h3>
-                            <p>
-                                use the search bar in the header on any page.
-                                enter a code such as 9709_s23_qp_12 to open and
-                                highlight that paper immediately.
-                            </p>
-                        </article>
-                        <article class="guide-card">
-                            <div class="guide-card-icon">▦</div>
-                            <h3>browse in context</h3>
-                            <p>
-                                subject pages keep related papers together.
-                                subjects with components, such as maths or the
-                                sciences, show that extra choice before years.
-                            </p>
-                        </article>
-                    </div>
-                </section>
-
-                <section class="guide-section" id="study">
-                    <div class="guide-section-heading">
-                        <div class="guide-number">02 / practise</div>
                         <div>
-                            <h2>turn papers into practice.</h2>
+
+                            <h2>
+                                everything in one place.
+                            </h2>
+
                             <p>
-                                every paper card puts the resources and study
-                                actions you need next to one another.
+                                cashewpapers brings the tools around past
+                                papers together, so you do not need another
+                                app to keep track of your revision.
                             </p>
+
                         </div>
+
                     </div>
+
 
                     <div class="guide-card-grid">
+
+
                         <article class="guide-card">
-                            <div class="guide-card-icon">↗</div>
-                            <h3>open a paper</h3>
+
+                            <div class="guide-card-icon">
+                                ✓
+                            </div>
+
+                            <h3>
+                                track your progress
+                            </h3>
+
                             <p>
-                                launch the question paper in the built-in reader,
-                                where you can focus on the document without
-                                leaving cashewpapers.
+                                mark papers as complete when you finish them
+                                and record your attempts. everything stays
+                                attached to the paper, so there is no need
+                                for another app or separate spreadsheet.
                             </p>
+
+
+                            <div class="guide-example guide-progress-example">
+
+                                <div class="guide-example-row">
+                                    <span>
+                                        9700_s25_qp_11
+                                    </span>
+
+                                    <span class="guide-example-status">
+                                        completed
+                                    </span>
+                                </div>
+
+
+                                <div class="guide-example-progress">
+                                    <div
+                                        class="guide-example-progress-fill"
+                                        style="width: 82%;"
+                                    ></div>
+                                </div>
+
+
+                                <div class="guide-example-meta">
+                                    <span>
+                                        progress
+                                    </span>
+
+                                    <span>
+                                        82%
+                                    </span>
+                                </div>
+
+
+                                <div class="guide-example-attempt">
+                                    attempt 2
+                                    <span>82.5%</span>
+                                </div>
+
+                            </div>
+
                         </article>
+
+
                         <article class="guide-card">
-                            <div class="guide-card-icon">✓</div>
-                            <h3>mark your answers</h3>
+
+                            <div class="guide-card-icon">
+                                □
+                            </div>
+
+                            <h3>
+                                plan it on your calendar
+                            </h3>
+
                             <p>
-                                use the marking tool for supported papers. submit
-                                your answers, review the result, and compare your
-                                work question by question.
+                                add papers directly to your calendar, move
+                                them to different days when your plans change,
+                                and colour code them so your revision stays
+                                easy to organise.
                             </p>
+
+
+                            <div class="guide-example guide-calendar-example">
+
+                                <div class="guide-calendar-head">
+                                    <span>mon</span>
+                                    <span>tue</span>
+                                    <span>wed</span>
+                                    <span>thu</span>
+                                    <span>fri</span>
+                                </div>
+
+
+                                <div class="guide-calendar-days">
+
+                                    <div class="guide-calendar-day">
+                                        <span>12</span>
+                                        <div
+                                            class="guide-calendar-pill"
+                                            data-guide-color="orange"
+                                        >
+                                            9709 qp12
+                                        </div>
+                                    </div>
+
+
+                                    <div class="guide-calendar-day">
+                                        <span>13</span>
+                                        <div
+                                            class="guide-calendar-pill"
+                                            data-guide-color="blue"
+                                        >
+                                            9702 qp22
+                                        </div>
+                                    </div>
+
+
+                                    <div class="guide-calendar-day">
+                                        <span>14</span>
+                                    </div>
+
+
+                                    <div class="guide-calendar-day">
+                                        <span>15</span>
+                                        <div
+                                            class="guide-calendar-pill"
+                                            data-guide-color="green"
+                                        >
+                                            9700 qp11
+                                        </div>
+                                    </div>
+
+
+                                    <div class="guide-calendar-day">
+                                        <span>16</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
                         </article>
+
+
                         <article class="guide-card">
-                            <div class="guide-card-icon">≡</div>
-                            <h3>use every document</h3>
+
+                            <div class="guide-card-icon">
+                                A
+                            </div>
+
+                            <h3>
+                                mark MCQ papers
+                            </h3>
+
                             <p>
-                                paper cards surface the question paper, mark
-                                scheme, examiner report, and insert whenever
-                                those files are available.
+                                answer supported multiple-choice papers
+                                directly in cashewpapers. choose your answers
+                                question by question or enter them as text,
+                                then receive your score and review.
                             </p>
+
+
+                            <div class="guide-example guide-mcq-example">
+
+                                <div class="guide-mcq-question">
+                                    <span>
+                                        question 12
+                                    </span>
+
+                                    <div class="guide-mcq-options">
+
+                                        <span>a</span>
+
+                                        <span class="selected">
+                                            b
+                                        </span>
+
+                                        <span>c</span>
+
+                                        <span>d</span>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="guide-mcq-result">
+                                    <span>
+                                        38 / 40
+                                    </span>
+
+                                    <span>
+                                        95%
+                                    </span>
+                                </div>
+
+                            </div>
+
                         </article>
+
+
                         <article class="guide-card">
-                            <div class="guide-card-icon">□</div>
-                            <h3>keep your place</h3>
+
+                            <div class="guide-card-icon">
+                                ⌕
+                            </div>
+
+                            <h3>
+                                search by paper code
+                            </h3>
+
                             <p>
-                                mark a paper complete from its card. your status
-                                and saved attempts stay connected to your account.
+                                already know the paper you need? enter its
+                                paper code in the search bar and jump straight
+                                to it without browsing through every subject,
+                                year, and session.
                             </p>
+
+
+                            <div class="guide-example guide-search-example">
+
+                                <div class="guide-search-input">
+                                    <span>
+                                        9709_s23_qp_12
+                                    </span>
+
+                                    <span class="guide-search-button">
+                                        →
+                                    </span>
+                                </div>
+
+
+                                <div class="guide-search-result">
+
+                                    <span>
+                                        9709_s23_qp_12
+                                    </span>
+
+                                    <span>
+                                        open paper →
+                                    </span>
+
+                                </div>
+
+                            </div>
+
                         </article>
+
+
+                        <article class="guide-card">
+
+                            <div class="guide-card-icon">
+                                ◎
+                            </div>
+
+                            <h3>
+                                personalise everything
+                            </h3>
+
+                            <p>
+                                create an account and keep your subject
+                                selection, paper progress, attempts, and
+                                calendar synced together. your revision
+                                follows you wherever you return to it.
+                            </p>
+
+
+                            <div class="guide-example guide-account-example">
+
+                                <div class="guide-account-item">
+                                    <span>subjects</span>
+                                    <strong>synced</strong>
+                                </div>
+
+                                <div class="guide-account-item">
+                                    <span>paper progress</span>
+                                    <strong>synced</strong>
+                                </div>
+
+                                <div class="guide-account-item">
+                                    <span>attempts</span>
+                                    <strong>synced</strong>
+                                </div>
+
+                                <div class="guide-account-item">
+                                    <span>calendar</span>
+                                    <strong>synced</strong>
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
                     </div>
+
                 </section>
 
-                <section class="guide-section" id="track">
-                    <div class="guide-section-heading">
-                        <div class="guide-number">03 / organise</div>
-                        <div>
-                            <h2>make the work visible.</h2>
-                            <p>
-                                cashewpapers pairs the paper archive with a
-                                lightweight way to plan and measure your revision.
-                            </p>
-                        </div>
-                    </div>
-
-                    <ul class="guide-list">
-                        <li>open <strong>my calendar</strong> to schedule a paper for a day.</li>
-                        <li>use a paper card’s calendar action to add that exact paper to your plan.</li>
-                        <li>toggle completion after you finish a paper to update its progress state.</li>
-                        <li>return to a subject page to see your work accumulate across its papers.</li>
-                    </ul>
-
-                    <div class="guide-callout">
-                        the calendar and completion history are personal features:
-                        sign in first if you want them to persist between visits.
-                    </div>
-                </section>
-
-                <section class="guide-section" id="account">
-                    <div class="guide-section-heading">
-                        <div class="guide-number">04 / personalise</div>
-                        <div>
-                            <h2>make it yours.</h2>
-                            <p>
-                                create an account to retain your selected subjects,
-                                paper completion states, attempts, and planned work.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="guide-card-grid">
-                        <article class="guide-card">
-                            <div class="guide-card-icon">◎</div>
-                            <h3>choose your subjects</h3>
-                            <p>
-                                select the subjects you take so the home page can
-                                focus on the papers that matter to you.
-                            </p>
-                        </article>
-                        <article class="guide-card">
-                            <div class="guide-card-icon">↺</div>
-                            <h3>come back seamlessly</h3>
-                            <p>
-                                your account carries your completion and attempt
-                                data across sessions, so revision has continuity.
-                            </p>
-                        </article>
-                    </div>
-                </section>
 
                 <section class="guide-start">
+
                     <div>
-                        <h2>ready when you are.</h2>
-                        <p>pick a subject and start with the paper in front of you.</p>
+
+                        <h2>
+                            ready when you are.
+                        </h2>
+
+                        <p>
+                            pick a subject and start with the paper in front of you.
+                        </p>
+
                     </div>
-                    <a href="../index.html">browse subjects →</a>
+
+
+                    <a href="../index.html">
+                        browse subjects →
+                    </a>
+
                 </section>
 
             </div>
