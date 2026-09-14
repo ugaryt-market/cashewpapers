@@ -5327,15 +5327,299 @@ applySubjectFilter();
 function generateGuidePage() {
 
     return documentHTML(
-        "Guide",
+        "Why us?",
 
         `
-            <div class="guide-page">
+            <style>
+
+                .why-us-page {
+                    --why-reveal-y: 42px;
+                }
+
+                .why-us-page .guide-hero {
+                    opacity: 0;
+                    transform: translateY(28px);
+                    animation:
+                        whyUsHeroIn 0.8s
+                        cubic-bezier(0.22, 1, 0.36, 1)
+                        forwards;
+                }
+
+                .why-us-page .guide-hero h1 {
+                    opacity: 0;
+                    transform: translateY(24px);
+                    animation:
+                        whyUsHeroTextIn 0.75s
+                        0.12s
+                        cubic-bezier(0.22, 1, 0.36, 1)
+                        forwards;
+                }
+
+                .why-us-page .guide-hero p {
+                    opacity: 0;
+                    transform: translateY(18px);
+                    animation:
+                        whyUsHeroTextIn 0.7s
+                        0.24s
+                        cubic-bezier(0.22, 1, 0.36, 1)
+                        forwards;
+                }
+
+
+                .why-us-section {
+                    opacity: 0;
+                    transform: translateY(var(--why-reveal-y));
+                    transition:
+                        opacity 0.75s ease,
+                        transform 0.75s
+                            cubic-bezier(0.22, 1, 0.36, 1);
+                }
+
+                .why-us-section.why-us-visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+
+                .why-us-example {
+                    overflow: hidden;
+                }
+
+
+                .why-progress-fill {
+                    width: 0 !important;
+                    transition:
+                        width 1.1s
+                        cubic-bezier(0.22, 1, 0.36, 1);
+                }
+
+                .why-us-visible .why-progress-fill {
+                    width: 82% !important;
+                }
+
+
+                .why-calendar-day {
+                    opacity: 0;
+                    transform: translateY(10px);
+                    transition:
+                        opacity 0.45s ease,
+                        transform 0.45s ease;
+                }
+
+                .why-us-visible .why-calendar-day {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                .why-us-visible .why-calendar-day:nth-child(1) {
+                    transition-delay: 0.15s;
+                }
+
+                .why-us-visible .why-calendar-day:nth-child(2) {
+                    transition-delay: 0.28s;
+                }
+
+                .why-us-visible .why-calendar-day:nth-child(3) {
+                    transition-delay: 0.41s;
+                }
+
+                .why-us-visible .why-calendar-day:nth-child(4) {
+                    transition-delay: 0.54s;
+                }
+
+                .why-us-visible .why-calendar-day:nth-child(5) {
+                    transition-delay: 0.67s;
+                }
+
+
+                .why-mcq-option {
+                    opacity: 0;
+                    transform: scale(0.9);
+                    transition:
+                        opacity 0.35s ease,
+                        transform 0.35s ease,
+                        background 0.25s ease;
+                }
+
+                .why-us-visible .why-mcq-option {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                .why-us-visible .why-mcq-option:nth-child(1) {
+                    transition-delay: 0.1s;
+                }
+
+                .why-us-visible .why-mcq-option:nth-child(2) {
+                    transition-delay: 0.2s;
+                }
+
+                .why-us-visible .why-mcq-option:nth-child(3) {
+                    transition-delay: 0.3s;
+                }
+
+                .why-us-visible .why-mcq-option:nth-child(4) {
+                    transition-delay: 0.4s;
+                }
+
+                .why-mcq-option.selected {
+                    transition:
+                        background 0.25s ease 0.65s,
+                        border-color 0.25s ease 0.65s,
+                        color 0.25s ease 0.65s;
+                }
+
+                .why-mcq-result {
+                    opacity: 0;
+                    transform: translateY(8px);
+                    transition:
+                        opacity 0.5s ease 0.85s,
+                        transform 0.5s ease 0.85s;
+                }
+
+                .why-us-visible .why-mcq-result {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+
+                .why-search-input {
+                    opacity: 0;
+                    transform: translateY(8px);
+                    transition:
+                        opacity 0.5s ease,
+                        transform 0.5s ease;
+                }
+
+                .why-us-visible .why-search-input {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                .why-search-result {
+                    opacity: 0;
+                    transform: translateY(10px);
+                    transition:
+                        opacity 0.55s ease 0.45s,
+                        transform 0.55s ease 0.45s;
+                }
+
+                .why-us-visible .why-search-result {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+
+                .why-account-item {
+                    opacity: 0;
+                    transform: translateX(-12px);
+                    transition:
+                        opacity 0.4s ease,
+                        transform 0.4s ease;
+                }
+
+                .why-us-visible .why-account-item {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+
+                .why-us-visible .why-account-item:nth-child(1) {
+                    transition-delay: 0.1s;
+                }
+
+                .why-us-visible .why-account-item:nth-child(2) {
+                    transition-delay: 0.23s;
+                }
+
+                .why-us-visible .why-account-item:nth-child(3) {
+                    transition-delay: 0.36s;
+                }
+
+                .why-us-visible .why-account-item:nth-child(4) {
+                    transition-delay: 0.49s;
+                }
+
+
+                .why-us-page .guide-start {
+                    opacity: 0;
+                    transform: translateY(22px);
+                    transition:
+                        opacity 0.7s ease,
+                        transform 0.7s
+                            cubic-bezier(0.22, 1, 0.36, 1);
+                }
+
+                .why-us-page .guide-start.why-us-visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+
+                @keyframes whyUsHeroIn {
+
+                    from {
+                        opacity: 0;
+                        transform: translateY(28px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+
+                }
+
+
+                @keyframes whyUsHeroTextIn {
+
+                    from {
+                        opacity: 0;
+                        transform: translateY(24px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+
+                }
+
+
+                @media (prefers-reduced-motion: reduce) {
+
+                    .why-us-page .guide-hero,
+                    .why-us-page .guide-hero h1,
+                    .why-us-page .guide-hero p,
+                    .why-us-section,
+                    .why-us-page .guide-start,
+                    .why-calendar-day,
+                    .why-mcq-option,
+                    .why-mcq-result,
+                    .why-search-input,
+                    .why-search-result,
+                    .why-account-item {
+                        opacity: 1 !important;
+                        transform: none !important;
+                        transition: none !important;
+                        animation: none !important;
+                    }
+
+                    .why-progress-fill {
+                        width: 82% !important;
+                        transition: none !important;
+                    }
+
+                }
+
+            </style>
+
+
+            <div class="guide-page why-us-page">
 
                 <section class="guide-hero">
 
                     <div class="guide-eyebrow">
-                        cashewpapers / guide
+                        cashewpapers / why us?
                     </div>
 
                     <h1>
@@ -5351,7 +5635,10 @@ function generateGuidePage() {
                 </section>
 
 
-                <section class="guide-section" id="progress">
+                <section
+                    class="guide-section why-us-section"
+                    id="progress"
+                >
 
                     <div class="guide-section-heading">
 
@@ -5377,7 +5664,9 @@ function generateGuidePage() {
                     </div>
 
 
-                    <div class="guide-example guide-progress-example">
+                    <div
+                        class="guide-example guide-progress-example why-us-example"
+                    >
 
                         <div class="guide-example-row">
 
@@ -5395,8 +5684,7 @@ function generateGuidePage() {
                         <div class="guide-example-progress">
 
                             <div
-                                class="guide-example-progress-fill"
-                                style="width: 82%;"
+                                class="guide-example-progress-fill why-progress-fill"
                             ></div>
 
                         </div>
@@ -5430,7 +5718,10 @@ function generateGuidePage() {
                 </section>
 
 
-                <section class="guide-section" id="calendar">
+                <section
+                    class="guide-section why-us-section"
+                    id="calendar"
+                >
 
                     <div class="guide-section-heading">
 
@@ -5456,7 +5747,9 @@ function generateGuidePage() {
                     </div>
 
 
-                    <div class="guide-example guide-calendar-example">
+                    <div
+                        class="guide-example guide-calendar-example why-us-example"
+                    >
 
                         <div class="guide-calendar-head">
 
@@ -5471,7 +5764,7 @@ function generateGuidePage() {
 
                         <div class="guide-calendar-days">
 
-                            <div class="guide-calendar-day">
+                            <div class="guide-calendar-day why-calendar-day">
 
                                 <span>
                                     12
@@ -5487,7 +5780,7 @@ function generateGuidePage() {
                             </div>
 
 
-                            <div class="guide-calendar-day">
+                            <div class="guide-calendar-day why-calendar-day">
 
                                 <span>
                                     13
@@ -5503,7 +5796,7 @@ function generateGuidePage() {
                             </div>
 
 
-                            <div class="guide-calendar-day">
+                            <div class="guide-calendar-day why-calendar-day">
 
                                 <span>
                                     14
@@ -5512,7 +5805,7 @@ function generateGuidePage() {
                             </div>
 
 
-                            <div class="guide-calendar-day">
+                            <div class="guide-calendar-day why-calendar-day">
 
                                 <span>
                                     15
@@ -5528,7 +5821,7 @@ function generateGuidePage() {
                             </div>
 
 
-                            <div class="guide-calendar-day">
+                            <div class="guide-calendar-day why-calendar-day">
 
                                 <span>
                                     16
@@ -5543,7 +5836,10 @@ function generateGuidePage() {
                 </section>
 
 
-                <section class="guide-section" id="mcq">
+                <section
+                    class="guide-section why-us-section"
+                    id="mcq"
+                >
 
                     <div class="guide-section-heading">
 
@@ -5570,7 +5866,9 @@ function generateGuidePage() {
                     </div>
 
 
-                    <div class="guide-example guide-mcq-example">
+                    <div
+                        class="guide-example guide-mcq-example why-us-example"
+                    >
 
                         <div class="guide-mcq-question">
 
@@ -5581,19 +5879,21 @@ function generateGuidePage() {
 
                             <div class="guide-mcq-options">
 
-                                <span>
+                                <span class="why-mcq-option">
                                     a
                                 </span>
 
-                                <span class="selected">
+                                <span
+                                    class="why-mcq-option selected"
+                                >
                                     b
                                 </span>
 
-                                <span>
+                                <span class="why-mcq-option">
                                     c
                                 </span>
 
-                                <span>
+                                <span class="why-mcq-option">
                                     d
                                 </span>
 
@@ -5602,7 +5902,7 @@ function generateGuidePage() {
                         </div>
 
 
-                        <div class="guide-mcq-result">
+                        <div class="guide-mcq-result why-mcq-result">
 
                             <span>
                                 38 / 40
@@ -5619,7 +5919,10 @@ function generateGuidePage() {
                 </section>
 
 
-                <section class="guide-section" id="search">
+                <section
+                    class="guide-section why-us-section"
+                    id="search"
+                >
 
                     <div class="guide-section-heading">
 
@@ -5645,9 +5948,11 @@ function generateGuidePage() {
                     </div>
 
 
-                    <div class="guide-example guide-search-example">
+                    <div
+                        class="guide-example guide-search-example why-us-example"
+                    >
 
-                        <div class="guide-search-input">
+                        <div class="guide-search-input why-search-input">
 
                             <span>
                                 9709_s23_qp_12
@@ -5660,7 +5965,7 @@ function generateGuidePage() {
                         </div>
 
 
-                        <div class="guide-search-result">
+                        <div class="guide-search-result why-search-result">
 
                             <span>
                                 9709_s23_qp_12
@@ -5677,7 +5982,10 @@ function generateGuidePage() {
                 </section>
 
 
-                <section class="guide-section" id="account">
+                <section
+                    class="guide-section why-us-section"
+                    id="account"
+                >
 
                     <div class="guide-section-heading">
 
@@ -5703,9 +6011,11 @@ function generateGuidePage() {
                     </div>
 
 
-                    <div class="guide-example guide-account-example">
+                    <div
+                        class="guide-example guide-account-example why-us-example"
+                    >
 
-                        <div class="guide-account-item">
+                        <div class="guide-account-item why-account-item">
 
                             <span>
                                 subjects
@@ -5718,7 +6028,7 @@ function generateGuidePage() {
                         </div>
 
 
-                        <div class="guide-account-item">
+                        <div class="guide-account-item why-account-item">
 
                             <span>
                                 paper progress
@@ -5731,7 +6041,7 @@ function generateGuidePage() {
                         </div>
 
 
-                        <div class="guide-account-item">
+                        <div class="guide-account-item why-account-item">
 
                             <span>
                                 attempts
@@ -5744,7 +6054,7 @@ function generateGuidePage() {
                         </div>
 
 
-                        <div class="guide-account-item">
+                        <div class="guide-account-item why-account-item">
 
                             <span>
                                 calendar
@@ -5783,6 +6093,94 @@ function generateGuidePage() {
                 </section>
 
             </div>
+
+
+            <script>
+
+                document.addEventListener(
+                    "DOMContentLoaded",
+                    () => {
+
+                        const navButton =
+                            document.querySelector(
+                                ".nav-guide-button"
+                            );
+
+                        if (navButton) {
+
+                            navButton.textContent =
+                                "why us?";
+
+                            navButton.setAttribute(
+                                "title",
+                                "why us?"
+                            );
+
+                        }
+
+
+                        const sections =
+                            document.querySelectorAll(
+                                ".why-us-section, .why-us-page .guide-start"
+                            );
+
+
+                        if (
+                            !("IntersectionObserver" in window)
+                        ) {
+
+                            sections.forEach(
+                                section =>
+                                    section.classList.add(
+                                        "why-us-visible"
+                                    )
+                            );
+
+                            return;
+
+                        }
+
+
+                        const observer =
+                            new IntersectionObserver(
+                                entries => {
+
+                                    entries.forEach(
+                                        entry => {
+
+                                            if (!entry.isIntersecting) {
+                                                return;
+                                            }
+
+                                            entry.target.classList.add(
+                                                "why-us-visible"
+                                            );
+
+                                            observer.unobserve(
+                                                entry.target
+                                            );
+
+                                        }
+                                    );
+
+                                },
+                                {
+                                    threshold: 0.18,
+                                    rootMargin:
+                                        "0px 0px -8% 0px"
+                                }
+                            );
+
+
+                        sections.forEach(
+                            section =>
+                                observer.observe(section)
+                        );
+
+                    }
+                );
+
+            </script>
         `,
 
         1
