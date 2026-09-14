@@ -5351,24 +5351,25 @@ function generateGuidePage() {
                 </section>
 
 
-                <section class="guide-section" id="guide-features">
+                <section class="guide-section" id="progress">
 
                     <div class="guide-section-heading">
 
                         <div class="guide-number">
-                            01 / simplify
+                            01 / progress
                         </div>
 
                         <div>
 
                             <h2>
-                                everything in one place.
+                                track your progress.
                             </h2>
 
                             <p>
-                                cashewpapers brings the tools around past
-                                papers together, so you do not need another
-                                app to keep track of your revision.
+                                mark papers as complete and record your
+                                attempts as you work. everything stays
+                                with the paper, so there is no need for
+                                another app or separate spreadsheet.
                             </p>
 
                         </div>
@@ -5376,297 +5377,384 @@ function generateGuidePage() {
                     </div>
 
 
-                    <div class="guide-card-grid">
+                    <div class="guide-example guide-progress-example">
+
+                        <div class="guide-example-row">
+
+                            <span>
+                                9700_s25_qp_11
+                            </span>
+
+                            <span class="guide-example-status">
+                                completed
+                            </span>
+
+                        </div>
 
 
-                        <article class="guide-card">
+                        <div class="guide-example-progress">
 
-                            <div class="guide-card-icon">
-                                ✓
-                            </div>
+                            <div
+                                class="guide-example-progress-fill"
+                                style="width: 82%;"
+                            ></div>
 
-                            <h3>
-                                track your progress
-                            </h3>
-
-                            <p>
-                                mark papers as complete when you finish them
-                                and record your attempts. everything stays
-                                attached to the paper, so there is no need
-                                for another app or separate spreadsheet.
-                            </p>
+                        </div>
 
 
-                            <div class="guide-example guide-progress-example">
+                        <div class="guide-example-meta">
 
-                                <div class="guide-example-row">
-                                    <span>
-                                        9700_s25_qp_11
-                                    </span>
+                            <span>
+                                progress
+                            </span>
 
-                                    <span class="guide-example-status">
-                                        completed
-                                    </span>
-                                </div>
+                            <span>
+                                82%
+                            </span>
 
-
-                                <div class="guide-example-progress">
-                                    <div
-                                        class="guide-example-progress-fill"
-                                        style="width: 82%;"
-                                    ></div>
-                                </div>
+                        </div>
 
 
-                                <div class="guide-example-meta">
-                                    <span>
-                                        progress
-                                    </span>
+                        <div class="guide-example-attempt">
 
-                                    <span>
-                                        82%
-                                    </span>
-                                </div>
+                            attempt 2
 
+                            <span>
+                                82.5%
+                            </span>
 
-                                <div class="guide-example-attempt">
-                                    attempt 2
-                                    <span>82.5%</span>
-                                </div>
+                        </div>
 
-                            </div>
+                    </div>
 
-                        </article>
+                </section>
 
 
-                        <article class="guide-card">
+                <section class="guide-section" id="calendar">
 
-                            <div class="guide-card-icon">
-                                □
-                            </div>
+                    <div class="guide-section-heading">
 
-                            <h3>
-                                plan it on your calendar
-                            </h3>
+                        <div class="guide-number">
+                            02 / calendar
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                plan it on your calendar.
+                            </h2>
 
                             <p>
-                                add papers directly to your calendar, move
-                                them to different days when your plans change,
-                                and colour code them so your revision stays
+                                add papers directly to your calendar,
+                                move them when your plans change, and
+                                colour code them so your revision stays
                                 easy to organise.
                             </p>
 
+                        </div>
 
-                            <div class="guide-example guide-calendar-example">
-
-                                <div class="guide-calendar-head">
-                                    <span>mon</span>
-                                    <span>tue</span>
-                                    <span>wed</span>
-                                    <span>thu</span>
-                                    <span>fri</span>
-                                </div>
+                    </div>
 
 
-                                <div class="guide-calendar-days">
+                    <div class="guide-example guide-calendar-example">
 
-                                    <div class="guide-calendar-day">
-                                        <span>12</span>
-                                        <div
-                                            class="guide-calendar-pill"
-                                            data-guide-color="orange"
-                                        >
-                                            9709 qp12
-                                        </div>
-                                    </div>
+                        <div class="guide-calendar-head">
 
+                            <span>mon</span>
+                            <span>tue</span>
+                            <span>wed</span>
+                            <span>thu</span>
+                            <span>fri</span>
 
-                                    <div class="guide-calendar-day">
-                                        <span>13</span>
-                                        <div
-                                            class="guide-calendar-pill"
-                                            data-guide-color="blue"
-                                        >
-                                            9702 qp22
-                                        </div>
-                                    </div>
+                        </div>
 
 
-                                    <div class="guide-calendar-day">
-                                        <span>14</span>
-                                    </div>
+                        <div class="guide-calendar-days">
 
+                            <div class="guide-calendar-day">
 
-                                    <div class="guide-calendar-day">
-                                        <span>15</span>
-                                        <div
-                                            class="guide-calendar-pill"
-                                            data-guide-color="green"
-                                        >
-                                            9700 qp11
-                                        </div>
-                                    </div>
+                                <span>
+                                    12
+                                </span>
 
-
-                                    <div class="guide-calendar-day">
-                                        <span>16</span>
-                                    </div>
-
+                                <div
+                                    class="guide-calendar-pill"
+                                    data-guide-color="orange"
+                                >
+                                    9709 qp12
                                 </div>
 
                             </div>
 
-                        </article>
 
+                            <div class="guide-calendar-day">
 
-                        <article class="guide-card">
+                                <span>
+                                    13
+                                </span>
 
-                            <div class="guide-card-icon">
-                                A
+                                <div
+                                    class="guide-calendar-pill"
+                                    data-guide-color="blue"
+                                >
+                                    9702 qp22
+                                </div>
+
                             </div>
 
-                            <h3>
-                                mark MCQ papers
-                            </h3>
+
+                            <div class="guide-calendar-day">
+
+                                <span>
+                                    14
+                                </span>
+
+                            </div>
+
+
+                            <div class="guide-calendar-day">
+
+                                <span>
+                                    15
+                                </span>
+
+                                <div
+                                    class="guide-calendar-pill"
+                                    data-guide-color="green"
+                                >
+                                    9700 qp11
+                                </div>
+
+                            </div>
+
+
+                            <div class="guide-calendar-day">
+
+                                <span>
+                                    16
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="guide-section" id="mcq">
+
+                    <div class="guide-section-heading">
+
+                        <div class="guide-number">
+                            03 / marking
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                mark MCQ papers.
+                            </h2>
 
                             <p>
                                 answer supported multiple-choice papers
-                                directly in cashewpapers. choose your answers
+                                directly in cashewpapers. choose answers
                                 question by question or enter them as text,
-                                then receive your score and review.
+                                then receive your score and review your
+                                answers.
                             </p>
 
+                        </div>
 
-                            <div class="guide-example guide-mcq-example">
-
-                                <div class="guide-mcq-question">
-                                    <span>
-                                        question 12
-                                    </span>
-
-                                    <div class="guide-mcq-options">
-
-                                        <span>a</span>
-
-                                        <span class="selected">
-                                            b
-                                        </span>
-
-                                        <span>c</span>
-
-                                        <span>d</span>
-
-                                    </div>
-                                </div>
+                    </div>
 
 
-                                <div class="guide-mcq-result">
-                                    <span>
-                                        38 / 40
-                                    </span>
+                    <div class="guide-example guide-mcq-example">
 
-                                    <span>
-                                        95%
-                                    </span>
-                                </div>
+                        <div class="guide-mcq-question">
+
+                            <span>
+                                question 12
+                            </span>
+
+
+                            <div class="guide-mcq-options">
+
+                                <span>
+                                    a
+                                </span>
+
+                                <span class="selected">
+                                    b
+                                </span>
+
+                                <span>
+                                    c
+                                </span>
+
+                                <span>
+                                    d
+                                </span>
 
                             </div>
 
-                        </article>
+                        </div>
 
 
-                        <article class="guide-card">
+                        <div class="guide-mcq-result">
 
-                            <div class="guide-card-icon">
-                                ⌕
-                            </div>
+                            <span>
+                                38 / 40
+                            </span>
 
-                            <h3>
-                                search by paper code
-                            </h3>
+                            <span>
+                                95%
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="guide-section" id="search">
+
+                    <div class="guide-section-heading">
+
+                        <div class="guide-number">
+                            04 / search
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                search by paper code.
+                            </h2>
 
                             <p>
                                 already know the paper you need? enter its
-                                paper code in the search bar and jump straight
-                                to it without browsing through every subject,
-                                year, and session.
+                                paper code in the search bar and jump
+                                straight to it instead of browsing through
+                                subjects, years, and sessions.
                             </p>
 
+                        </div>
 
-                            <div class="guide-example guide-search-example">
-
-                                <div class="guide-search-input">
-                                    <span>
-                                        9709_s23_qp_12
-                                    </span>
-
-                                    <span class="guide-search-button">
-                                        →
-                                    </span>
-                                </div>
+                    </div>
 
 
-                                <div class="guide-search-result">
+                    <div class="guide-example guide-search-example">
 
-                                    <span>
-                                        9709_s23_qp_12
-                                    </span>
+                        <div class="guide-search-input">
 
-                                    <span>
-                                        open paper →
-                                    </span>
+                            <span>
+                                9709_s23_qp_12
+                            </span>
 
-                                </div>
+                            <span class="guide-search-button">
+                                →
+                            </span>
 
-                            </div>
-
-                        </article>
+                        </div>
 
 
-                        <article class="guide-card">
+                        <div class="guide-search-result">
 
-                            <div class="guide-card-icon">
-                                ◎
-                            </div>
+                            <span>
+                                9709_s23_qp_12
+                            </span>
 
-                            <h3>
-                                personalise everything
-                            </h3>
+                            <span>
+                                open paper →
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="guide-section" id="account">
+
+                    <div class="guide-section-heading">
+
+                        <div class="guide-number">
+                            05 / account
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                personalise everything.
+                            </h2>
 
                             <p>
                                 create an account and keep your subject
                                 selection, paper progress, attempts, and
                                 calendar synced together. your revision
-                                follows you wherever you return to it.
+                                stays organised wherever you return to it.
                             </p>
 
+                        </div>
 
-                            <div class="guide-example guide-account-example">
+                    </div>
 
-                                <div class="guide-account-item">
-                                    <span>subjects</span>
-                                    <strong>synced</strong>
-                                </div>
 
-                                <div class="guide-account-item">
-                                    <span>paper progress</span>
-                                    <strong>synced</strong>
-                                </div>
+                    <div class="guide-example guide-account-example">
 
-                                <div class="guide-account-item">
-                                    <span>attempts</span>
-                                    <strong>synced</strong>
-                                </div>
+                        <div class="guide-account-item">
 
-                                <div class="guide-account-item">
-                                    <span>calendar</span>
-                                    <strong>synced</strong>
-                                </div>
+                            <span>
+                                subjects
+                            </span>
 
-                            </div>
+                            <strong>
+                                synced
+                            </strong>
 
-                        </article>
+                        </div>
 
+
+                        <div class="guide-account-item">
+
+                            <span>
+                                paper progress
+                            </span>
+
+                            <strong>
+                                synced
+                            </strong>
+
+                        </div>
+
+
+                        <div class="guide-account-item">
+
+                            <span>
+                                attempts
+                            </span>
+
+                            <strong>
+                                synced
+                            </strong>
+
+                        </div>
+
+
+                        <div class="guide-account-item">
+
+                            <span>
+                                calendar
+                            </span>
+
+                            <strong>
+                                synced
+                            </strong>
+
+                        </div>
 
                     </div>
 
