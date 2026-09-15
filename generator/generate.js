@@ -133,7 +133,7 @@ const SUBJECT_CATEGORIES = {
         Methods).
     */
     psychology: [
-        ["approaches", "Approaches & Research", "🧠", "approaches & research"],
+        ["approaches", "Approaches / Research Methods", "🧠", "approaches / research methods"],
         ["specialist", "Specialist Options", "🔬", "specialist"]
     ],
 
