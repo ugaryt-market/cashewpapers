@@ -408,18 +408,43 @@ const FLAT_PAPER_CATEGORY_RULES = {
 };
 
 function inferFlatCategory(subjectKey, paperNumber) {
-    const rules = FLAT_PAPER_CATEGORY_RULES[subjectKey];
+
+    const rules =
+        FLAT_PAPER_CATEGORY_RULES[subjectKey];
 
     if (!rules) {
         return null;
     }
 
-    const paper = String(paperNumber);
+    /*
+        Cambridge paper filenames use components such as:
 
-    for (const [categoryKey, paperNumbers] of Object.entries(rules)) {
+        11, 12, 13 → Paper 1
+        21, 22, 23 → Paper 2
+        31, 32, 33 → Paper 3
+        41, 42, 43 → Paper 4
+
+        Therefore the first digit identifies the paper.
+    */
+
+    const paper =
+        String(paperNumber || "")
+            .trim()
+            .charAt(0);
+
+    if (!paper) {
+        return null;
+    }
+
+    for (
+        const [categoryKey, paperNumbers]
+        of Object.entries(rules)
+    ) {
+
         if (paperNumbers.includes(paper)) {
             return categoryKey;
         }
+
     }
 
     return null;
