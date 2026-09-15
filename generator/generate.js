@@ -571,7 +571,7 @@ function buildPaperSearchIndex(database) {
     approaches/specialist, economics' mcq/responses, or any future
     entry added to SUBJECT_CATEGORIES). Exactly the same algorithm as
     the original mathematics-only version, just parameterized on
-    subjectKey.
+    subjectKey. penus.
 */
 function addCategorizedSearchIndex(subjectKey, subjectName) {
 
