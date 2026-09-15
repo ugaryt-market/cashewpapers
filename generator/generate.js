@@ -370,13 +370,70 @@ function scanFiles(dir, base = dir) {
    DATABASE
    ============================================================ */
 
+const FLAT_PAPER_CATEGORY_RULES = {
+    mathematics: {
+        pure: ["1", "2", "3"],
+        statsmech: ["4", "5", "6"]
+    },
+
+    physics: {
+        written: ["1", "2", "4"],
+        practical: ["3", "5"]
+    },
+
+    chemistry: {
+        written: ["1", "2", "4"],
+        practical: ["3", "5"]
+    },
+
+    biology: {
+        written: ["1", "2", "4"],
+        practical: ["3", "5"]
+    },
+
+    economics: {
+        mcq: ["1", "3"],
+        responses: ["2", "4"]
+    },
+
+    "computer-science": {
+        theory: ["1", "3"],
+        programming: ["2", "4"]
+    },
+
+    psychology: {
+        approaches: ["1", "2"],
+        specialist: ["3", "4"]
+    }
+};
+
+function inferFlatCategory(subjectKey, paperNumber) {
+    const rules = FLAT_PAPER_CATEGORY_RULES[subjectKey];
+
+    if (!rules) {
+        return null;
+    }
+
+    const paper = String(paperNumber);
+
+    for (const [categoryKey, paperNumbers] of Object.entries(rules)) {
+        if (paperNumbers.includes(paper)) {
+            return categoryKey;
+        }
+    }
+
+    return null;
+}
+
+
 function buildDatabase(subjects) {
 
     const database = {};
 
     for (const [subjectKey, subject] of Object.entries(subjects)) {
 
-        const subjectPath = path.join(PAPERS_DIR, subjectKey);
+        const subjectPath =
+            path.join(PAPERS_DIR, subjectKey);
 
         if (!fs.existsSync(subjectPath)) {
             continue;
@@ -387,44 +444,70 @@ function buildDatabase(subjects) {
             years: {}
         };
 
-        const subjectFiles = scanFiles(subjectPath);
+        const subjectFiles =
+            scanFiles(subjectPath);
 
         for (const file of subjectFiles) {
 
-            if (!file.relative.toLowerCase().endsWith(".pdf")) {
+            if (
+                !file.relative
+                    .toLowerCase()
+                    .endsWith(".pdf")
+            ) {
                 continue;
             }
 
-            const parts = file.relative.split(path.sep);
+            const parts =
+                file.relative.split(path.sep);
 
             let year;
             let sessionFolder;
             let filename;
+            let categoryKey = null;
+            let isFlatFile = false;
 
             /*
-                Categorized subjects (mathematics, sciences, etc):
+                Categorized subjects support BOTH:
 
+                Existing:
                 <subject>/
                 <category>/
                 <year>/
                 <session>/
                 file.pdf
+
+                New flat format:
+                <subject>/
+                file.pdf
+
+                The flat format gets its category from
+                the paper number in the filename.
             */
 
             if (hasCategories(subjectKey)) {
 
-                if (parts.length < 4) {
-                    continue;
-                }
+                if (parts.length === 1) {
 
-                year = parts[1];
-                sessionFolder = parts[2];
-                filename = parts[3];
+                    isFlatFile = true;
+                    filename = parts[0];
+
+                } else {
+
+                    if (parts.length < 4) {
+                        continue;
+                    }
+
+                    categoryKey = parts[0];
+                    year = parts[1];
+                    sessionFolder = parts[2];
+                    filename = parts[3];
+
+                }
 
             }
 
             /*
-                Other subjects:
+                Uncategorized subjects continue to use:
 
                 <subject>/
                 <year>/
@@ -444,7 +527,8 @@ function buildDatabase(subjects) {
 
             }
 
-            const parsed = parsePaperFilename(filename);
+            const parsed =
+                parsePaperFilename(filename);
 
             if (!parsed) {
                 continue;
@@ -454,22 +538,89 @@ function buildDatabase(subjects) {
                 continue;
             }
 
-            if (!database[subjectKey].years[year]) {
-                database[subjectKey].years[year] = {};
+            /*
+                Flat categorized files derive their category,
+                year, and session directly from the filename.
+            */
+
+            if (isFlatFile) {
+
+                categoryKey =
+                    inferFlatCategory(
+                        subjectKey,
+                        parsed.paper
+                    );
+
+                if (!categoryKey) {
+                    continue;
+                }
+
+                year =
+                    "20" +
+                    parsed.sessionCode.slice(1);
+
+                sessionFolder =
+                    parsed.sessionCode;
+
             }
 
-            const sessionCode = parsed.sessionCode;
+            /*
+                Make sure the category found in an existing
+                manually-organized folder is actually valid.
+            */
 
-            if (!database[subjectKey].years[year][sessionFolder]) {
+            if (
+                hasCategories(subjectKey) &&
+                !getCategoryInfo(
+                    subjectKey,
+                    categoryKey
+                )
+            ) {
+                continue;
+            }
 
-                database[subjectKey].years[year][sessionFolder] = {
-                    sessionCode,
-                    papers: {}
-                };
+            if (
+                !database[subjectKey]
+                    .years[year]
+            ) {
+                database[subjectKey]
+                    .years[year] = {};
+            }
+
+            const sessionCode =
+                parsed.sessionCode;
+
+            if (
+                !database[subjectKey]
+                    .years[year][sessionFolder]
+            ) {
+
+                database[subjectKey]
+                    .years[year][sessionFolder] = {
+                        sessionCode,
+                        categoryKey,
+                        papers: {}
+                    };
 
             }
 
-            const session = database[subjectKey].years[year][sessionFolder];
+            const session =
+                database[subjectKey]
+                    .years[year][sessionFolder];
+
+            /*
+                In case an existing nested paper was already
+                found, keep its category. This also protects
+                against accidental mixing of files.
+            */
+
+            if (
+                !session.categoryKey &&
+                categoryKey
+            ) {
+                session.categoryKey =
+                    categoryKey;
+            }
 
             if (!session.papers[parsed.paper]) {
 
@@ -478,36 +629,90 @@ function buildDatabase(subjects) {
                     question: null,
                     markScheme: null,
                     examinerReport: null,
-                    insert: null
+                    insert: null,
+                    code: null
                 };
 
             }
 
-            const paper = session.papers[parsed.paper];
+            const paper =
+                session.papers[parsed.paper];
 
-            const publicPath = path
-                .join("papers", subjectKey, file.relative)
-                .split(path.sep)
-                .join("/");
+            const publicPath =
+                path
+                    .join(
+                        "papers",
+                        subjectKey,
+                        file.relative
+                    )
+                    .split(path.sep)
+                    .join("/");
+
+            /*
+                Existing manually-organized files always
+                take priority over flat files.
+
+                Therefore:
+                - nested file + flat file = nested wins
+                - flat file only = flat file is used
+            */
 
             if (parsed.type === "qp") {
-                paper.question = publicPath;
-                paper.code = filename.replace(/\.pdf$/i, "");
+
+                if (
+                    !paper.question ||
+                    !isFlatFile
+                ) {
+                    paper.question =
+                        publicPath;
+
+                    paper.code =
+                        filename.replace(
+                            /\.pdf$/i,
+                            ""
+                        );
+                }
+
             }
 
             if (parsed.type === "ms") {
-                paper.markScheme = publicPath;
+
+                if (
+                    !paper.markScheme ||
+                    !isFlatFile
+                ) {
+                    paper.markScheme =
+                        publicPath;
+                }
+
             }
 
             if (parsed.type === "er") {
-                paper.examinerReport = publicPath;
+
+                if (
+                    !paper.examinerReport ||
+                    !isFlatFile
+                ) {
+                    paper.examinerReport =
+                        publicPath;
+                }
+
             }
 
             if (parsed.type === "in") {
-                paper.insert = publicPath;
+
+                if (
+                    !paper.insert ||
+                    !isFlatFile
+                ) {
+                    paper.insert =
+                        publicPath;
+                }
+
             }
 
         }
+
     }
 
     return database;
@@ -524,34 +729,62 @@ function buildPaperSearchIndex(database) {
 
     const index = {};
 
-    for (const [subjectKey, data] of Object.entries(database)) {
+    for (
+        const [subjectKey, data]
+        of Object.entries(database)
+    ) {
 
-        for (const [year, sessions] of Object.entries(data.years || {})) {
+        for (
+            const [year, sessions]
+            of Object.entries(
+                data.years || {}
+            )
+        ) {
 
-            for (const session of Object.values(sessions || {})) {
+            for (
+                const session
+                of Object.values(
+                    sessions || {}
+                )
+            ) {
 
-                const slug = sessionSlug(session.sessionCode);
+                const slug =
+                    sessionSlug(
+                        session.sessionCode
+                    );
 
-                for (const paper of Object.values(session.papers || {})) {
+                const categoryKey =
+                    session.categoryKey || null;
+
+                for (
+                    const paper
+                    of Object.values(
+                        session.papers || {}
+                    )
+                ) {
 
                     if (!paper.code) {
                         continue;
                     }
 
-                    /*
-                       Categorized subjects are handled separately because
-                       their repository contains an extra category level.
-                    */
-                    if (hasCategories(subjectKey)) {
-                        continue;
-                    }
+                    const virtualPath =
+                        hasCategories(subjectKey)
+                            ? `${subjectKey}/${categoryKey}/${year}/${slug}/#paper-${paper.code}`
+                            : `${subjectKey}/${year}/${slug}/#paper-${paper.code}`;
 
-                    index[paper.code.toLowerCase()] = {
-                        path: `${subjectKey}/${year}/${slug}/#paper-${paper.code}`,
-                        code: paper.code,
-                        subject: data.subject.name,
-                        paper: paper.paper,
-                        questionPath: paper.question || ""
+                    index[
+                        paper.code.toLowerCase()
+                    ] = {
+                        path:
+                            virtualPath,
+                        code:
+                            paper.code,
+                        subject:
+                            data.subject.name,
+                        paper:
+                            paper.paper,
+                        questionPath:
+                            paper.question || ""
                     };
 
                 }
@@ -565,55 +798,102 @@ function buildPaperSearchIndex(database) {
     return index;
 }
 
-/*
-    Populates PAPER_SEARCH_INDEX for every category of a categorized
-    subject (mathematics' pure/statsmech, the sciences' written/practical,
-    computer science's theory/programming, psychology's
-    approaches/specialist, economics' mcq/responses, or any future
-    entry added to SUBJECT_CATEGORIES). Exactly the same algorithm as
-    the original mathematics-only version, just parameterized on
-    subjectKey. penus.
-*/
-function addCategorizedSearchIndex(subjectKey, subjectName) {
 
-    const categories = getCategories(subjectKey);
+/*
+    Populates PAPER_SEARCH_INDEX for categorized subjects.
+
+    Existing nested files are discovered exactly as before.
+
+    Flat files directly inside papers/<subject>/ are also
+    discovered and mapped to their generated category/year/
+    session page using the filename rules.
+*/
+function addCategorizedSearchIndex(
+    subjectKey,
+    subjectName
+) {
+
+    const categories =
+        getCategories(subjectKey);
 
     if (!categories) {
         return;
     }
 
-    for (const [categoryKey] of categories) {
+    const subjectPath =
+        path.join(
+            PAPERS_DIR,
+            subjectKey
+        );
 
-        const categoryPath = path.join(PAPERS_DIR, subjectKey, categoryKey);
+    /*
+        Existing nested category folders.
+    */
 
-        for (const file of scanFiles(categoryPath)) {
+    for (
+        const [categoryKey]
+        of categories
+    ) {
 
-            if (!file.relative.toLowerCase().endsWith(".pdf")) {
+        const categoryPath =
+            path.join(
+                subjectPath,
+                categoryKey
+            );
+
+        for (
+            const file
+            of scanFiles(categoryPath)
+        ) {
+
+            if (
+                !file.relative
+                    .toLowerCase()
+                    .endsWith(".pdf")
+            ) {
                 continue;
             }
 
-            const parts = file.relative.split(path.sep);
+            const parts =
+                file.relative.split(path.sep);
 
             if (parts.length < 3) {
                 continue;
             }
 
-            const year = parts[0];
-            const filename = parts[2];
+            const year =
+                parts[0];
 
-            const parsed = parsePaperFilename(filename);
+            const filename =
+                parts[2];
 
-            if (!parsed || parsed.type !== "qp") {
+            const parsed =
+                parsePaperFilename(filename);
+
+            if (
+                !parsed ||
+                parsed.type !== "qp"
+            ) {
                 continue;
             }
 
-            const code = filename.replace(/\.pdf$/i, "");
+            const code =
+                filename.replace(
+                    /\.pdf$/i,
+                    ""
+                );
 
-            PAPER_SEARCH_INDEX[code.toLowerCase()] = {
-                path: `${subjectKey}/${categoryKey}/${year}/${sessionSlug(parsed.sessionCode)}/#paper-${code}`,
+            PAPER_SEARCH_INDEX[
+                code.toLowerCase()
+            ] = {
+                path:
+                    `${subjectKey}/${categoryKey}/${year}/${sessionSlug(parsed.sessionCode)}/#paper-${code}`,
                 code,
-                subject: subjectName || subjectKey,
-                paper: parsed.paper,
+                subject:
+                    subjectName ||
+                    subjectKey,
+                paper:
+                    parsed.paper,
                 questionPath: ""
             };
 
@@ -621,9 +901,108 @@ function addCategorizedSearchIndex(subjectKey, subjectName) {
 
     }
 
-}
+    /*
+        New flat files directly inside
+        papers/<subject>/
+    */
 
-/*
+    for (
+        const file
+        of scanFiles(subjectPath)
+    ) {
+
+        const relativeParts =
+            file.relative.split(path.sep);
+
+        /*
+            Only process files immediately inside
+            the subject folder. Nested files were handled
+            above.
+        */
+
+        if (relativeParts.length !== 1) {
+            continue;
+        }
+
+        if (
+            !file.relative
+                .toLowerCase()
+                .endsWith(".pdf")
+        ) {
+            continue;
+        }
+
+        const filename =
+            relativeParts[0];
+
+        const parsed =
+            parsePaperFilename(filename);
+
+        if (
+            !parsed ||
+            parsed.type !== "qp"
+        ) {
+            continue;
+        }
+
+        const categoryKey =
+            inferFlatCategory(
+                subjectKey,
+                parsed.paper
+            );
+
+        if (!categoryKey) {
+            continue;
+        }
+
+        const year =
+            "20" +
+            parsed.sessionCode.slice(1);
+
+        const code =
+            filename.replace(
+                /\.pdf$/i,
+                ""
+            );
+
+        /*
+            Existing manually-organized files take
+            priority over a flat duplicate.
+        */
+
+        if (
+            PAPER_SEARCH_INDEX[
+                code.toLowerCase()
+            ]
+        ) {
+            continue;
+        }
+
+        PAPER_SEARCH_INDEX[
+            code.toLowerCase()
+        ] = {
+            path:
+                `${subjectKey}/${categoryKey}/${year}/${sessionSlug(parsed.sessionCode)}/#paper-${code}`,
+            code,
+            subject:
+                subjectName ||
+                subjectKey,
+            paper:
+                parsed.paper,
+            questionPath:
+                path
+                    .join(
+                        "papers",
+                        subjectKey,
+                        filename
+                    )
+                    .split(path.sep)
+                    .join("/")
+        };
+
+    }
+
+}
    Every generated HTML page loads one external search script.
    This avoids embedding the search system into the page's
    executable inline JavaScript.
