@@ -40,7 +40,10 @@ const CATEGORY_ICON_FILES = {
     written: "written.svg",
     practical: "practical.svg",
     theory: "stackofbooks.svg",
-    programming: "21.svg"
+    programming: "21.svg",
+    mcq: "mcq.svg",
+    approaches: "22.svg",
+    specialist: "stackofbooks.svg"
 };
 
 const IMAGE_ASSETS = [
@@ -60,7 +63,8 @@ const IMAGE_ASSETS = [
     "written.svg",
     "practical.svg",
     "calendar.svg",
-    "stackofbooks.svg"
+    "stackofbooks.svg",
+    "mcq.svg"
 ];
 
 /*
@@ -4009,12 +4013,12 @@ function documentHTML(title, body, depth = 0) {
             </a>
 
             <a
-                href="${prefix}guide/"
-                class="nav-account nav-guide-button"
-                title="guide"
-            >
-                guide
-            </a>
+        href="${prefix}guide/"
+        class="nav-account nav-guide-button"
+        title="why us?"
+    >
+        why us?
+    </a>
 
             <a id="authNav" href="${prefix}login/" class="nav-account">
                 Login / Signup
