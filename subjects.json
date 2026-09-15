@@ -23,12 +23,12 @@
     "icon": "🧪",
     "description": "AS & A Level Chemistry past papers."
   },
-  "economics": {
+ "economics": {
     "name": "Economics",
-    "code": "0455",
+    "code": "9708",
     "icon": "📈",
-    "description": "IGCSE Economics past papers."
-  },
+    "description": "AS & A Level Economics past papers."
+},
   "computer-science": {
     "name": "Computer Science",
     "code": "9618",
