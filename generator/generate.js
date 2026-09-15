@@ -1003,10 +1003,7 @@ function addCategorizedSearchIndex(
     }
 
 }
-   Every generated HTML page loads one external search script.
-   This avoids embedding the search system into the page's
-   executable inline JavaScript.
-*/
+
 function writeSearchScript() {
 
     const searchScript = `
