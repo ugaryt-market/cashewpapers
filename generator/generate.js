@@ -9907,33 +9907,121 @@ function buildCategoryYears(subjectKey, categoryKey) {
 
     const categoryYears = {};
 
-    for (const file of scanFiles(path.join(PAPERS_DIR, subjectKey, categoryKey))) {
+    /*
+        Build the category data from the same unified database
+        logic used by buildDatabase().
 
-        if (!file.relative.toLowerCase().endsWith(".pdf")) {
+        This means both:
+        - existing nested papers
+        - new flat papers in papers/<subject>/
+
+        appear in the generated category pages.
+    */
+
+    const subjectPath =
+        path.join(PAPERS_DIR, subjectKey);
+
+    for (const file of scanFiles(subjectPath)) {
+
+        if (
+            !file.relative
+                .toLowerCase()
+                .endsWith(".pdf")
+        ) {
             continue;
         }
 
-        const parts = file.relative.split(path.sep);
+        const parts =
+            file.relative.split(path.sep);
 
-        if (parts.length < 3) {
+        let year;
+        let sessionFolder;
+        let filename;
+        let fileCategoryKey = null;
+        let isFlatFile = false;
+
+        /*
+            Existing nested structure:
+
+            <category>/<year>/<session>/file.pdf
+        */
+
+        if (parts.length >= 4) {
+
+            fileCategoryKey = parts[0];
+            year = parts[1];
+            sessionFolder = parts[2];
+            filename = parts[3];
+
+        }
+
+        /*
+            New flat structure:
+
+            file.pdf
+        */
+
+        else if (parts.length === 1) {
+
+            isFlatFile = true;
+            filename = parts[0];
+
+        }
+
+        else {
             continue;
         }
 
-        const year = parts[0];
-        const sessionFolder = parts[1];
-        const filename = parts[2];
-
-        const parsed = parsePaperFilename(filename);
+        const parsed =
+            parsePaperFilename(filename);
 
         if (!parsed) {
             continue;
+        }
+
+        /*
+            Only include files belonging to the category
+            currently being generated.
+        */
+
+        if (isFlatFile) {
+
+            fileCategoryKey =
+                inferFlatCategory(
+                    subjectKey,
+                    parsed.paper
+                );
+
+            if (
+                fileCategoryKey !== categoryKey
+            ) {
+                continue;
+            }
+
+            year =
+                "20" +
+                parsed.sessionCode.slice(1);
+
+            sessionFolder =
+                parsed.sessionCode;
+
+        } else {
+
+            if (
+                fileCategoryKey !== categoryKey
+            ) {
+                continue;
+            }
+
         }
 
         if (!categoryYears[year]) {
             categoryYears[year] = {};
         }
 
-        if (!categoryYears[year][sessionFolder]) {
+        if (
+            !categoryYears[year][sessionFolder]
+        ) {
 
             categoryYears[year][sessionFolder] = {
                 sessionCode: parsed.sessionCode,
@@ -9942,7 +10030,8 @@ function buildCategoryYears(subjectKey, categoryKey) {
 
         }
 
-        const session = categoryYears[year][sessionFolder];
+        const session =
+            categoryYears[year][sessionFolder];
 
         if (!session.papers[parsed.paper]) {
 
@@ -9957,34 +10046,89 @@ function buildCategoryYears(subjectKey, categoryKey) {
 
         }
 
-        const paper = session.papers[parsed.paper];
+        const paper =
+            session.papers[parsed.paper];
 
-        const publicPath = path
-            .join("papers", subjectKey, categoryKey, file.relative)
-            .split(path.sep)
-            .join("/");
+        const publicPath =
+            path
+                .join(
+                    "papers",
+                    subjectKey,
+                    file.relative
+                )
+                .split(path.sep)
+                .join("/");
+
+        /*
+            Existing nested files take priority over
+            flat duplicates.
+        */
 
         if (parsed.type === "qp") {
-            paper.question = publicPath;
-            paper.code = filename.replace(/\.pdf$/i, "");
+
+            if (
+                !paper.question ||
+                !isFlatFile
+            ) {
+
+                paper.question =
+                    publicPath;
+
+                paper.code =
+                    filename.replace(
+                        /\.pdf$/i,
+                        ""
+                    );
+
+            }
+
         }
 
         if (parsed.type === "ms") {
-            paper.markScheme = publicPath;
+
+            if (
+                !paper.markScheme ||
+                !isFlatFile
+            ) {
+
+                paper.markScheme =
+                    publicPath;
+
+            }
+
         }
 
         if (parsed.type === "er") {
-            paper.examinerReport = publicPath;
+
+            if (
+                !paper.examinerReport ||
+                !isFlatFile
+            ) {
+
+                paper.examinerReport =
+                    publicPath;
+
+            }
+
         }
 
         if (parsed.type === "in") {
-            paper.insert = publicPath;
+
+            if (
+                !paper.insert ||
+                !isFlatFile
+            ) {
+
+                paper.insert =
+                    publicPath;
+
+            }
+
         }
 
     }
 
     return categoryYears;
-
 }
 
 function writeCategorizedSubjectPages(subjectKey, data) {
