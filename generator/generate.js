@@ -43,7 +43,8 @@ const CATEGORY_ICON_FILES = {
     programming: "21.svg",
     mcq: "mcq.svg",
     approaches: "22.svg",
-    specialist: "stackofbooks.svg"
+    specialist: "stackofbooks.svg",
+    responses: "written.svg",
 };
 
 const IMAGE_ASSETS = [
