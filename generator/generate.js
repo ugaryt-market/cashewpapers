@@ -2709,13 +2709,58 @@ main {
     min-height: 14px;
 }
 
+.calendar-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.calendar-tabs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.calendar-tab {
+    height: 38px;
+    padding: 0 15px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #3a3c3f;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.calendar-tab:hover {
+    background: #414346;
+    color: var(--text);
+    border-color: var(--subdued);
+}
+
+.calendar-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.calendar-tab.active:hover {
+    background: #ffa86c;
+    border-color: #ffa86c;
+    color: white;
+}
+
 .calendar-help-box {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 145px;
-    padding: 12px 13px;
+    position: relative;
+    width: min(300px, 100%);
+    padding: 11px 38px 11px 13px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: #2c2e31;
@@ -2723,29 +2768,193 @@ main {
     font-size: 11px;
     line-height: 1.5;
     box-shadow: var(--shadow);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.calendar-help-box.hidden {
+    display: none;
+}
+
+.calendar-help-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 .calendar-help-box strong {
     display: block;
-    margin-bottom: 4px;
     color: var(--text);
     font-size: 11px;
     font-weight: 400;
 }
 
+.calendar-help-close {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: 0;
+    transition:
+        opacity 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.calendar-help-box:hover .calendar-help-close,
+.calendar-help-close:focus-visible {
+    opacity: 1;
+}
+
+.calendar-help-close:hover {
+    background: #3a3c3f;
+    color: var(--text);
+}
+
+.calendar-mode-note {
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.calendar-completed-pill {
+    --calendar-entry-color: #3a3127;
+    border-color: var(--subdued);
+    color: var(--primary);
+}
+
+.calendar-completed-pill:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.calendar-shell.completed-mode .calendar-cell {
+    cursor: default;
+}
+
+.calendar-shell.completed-mode .calendar-cell:hover {
+    transform: none;
+}
+
+.completion-confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 2000;
+}
+
+.completion-confetti-piece {
+    position: absolute;
+    top: -24px;
+    width: 8px;
+    height: 13px;
+    border-radius: 2px;
+    opacity: 1;
+    animation:
+        completionConfettiFall 1.45s cubic-bezier(0.16, 0.72, 0.24, 1)
+        forwards;
+}
+
+@keyframes completionConfettiFall {
+    to {
+        transform:
+            translate3d(var(--confetti-x), 110vh, 0)
+            rotate(var(--confetti-rotation));
+        opacity: 0;
+    }
+}
+
+.completion-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 1900;
+    width: min(560px, calc(100vw - 40px));
+    padding: 13px 14px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: #2c2e31;
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.35);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    transform: translate(-50%, 20px);
+    opacity: 0;
+    animation: completionToastIn 0.28s ease forwards;
+}
+
+@keyframes completionToastIn {
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+.completion-toast-message {
+    min-width: 0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.completion-toast-button {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.completion-toast-button:hover {
+    background: #ffa86c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .completion-confetti {
+        display: none;
+    }
+
+    .completion-toast {
+        animation: none;
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+
+}
+
 @media (max-width: 1180px) {
 
-    .calendar-shell {
-        flex-wrap: wrap;
+    .calendar-toolbar {
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .calendar-help-box {
-        position: static;
-        transform: none;
-        width: min(100%, 420px);
-        flex-basis: 100%;
-        order: -1;
-        margin: 0 auto 2px;
+        width: 100%;
     }
 
 }
@@ -4530,20 +4739,384 @@ window.addEventListener(
 
 async function getPaperStatus(key) {
     const user = await getCurrentUser();
+
     return user
         ? await CashewUserData.getPaperStatus(key)
         : "incomplete";
 }
 
 async function setPaperStatus(key, status) {
-    return await CashewUserData.setPaperStatus(key, status);
+    return await CashewUserData.setPaperStatus(
+        key,
+        status
+    );
 }
 
 async function getPaperAttempts(key) {
     const user = await getCurrentUser();
+
     return user
         ? await CashewUserData.getPaperAttempts(key)
         : [];
+}
+
+
+/* ============================================================
+   COMPLETED PAPER LOCAL STORAGE
+   ============================================================ */
+
+const COMPLETED_PAPERS_STORAGE_PREFIX =
+    "cashewpapers:completed-papers:";
+
+function completedPapersStorageKey(userId) {
+    return (
+        COMPLETED_PAPERS_STORAGE_PREFIX +
+        String(userId || "")
+    );
+}
+
+function readCompletedPapers(userId) {
+
+    if (!userId) {
+        return {};
+    }
+
+    try {
+
+        const raw =
+            window.localStorage.getItem(
+                completedPapersStorageKey(userId)
+            );
+
+        if (!raw) {
+            return {};
+        }
+
+        const parsed =
+            JSON.parse(raw);
+
+        return (
+            parsed &&
+            typeof parsed === "object"
+                ? parsed
+                : {}
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "cashewpapers: unable to read completed papers",
+            error
+        );
+
+        return {};
+    }
+}
+
+function writeCompletedPapers(
+    userId,
+    papers
+) {
+
+    if (!userId) {
+        return;
+    }
+
+    try {
+
+        window.localStorage.setItem(
+            completedPapersStorageKey(userId),
+            JSON.stringify(papers || {})
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "cashewpapers: unable to save completed paper date",
+            error
+        );
+
+    }
+}
+
+function rememberCompletedPaper(
+    userId,
+    entry
+) {
+
+    const papers =
+        readCompletedPapers(userId);
+
+    papers[entry.key] = entry;
+
+    writeCompletedPapers(
+        userId,
+        papers
+    );
+}
+
+function forgetCompletedPaper(
+    userId,
+    key
+) {
+
+    const papers =
+        readCompletedPapers(userId);
+
+    delete papers[key];
+
+    writeCompletedPapers(
+        userId,
+        papers
+    );
+}
+
+function getPaperCompletionReference(
+    button,
+    key
+) {
+
+    const card =
+        button.closest(".paper-card");
+
+    const codeElement =
+        card
+            ? card.querySelector(".paper-code")
+            : null;
+
+    const cardCode =
+        card
+            ? String(
+                card.dataset.paperCode || ""
+            ).trim()
+            : "";
+
+    const displayCode =
+        codeElement
+            ? String(
+                codeElement.textContent || ""
+            ).trim()
+            : "";
+
+    const code =
+        displayCode ||
+        cardCode ||
+        key;
+
+    const hrefUrl =
+        new URL(
+            window.location.href
+        );
+
+    hrefUrl.hash =
+        "paper-" +
+        encodeURIComponent(
+            cardCode || displayCode || key
+        );
+
+    return {
+        key,
+        code,
+        href: hrefUrl.toString(),
+        completedAt:
+            new Date().toISOString()
+    };
+}
+
+
+/* ============================================================
+   COMPLETION FEEDBACK
+   ============================================================ */
+
+function launchCompletionConfetti() {
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+    container.className =
+        "completion-confetti";
+
+    const colours = [
+        "var(--primary)",
+        "#ffca8a",
+        "#9d7a53",
+        "#d6c2a8",
+        "#7f6a55"
+    ];
+
+    for (
+        let i = 0;
+        i < 48;
+        i++
+    ) {
+
+        const piece =
+            document.createElement(
+                "span"
+            );
+
+        piece.className =
+            "completion-confetti-piece";
+
+        const x =
+            (
+                Math.random() * 160 -
+                80
+            ) + "vw";
+
+        const rotation =
+            (
+                Math.random() * 1200 -
+                600
+            ) + "deg";
+
+        const left =
+            Math.random() * 100;
+
+        const delay =
+            Math.random() * 0.18;
+
+        const duration =
+            1.1 +
+            Math.random() * 0.55;
+
+        piece.style.left =
+            left + "%";
+
+        piece.style.background =
+            colours[
+                Math.floor(
+                    Math.random() *
+                    colours.length
+                )
+            ];
+
+        piece.style.setProperty(
+            "--confetti-x",
+            x
+        );
+
+        piece.style.setProperty(
+            "--confetti-rotation",
+            rotation
+        );
+
+        piece.style.animationDelay =
+            delay + "s";
+
+        piece.style.animationDuration =
+            duration + "s";
+
+        container.appendChild(
+            piece
+        );
+    }
+
+    document.body.appendChild(
+        container
+    );
+
+    window.setTimeout(
+        () => {
+            container.remove();
+        },
+        2200
+    );
+}
+
+function showCompletionToast() {
+
+    const existing =
+        document.querySelector(
+            ".completion-toast"
+        );
+
+    if (existing) {
+        existing.remove();
+    }
+
+    const toast =
+        document.createElement(
+            "div"
+        );
+
+    toast.className =
+        "completion-toast";
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+    message.className =
+        "completion-toast-message";
+
+    message.textContent =
+        "paper marked as completed! see all completed papers here:";
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+    button.type =
+        "button";
+
+    button.className =
+        "completion-toast-button";
+
+    button.textContent =
+        "completed papers →";
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            const prefix =
+                document.body.dataset.searchPrefix ||
+                "";
+
+            window.location.href =
+                prefix +
+                "scheduler/?tab=completed";
+
+        }
+    );
+
+    toast.appendChild(
+        message
+    );
+
+    toast.appendChild(
+        button
+    );
+
+    document.body.appendChild(
+        toast
+    );
+
+    window.setTimeout(
+        () => {
+
+            if (
+                toast.isConnected
+            ) {
+                toast.remove();
+            }
+
+        },
+        7000
+    );
+}
+
+function showCompletionFeedback() {
+
+    launchCompletionConfetti();
+
+    showCompletionToast();
+
 }
 
 function formatAttemptDate(isoDate) {
@@ -5395,13 +5968,10 @@ async function togglePaperStatus(button) {
         return;
     }
 
-    clearLoginNotice(progress);
+    clearLoginNotice(
+        progress
+    );
 
-    /*
-       Give immediate visual feedback before any network request.
-       The button itself does not change to completed until the
-       Supabase write succeeds.
-    */
     button.classList.remove(
         "status-pop"
     );
@@ -5467,6 +6037,33 @@ async function togglePaperStatus(button) {
             loader.classList.add(
                 "ready"
             );
+        }
+
+        if (
+            next ===
+            "completed"
+        ) {
+
+            const completionEntry =
+                getPaperCompletionReference(
+                    button,
+                    key
+                );
+
+            rememberCompletedPaper(
+                user.id,
+                completionEntry
+            );
+
+            showCompletionFeedback();
+
+        } else {
+
+            forgetCompletedPaper(
+                user.id,
+                key
+            );
+
         }
 
         await initializeOverviewProgress();
@@ -8976,24 +9573,25 @@ setStatus(
 function generateSchedulerPage() {
 
     return documentHTML(
-
         "My Calendar",
-
         `
-
             <div class="page-header">
-
                 ${breadcrumbHTML([
-                    { label: "subjects", href: "../" },
-                    { label: "my calendar", current: true }
+                    {
+                        label: "subjects",
+                        href: "../"
+                    },
+                    {
+                        label: "my calendar",
+                        current: true
+                    }
                 ])}
 
                 <h1>my calendar</h1>
 
-                <p>plan out when you'll tackle each past paper.</p>
-
-                
-
+                <p>
+                    plan out when you'll tackle each past paper.
+                </p>
             </div>
 
             <div
@@ -9002,12 +9600,68 @@ function generateSchedulerPage() {
                 style="display:none;"
             ></div>
 
-            <div class="calendar-shell">
+            <div class="calendar-toolbar">
 
-                <div class="calendar-help-box">
-                    <strong>calendar tip</strong>
-                    right click a scheduled paper to move, delete, or change its colour.
+                <div
+                    class="calendar-tabs"
+                    role="tablist"
+                    aria-label="calendar views"
+                >
+
+                    <button
+                        type="button"
+                        id="calendarTabScheduled"
+                        class="calendar-tab active"
+                        role="tab"
+                        aria-selected="true"
+                    >
+                        my calendar
+                    </button>
+
+                    <button
+                        type="button"
+                        id="calendarTabCompleted"
+                        class="calendar-tab"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        completed papers
+                    </button>
+
                 </div>
+
+                <div
+                    class="calendar-help-box"
+                    id="calendarHelpBox"
+                >
+
+                    <div class="calendar-help-title-row">
+                        <strong>calendar tip</strong>
+
+                        <button
+                            type="button"
+                            class="calendar-help-close"
+                            id="calendarHelpClose"
+                            aria-label="close calendar tip"
+                            title="close"
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    right click a scheduled paper to move,
+                    delete, or change its colour.
+
+                </div>
+
+            </div>
+
+            <div
+                class="calendar-mode-note"
+                id="calendarModeNote"
+            ></div>
+
+            <div class="calendar-shell" id="calendarShell">
 
                 <button
                     type="button"
@@ -9020,11 +9674,20 @@ function generateSchedulerPage() {
 
                 <div class="calendar-card">
 
-                    <div class="calendar-month-title" id="calendarMonthTitle"></div>
+                    <div
+                        class="calendar-month-title"
+                        id="calendarMonthTitle"
+                    ></div>
 
-                    <div class="calendar-grid" id="calendarDayLabels"></div>
+                    <div
+                        class="calendar-grid"
+                        id="calendarDayLabels"
+                    ></div>
 
-                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div
+                        class="calendar-grid"
+                        id="calendarGrid"
+                    ></div>
 
                 </div>
 
@@ -9045,7 +9708,13 @@ function generateSchedulerPage() {
                 role="menu"
                 aria-hidden="true"
             >
-                <div class="calendar-context-title" id="calendarContextTitle">paper</div>
+
+                <div
+                    class="calendar-context-title"
+                    id="calendarContextTitle"
+                >
+                    paper
+                </div>
 
                 <button
                     type="button"
@@ -9056,13 +9725,21 @@ function generateSchedulerPage() {
                 </button>
 
                 <div class="calendar-context-move">
-                    <label for="calendarContextDate">move to date</label>
+
+                    <label
+                        for="calendarContextDate"
+                    >
+                        move to date
+                    </label>
+
                     <div class="calendar-context-move-row">
+
                         <input
                             type="date"
                             id="calendarContextDate"
                             class="calendar-context-date"
                         >
+
                         <button
                             type="button"
                             class="calendar-context-action calendar-context-confirm"
@@ -9070,7 +9747,9 @@ function generateSchedulerPage() {
                         >
                             move
                         </button>
+
                     </div>
+
                 </div>
 
                 <button
@@ -9081,24 +9760,76 @@ function generateSchedulerPage() {
                     change colour
                 </button>
 
-                <div class="calendar-context-colours" id="calendarContextColours">
-                    <button type="button" class="calendar-context-colour default" data-color="default" aria-label="default"></button>
-                    <button type="button" class="calendar-context-colour orange" data-color="orange" aria-label="orange"></button>
-                    <button type="button" class="calendar-context-colour blue" data-color="blue" aria-label="blue"></button>
-                    <button type="button" class="calendar-context-colour green" data-color="green" aria-label="green"></button>
-                    <button type="button" class="calendar-context-colour purple" data-color="purple" aria-label="purple"></button>
-                    <button type="button" class="calendar-context-colour red" data-color="red" aria-label="red"></button>
-                    <button type="button" class="calendar-context-colour yellow" data-color="yellow" aria-label="yellow"></button>
+                <div
+                    class="calendar-context-colours"
+                    id="calendarContextColours"
+                >
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour default"
+                        data-color="default"
+                        aria-label="default"
+                    ></button>
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour orange"
+                        data-color="orange"
+                        aria-label="orange"
+                    ></button>
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour blue"
+                        data-color="blue"
+                        aria-label="blue"
+                    ></button>
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour green"
+                        data-color="green"
+                        aria-label="green"
+                    ></button>
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour purple"
+                        data-color="purple"
+                        aria-label="purple"
+                    ></button>
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour red"
+                        data-color="red"
+                        aria-label="red"
+                    ></button>
+
+                    <button
+                        type="button"
+                        class="calendar-context-colour yellow"
+                        data-color="yellow"
+                        aria-label="yellow"
+                    ></button>
+
                 </div>
+
             </div>
 
-            <div class="calendar-day-modal" id="calendarDayModal">
+            <div
+                class="calendar-day-modal"
+                id="calendarDayModal"
+            >
 
                 <div class="calendar-day-modal-content">
 
                     <div class="attempt-form-title">
 
-                        <span id="calendarModalTitle">schedule</span>
+                        <span id="calendarModalTitle">
+                            schedule
+                        </span>
 
                         <button
                             type="button"
@@ -9111,9 +9842,15 @@ function generateSchedulerPage() {
 
                     </div>
 
-                    <div id="calendarModalEntries" class="calendar-modal-entries"></div>
+                    <div
+                        id="calendarModalEntries"
+                        class="calendar-modal-entries"
+                    ></div>
 
-                    <form id="calendarAddForm" class="calendar-add-form">
+                    <form
+                        id="calendarAddForm"
+                        class="calendar-add-form"
+                    >
 
                         <input
                             id="calendarAddInput"
@@ -9145,147 +9882,627 @@ function generateSchedulerPage() {
 
 (async function () {
 
-    const params = new URLSearchParams(
-        window.location.search
-    );
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-    const schedulingKey = params.get("key");
-    const schedulingCode = params.get("code");
-    const schedulingSubject = params.get("subject");
-    const schedulingPaper = params.get("paper");
-    const schedulingPath = params.get("path");
-    const schedulingFile = params.get("file");
+    const schedulingKey =
+        params.get("key");
 
-    let schedulingActive = Boolean(schedulingKey);
-    let currentMonth = new Date();
+    const schedulingCode =
+        params.get("code");
+
+    const schedulingSubject =
+        params.get("subject");
+
+    const schedulingPaper =
+        params.get("paper");
+
+    const schedulingPath =
+        params.get("path");
+
+    const schedulingFile =
+        params.get("file");
+
+    let activeTab =
+        params.get("tab") === "completed"
+            ? "completed"
+            : "scheduled";
+
+    let schedulingActive =
+        activeTab === "scheduled" &&
+        Boolean(schedulingKey);
+
+    let currentMonth =
+        new Date();
+
     currentMonth.setDate(1);
     currentMonth.setHours(0, 0, 0, 0);
 
     let selectedDateKey = null;
     let schedule = {};
-
-    async function loadSchedule() {
-        const user = await getCurrentUser();
-        if (!user) {
-            schedule = {};
-            return schedule;
-        }
-        schedule =
-            await CashewUserData.getCalendarSchedule();
-        return schedule;
-    }
-
-    async function refreshSchedule() {
-        await loadSchedule();
-        renderGrid();
-        if (selectedDateKey) {
-            renderModalEntries();
-        }
-    }
+    let completedSchedule = {};
+    let calendarUserId = null;
 
     function dateKey(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return year + "-" + month + "-" + day;
+
+        const year =
+            date.getFullYear();
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(2, "0");
+
+        return (
+            year +
+            "-" +
+            month +
+            "-" +
+            day
+        );
+
     }
 
     function formatMonthTitle(date) {
+
         return date.toLocaleDateString(
             "en-US",
-            { month: "long", year: "numeric" }
+            {
+                month: "long",
+                year: "numeric"
+            }
         );
+
     }
 
     const dayLabels = [
-        "sun", "mon", "tue", "wed", "thu", "fri", "sat"
+        "sun",
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat"
     ];
 
     function renderDayLabels() {
+
         const container =
-            document.getElementById("calendarDayLabels");
-        container.innerHTML = dayLabels
-            .map(label =>
-                '<div class="calendar-day-label">' +
-                label +
-                "</div>"
-            )
-            .join("");
-    }
+            document.getElementById(
+                "calendarDayLabels"
+            );
 
-    function renderBanner() {
-        const banner =
-            document.getElementById("schedulingBanner");
+        container.innerHTML =
+            dayLabels
+                .map(
+                    label =>
+                        '<div class="calendar-day-label">' +
+                        label +
+                        "</div>"
+                )
+                .join("");
 
-        if (!schedulingActive) {
-            banner.style.display = "none";
-            return;
-        }
-
-        banner.style.display = "block";
-        banner.textContent =
-            "scheduling " +
-            formatScheduledEntryLabel({
-                code: schedulingCode,
-                subject: schedulingSubject,
-                paper: schedulingPaper
-            }) +
-            " — click a date to add it.";
     }
 
     function escapeHtml(value) {
-        return String(value || "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+
+        return String(
+            value || ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
     }
 
     function getScheduledPaperNumber(entry) {
-        if (entry && entry.paper) {
-            return String(entry.paper);
+
+        if (
+            entry &&
+            entry.paper
+        ) {
+            return String(
+                entry.paper
+            );
         }
-        const code = String(entry && entry.code || "");
-        const match = code.match(/_(?:qp|ms|er|in)_(\d+)$/i);
-        return match ? match[1] : "";
+
+        const code =
+            String(
+                entry &&
+                entry.code ||
+                ""
+            );
+
+        const match =
+            code.match(
+                /_(?:qp|ms|er|in)_(\d+)$/i
+            );
+
+        return match
+            ? match[1]
+            : "";
+
     }
 
     function formatScheduledEntryLabel(entry) {
-        const subject = String(
-            entry && entry.subject || ""
-        ).trim().toLowerCase();
-        const paper = getScheduledPaperNumber(entry);
-        if (subject && paper) {
-            return subject + " p" + paper;
+
+        const subject =
+            String(
+                entry &&
+                entry.subject ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+        const paper =
+            getScheduledPaperNumber(
+                entry
+            );
+
+        if (
+            subject &&
+            paper
+        ) {
+            return (
+                subject +
+                " p" +
+                paper
+            );
         }
+
         return String(
-            entry && (entry.code || entry.label) || "paper"
+            entry &&
+            (
+                entry.code ||
+                entry.label
+            ) ||
+            "paper"
         );
+
     }
 
     function getScheduledPaperHref(entry) {
+
         if (!entry) {
             return "";
         }
+
         if (entry.href) {
             return entry.href;
         }
+
         if (entry.path) {
-            return "../" + entry.path;
+            return (
+                "../" +
+                entry.path
+            );
         }
+
         if (entry.questionPath) {
-            return "../viewer/?file=" +
-                encodeURIComponent(entry.questionPath);
+            return (
+                "../viewer/?file=" +
+                encodeURIComponent(
+                    entry.questionPath
+                )
+            );
         }
+
         return "";
+
     }
 
     function navigateToScheduledPaper(entry) {
-        const href = getScheduledPaperHref(entry);
+
+        const href =
+            getScheduledPaperHref(
+                entry
+            );
+
         if (href) {
-            window.location.assign(href);
+            window.location.assign(
+                href
+            );
         }
+
+    }
+
+    async function loadSchedule() {
+
+        const user =
+            await getCurrentUser();
+
+        if (!user) {
+
+            schedule = {};
+
+            return schedule;
+        }
+
+        schedule =
+            await CashewUserData
+                .getCalendarSchedule();
+
+        if (
+            !schedule ||
+            typeof schedule !==
+                "object"
+        ) {
+            schedule = {};
+        }
+
+        return schedule;
+
+    }
+
+    async function loadCompletedPapers() {
+
+        const user =
+            await getCurrentUser();
+
+        if (!user) {
+
+            calendarUserId = null;
+            completedSchedule = {};
+
+            return;
+        }
+
+        calendarUserId =
+            String(
+                user.id
+            );
+
+        const stored =
+            readCompletedPapers(
+                calendarUserId
+            );
+
+        completedSchedule = {};
+
+        Object.values(
+            stored
+        ).forEach(entry => {
+
+            const parsed =
+                new Date(
+                    entry.completedAt
+                );
+
+            if (
+                Number.isNaN(
+                    parsed.getTime()
+                )
+            ) {
+                return;
+            }
+
+            const key =
+                dateKey(parsed);
+
+            if (
+                !completedSchedule[key]
+            ) {
+                completedSchedule[key] =
+                    [];
+            }
+
+            completedSchedule[key]
+                .push(entry);
+
+        });
+
+        Object.values(
+            completedSchedule
+        ).forEach(entries => {
+
+            entries.sort(
+                (a, b) =>
+                    String(
+                        a.completedAt
+                    ).localeCompare(
+                        String(
+                            b.completedAt
+                        )
+                    )
+            );
+
+        });
+
+    }
+
+    async function refreshCalendarData() {
+
+        await Promise.all([
+            loadSchedule(),
+            loadCompletedPapers()
+        ]);
+
+        renderBanner();
+        renderModeNote();
+        renderGrid();
+
+        if (
+            selectedDateKey &&
+            activeTab === "scheduled"
+        ) {
+            renderModalEntries();
+        }
+
+    }
+
+    function renderBanner() {
+
+        const banner =
+            document.getElementById(
+                "schedulingBanner"
+            );
+
+        if (
+            activeTab !==
+            "scheduled"
+        ) {
+            banner.style.display =
+                "none";
+
+            return;
+        }
+
+        if (!schedulingActive) {
+            banner.style.display =
+                "none";
+
+            return;
+        }
+
+        banner.style.display =
+            "block";
+
+        banner.textContent =
+            "scheduling " +
+            formatScheduledEntryLabel({
+                code:
+                    schedulingCode,
+                subject:
+                    schedulingSubject,
+                paper:
+                    schedulingPaper
+            }) +
+            " — click a date to add it.";
+
+    }
+
+    function renderModeNote() {
+
+        const note =
+            document.getElementById(
+                "calendarModeNote"
+            );
+
+        if (
+            activeTab ===
+            "scheduled"
+        ) {
+            note.textContent =
+                "";
+
+            return;
+        }
+
+        if (!calendarUserId) {
+
+            note.textContent =
+                "log in to see your completed papers.";
+
+            return;
+        }
+
+        const count =
+            Object.values(
+                completedSchedule
+            )
+                .reduce(
+                    (
+                        total,
+                        entries
+                    ) =>
+                        total +
+                        entries.length,
+                    0
+                );
+
+        note.textContent =
+            count
+                ? "papers are shown on the date you completed them."
+                : "no completed papers yet.";
+
+    }
+
+    function updateTabUI() {
+
+        const scheduledButton =
+            document.getElementById(
+                "calendarTabScheduled"
+            );
+
+        const completedButton =
+            document.getElementById(
+                "calendarTabCompleted"
+            );
+
+        const shell =
+            document.getElementById(
+                "calendarShell"
+            );
+
+        const scheduled =
+            activeTab ===
+            "scheduled";
+
+        scheduledButton.classList.toggle(
+            "active",
+            scheduled
+        );
+
+        completedButton.classList.toggle(
+            "active",
+            !scheduled
+        );
+
+        scheduledButton.setAttribute(
+            "aria-selected",
+            scheduled
+                ? "true"
+                : "false"
+        );
+
+        completedButton.setAttribute(
+            "aria-selected",
+            scheduled
+                ? "false"
+                : "true"
+        );
+
+        shell.classList.toggle(
+            "completed-mode",
+            !scheduled
+        );
+
+    }
+
+    async function switchTab(tab) {
+
+        activeTab =
+            tab === "completed"
+                ? "completed"
+                : "scheduled";
+
+        schedulingActive =
+            activeTab ===
+                "scheduled" &&
+            Boolean(
+                schedulingKey
+            );
+
+        const url =
+            new URL(
+                window.location.href
+            );
+
+        if (
+            activeTab ===
+            "completed"
+        ) {
+            url.searchParams.set(
+                "tab",
+                "completed"
+            );
+        } else {
+            url.searchParams.delete(
+                "tab"
+            );
+        }
+
+        window.history.replaceState(
+            {},
+            "",
+            url.toString()
+        );
+
+        if (
+            activeTab ===
+            "completed"
+        ) {
+            await loadCompletedPapers();
+        } else {
+            await loadSchedule();
+        }
+
+        updateTabUI();
+        renderBanner();
+        renderModeNote();
+        renderGrid();
+
+    }
+
+    function initializeCalendarTip() {
+
+        const box =
+            document.getElementById(
+                "calendarHelpBox"
+            );
+
+        const closeButton =
+            document.getElementById(
+                "calendarHelpClose"
+            );
+
+        const storageKey =
+            "cashewpapers:calendar-tip-dismissed";
+
+        try {
+
+            if (
+                window.localStorage.getItem(
+                    storageKey
+                ) === "1"
+            ) {
+                box.classList.add(
+                    "hidden"
+                );
+            }
+
+        } catch (error) {
+            /* Ignore storage failures. */
+        }
+
+        closeButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                box.classList.add(
+                    "hidden"
+                );
+
+                try {
+                    window.localStorage.setItem(
+                        storageKey,
+                        "1"
+                    );
+                } catch (error) {
+                    /* Ignore storage failures. */
+                }
+
+            }
+        );
+
     }
 
     const calendarColours = [
@@ -9302,543 +10519,1271 @@ function generateSchedulerPage() {
     let contextSourceDate = null;
 
     function normalizeCalendarColor(value) {
-        const normalized = String(value || "default").toLowerCase();
-        return calendarColours.includes(normalized)
+
+        const normalized =
+            String(
+                value ||
+                "default"
+            ).toLowerCase();
+
+        return calendarColours.includes(
+            normalized
+        )
             ? normalized
             : "default";
+
     }
 
     function closeCalendarContextMenu() {
-        const menu = document.getElementById("calendarContextMenu");
+
+        const menu =
+            document.getElementById(
+                "calendarContextMenu"
+            );
+
         if (!menu) {
             return;
         }
-        menu.classList.remove("open");
-        menu.setAttribute("aria-hidden", "true");
+
+        menu.classList.remove(
+            "open"
+        );
+
+        menu.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
         contextEntry = null;
         contextSourceDate = null;
+
     }
 
-    function openCalendarContextMenu(event, entry, dateKeyValue) {
+    function openCalendarContextMenu(
+        event,
+        entry,
+        dateKeyValue
+    ) {
+
         event.preventDefault();
         event.stopPropagation();
 
-        const menu = document.getElementById("calendarContextMenu");
-        const title = document.getElementById("calendarContextTitle");
-        const dateInput = document.getElementById("calendarContextDate");
+        const menu =
+            document.getElementById(
+                "calendarContextMenu"
+            );
 
-        contextEntry = entry;
-        contextSourceDate = dateKeyValue;
+        const title =
+            document.getElementById(
+                "calendarContextTitle"
+            );
 
-        title.textContent = formatScheduledEntryLabel(entry);
-        dateInput.value = dateKeyValue;
+        const dateInput =
+            document.getElementById(
+                "calendarContextDate"
+            );
 
-        menu.classList.add("open");
-        menu.setAttribute("aria-hidden", "false");
+        contextEntry =
+            entry;
 
-        const menuWidth = menu.offsetWidth || 240;
-        const menuHeight = menu.offsetHeight || 260;
+        contextSourceDate =
+            dateKeyValue;
+
+        title.textContent =
+            formatScheduledEntryLabel(
+                entry
+            );
+
+        dateInput.value =
+            dateKeyValue;
+
+        menu.classList.add(
+            "open"
+        );
+
+        menu.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        const menuWidth =
+            menu.offsetWidth ||
+            240;
+
+        const menuHeight =
+            menu.offsetHeight ||
+            260;
+
         const margin = 10;
-        const left = Math.min(
-            event.clientX,
-            window.innerWidth - menuWidth - margin
-        );
-        const top = Math.min(
-            event.clientY,
-            window.innerHeight - menuHeight - margin
-        );
 
-        menu.style.left = Math.max(margin, left) + "px";
-        menu.style.top = Math.max(margin, top) + "px";
+        const left =
+            Math.min(
+                event.clientX,
+                window.innerWidth -
+                    menuWidth -
+                    margin
+            );
+
+        const top =
+            Math.min(
+                event.clientY,
+                window.innerHeight -
+                    menuHeight -
+                    margin
+            );
+
+        menu.style.left =
+            Math.max(
+                margin,
+                left
+            ) + "px";
+
+        menu.style.top =
+            Math.max(
+                margin,
+                top
+            ) + "px";
+
     }
 
     async function deleteContextEntry() {
+
         if (!contextEntry) {
             return;
         }
 
-        const entryId = contextEntry.id;
+        const entryId =
+            contextEntry.id;
+
         closeCalendarContextMenu();
 
         try {
-            await CashewUserData.deleteCalendarEvent(entryId);
-            await refreshSchedule();
+
+            await CashewUserData
+                .deleteCalendarEvent(
+                    entryId
+                );
+
+            await loadSchedule();
+            renderGrid();
+
+            if (
+                selectedDateKey
+            ) {
+                renderModalEntries();
+            }
+
         } catch (error) {
+
             console.error(
                 "cashewpapers: unable to delete calendar event",
                 error
             );
+
         }
+
     }
 
     async function moveContextEntry() {
+
         if (!contextEntry) {
             return;
         }
 
-        const dateInput = document.getElementById("calendarContextDate");
-        const nextDate = String(dateInput.value || "");
+        const dateInput =
+            document.getElementById(
+                "calendarContextDate"
+            );
 
-        if (!nextDate || nextDate === contextSourceDate) {
+        const nextDate =
+            String(
+                dateInput.value ||
+                ""
+            );
+
+        if (
+            !nextDate ||
+            nextDate ===
+                contextSourceDate
+        ) {
             closeCalendarContextMenu();
             return;
         }
 
-        const entryId = contextEntry.id;
+        const entryId =
+            contextEntry.id;
+
         closeCalendarContextMenu();
 
         try {
-            await CashewUserData.updateCalendarEvent(
-                entryId,
-                { date: nextDate }
-            );
-            await refreshSchedule();
+
+            await CashewUserData
+                .updateCalendarEvent(
+                    entryId,
+                    {
+                        date:
+                            nextDate
+                    }
+                );
+
+            await loadSchedule();
+            renderGrid();
+
         } catch (error) {
+
             console.error(
                 "cashewpapers: unable to move calendar event",
                 error
             );
+
         }
+
     }
 
-    async function setContextEntryColor(color) {
+    async function setContextEntryColor(
+        color
+    ) {
+
         if (!contextEntry) {
             return;
         }
 
-        const normalized = normalizeCalendarColor(color);
-        const entryId = contextEntry.id;
+        const normalized =
+            normalizeCalendarColor(
+                color
+            );
+
+        const entryId =
+            contextEntry.id;
+
         closeCalendarContextMenu();
 
         try {
-            await CashewUserData.updateCalendarEvent(
-                entryId,
-                { color: normalized }
-            );
-            await refreshSchedule();
+
+            await CashewUserData
+                .updateCalendarEvent(
+                    entryId,
+                    {
+                        color:
+                            normalized
+                    }
+                );
+
+            await loadSchedule();
+            renderGrid();
+
         } catch (error) {
+
             console.error(
                 "cashewpapers: unable to colour calendar event",
                 error
             );
+
         }
+
     }
 
     function initializeCalendarContextMenu() {
-        document
-            .getElementById("calendarContextDelete")
-            .addEventListener("click", deleteContextEntry);
 
         document
-            .getElementById("calendarContextMove")
-            .addEventListener("click", moveContextEntry);
+            .getElementById(
+                "calendarContextDelete"
+            )
+            .addEventListener(
+                "click",
+                deleteContextEntry
+            );
 
         document
-            .getElementById("calendarContextColours")
-            .addEventListener("click", event => {
-                const button = event.target.closest("[data-color]");
-                if (!button) {
-                    return;
+            .getElementById(
+                "calendarContextMove"
+            )
+            .addEventListener(
+                "click",
+                moveContextEntry
+            );
+
+        document
+            .getElementById(
+                "calendarContextColours"
+            )
+            .addEventListener(
+                "click",
+                event => {
+
+                    const button =
+                        event.target.closest(
+                            "[data-color]"
+                        );
+
+                    if (!button) {
+                        return;
+                    }
+
+                    setContextEntryColor(
+                        button.dataset.color
+                    );
+
                 }
-                setContextEntryColor(button.dataset.color);
-            });
+            );
 
         document
-            .getElementById("calendarContextMenu")
-            .addEventListener("contextmenu", event => {
-                event.preventDefault();
-            });
+            .getElementById(
+                "calendarContextMenu"
+            )
+            .addEventListener(
+                "contextmenu",
+                event => {
+                    event.preventDefault();
+                }
+            );
 
-        document.addEventListener("click", event => {
-            if (!event.target.closest("#calendarContextMenu")) {
-                closeCalendarContextMenu();
+        document.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    !event.target.closest(
+                        "#calendarContextMenu"
+                    )
+                ) {
+                    closeCalendarContextMenu();
+                }
+
             }
+        );
 
-        });
+        document.addEventListener(
+            "keydown",
+            event => {
 
-        document.addEventListener("keydown", event => {
-            if (event.key === "Escape") {
-                closeCalendarContextMenu();
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+                    closeCalendarContextMenu();
+                }
+
             }
-        });
+        );
 
-        window.addEventListener("resize", closeCalendarContextMenu);
-        window.addEventListener("scroll", closeCalendarContextMenu, true);
+        window.addEventListener(
+            "resize",
+            closeCalendarContextMenu
+        );
+
+        window.addEventListener(
+            "scroll",
+            closeCalendarContextMenu,
+            true
+        );
+
     }
 
     function renderGrid() {
-        const grid = document.getElementById("calendarGrid");
-        const title = document.getElementById("calendarMonthTitle");
 
-        title.textContent = formatMonthTitle(currentMonth);
+        const grid =
+            document.getElementById(
+                "calendarGrid"
+            );
 
-        const firstOfMonth = new Date(currentMonth);
-        const startOffset = firstOfMonth.getDay();
-        const gridStart = new Date(firstOfMonth);
-        gridStart.setDate(gridStart.getDate() - startOffset);
+        const title =
+            document.getElementById(
+                "calendarMonthTitle"
+            );
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        title.textContent =
+            formatMonthTitle(
+                currentMonth
+            );
+
+        const firstOfMonth =
+            new Date(
+                currentMonth
+            );
+
+        const startOffset =
+            firstOfMonth.getDay();
+
+        const gridStart =
+            new Date(
+                firstOfMonth
+            );
+
+        gridStart.setDate(
+            gridStart.getDate() -
+            startOffset
+        );
+
+        const today =
+            new Date();
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+        const completedMode =
+            activeTab ===
+            "completed";
+
+        const data =
+            completedMode
+                ? completedSchedule
+                : schedule;
 
         let html = "";
 
-        for (let i = 0; i < 42; i++) {
-            const cellDate = new Date(gridStart);
-            cellDate.setDate(cellDate.getDate() + i);
+        for (
+            let i = 0;
+            i < 42;
+            i++
+        ) {
 
-            const key = dateKey(cellDate);
+            const cellDate =
+                new Date(
+                    gridStart
+                );
+
+            cellDate.setDate(
+                cellDate.getDate() +
+                i
+            );
+
+            const key =
+                dateKey(
+                    cellDate
+                );
+
             const outside =
                 cellDate.getMonth() !==
                 currentMonth.getMonth();
+
             const isToday =
-                cellDate.getTime() === today.getTime();
-            const entries = schedule[key] || [];
+                cellDate.getTime() ===
+                today.getTime();
 
-            const renderEntryPill = entry => {
-                const color = normalizeCalendarColor(entry.color);
-                return (
-                    '<div class="calendar-entry-pill" ' +
-                    'data-scheduled-entry="true" ' +
-                    'data-calendar-color="' +
-                    escapeHtml(color) +
-                    '" ' +
-                    'data-event-id="' +
-                    escapeHtml(entry.id) +
-                    '">' +
-                    escapeHtml(
-                        formatScheduledEntryLabel(entry)
-                    ) +
-                    "</div>"
-                );
-            };
+            const entries =
+                data[key] || [];
 
-            const pills = entries
-                .map(renderEntryPill)
-                .join("");
+            let pills = "";
+
+            if (
+                completedMode
+            ) {
+
+                pills =
+                    entries
+                        .map(
+                            (
+                                entry,
+                                index
+                            ) => {
+
+                                const completedDate =
+                                    new Date(
+                                        entry.completedAt
+                                    );
+
+                                const title =
+                                    Number.isNaN(
+                                        completedDate.getTime()
+                                    )
+                                        ? ""
+                                        : (
+                                            "completed " +
+                                            completedDate.toLocaleDateString(
+                                                "en-US",
+                                                {
+                                                    month: "long",
+                                                    day: "numeric",
+                                                    year: "numeric"
+                                                }
+                                            )
+                                        );
+
+                                return (
+                                    '<div' +
+                                    ' class="calendar-entry-pill calendar-completed-pill"' +
+                                    ' data-completed-entry="true"' +
+                                    ' data-completed-index="' +
+                                    index +
+                                    '"' +
+                                    (
+                                        title
+                                            ? ' title="' +
+                                              escapeHtml(
+                                                  title
+                                              ) +
+                                              '"'
+                                            : ""
+                                    ) +
+                                    '>' +
+                                    escapeHtml(
+                                        entry.code ||
+                                        "paper"
+                                    ) +
+                                    "</div>"
+                                );
+
+                            }
+                        )
+                        .join("");
+
+            } else {
+
+                pills =
+                    entries
+                        .map(
+                            entry => {
+
+                                const color =
+                                    normalizeCalendarColor(
+                                        entry.color
+                                    );
+
+                                return (
+                                    '<div class="calendar-entry-pill" ' +
+                                    'data-scheduled-entry="true" ' +
+                                    'data-calendar-color="' +
+                                    escapeHtml(
+                                        color
+                                    ) +
+                                    '" ' +
+                                    'data-event-id="' +
+                                    escapeHtml(
+                                        entry.id
+                                    ) +
+                                    '">' +
+                                    escapeHtml(
+                                        formatScheduledEntryLabel(
+                                            entry
+                                        )
+                                    ) +
+                                    "</div>"
+                                );
+
+                            }
+                        )
+                        .join("");
+
+            }
 
             html +=
                 '<div class="calendar-cell' +
-                (outside ? " outside" : "") +
-                (isToday ? " today" : "") +
-                '" data-date="' + key + '">' +
+                (
+                    outside
+                        ? " outside"
+                        : ""
+                ) +
+                (
+                    isToday
+                        ? " today"
+                        : ""
+                ) +
+                '" data-date="' +
+                key +
+                '">' +
                 '<div class="calendar-date-num">' +
                 cellDate.getDate() +
                 "</div>" +
                 pills +
                 "</div>";
+
         }
 
-        grid.innerHTML = html;
+        grid.innerHTML =
+            html;
 
-        grid.querySelectorAll(".calendar-cell")
-            .forEach(cell => {
-                cell.addEventListener("click", event => {
-                    const entryElement =
-                        event.target.closest(
-                            "[data-scheduled-entry]"
-                        );
+        grid.querySelectorAll(
+            ".calendar-cell"
+        ).forEach(
+            cell => {
 
-                    if (entryElement) {
-                        const entries =
-                            schedule[cell.dataset.date] || [];
-                        const entryId = entryElement.dataset.eventId;
-                        const entry = entries.find(
-                            item => String(item.id) === String(entryId)
-                        );
+                cell.addEventListener(
+                    "click",
+                    event => {
 
-                        if (entry) {
-                            navigateToScheduledPaper(entry);
+                        const completedEntryElement =
+                            event.target.closest(
+                                "[data-completed-entry]"
+                            );
+
+                        if (
+                            completedMode
+                        ) {
+
+                            if (
+                                completedEntryElement
+                            ) {
+
+                                const entries =
+                                    completedSchedule[
+                                        cell.dataset.date
+                                    ] || [];
+
+                                const index =
+                                    Number(
+                                        completedEntryElement
+                                            .dataset
+                                            .completedIndex
+                                    );
+
+                                const entry =
+                                    entries[index];
+
+                                if (entry) {
+                                    navigateToScheduledPaper(
+                                        entry
+                                    );
+                                }
+
+                            }
+
                             return;
                         }
+
+                        const entryElement =
+                            event.target.closest(
+                                "[data-scheduled-entry]"
+                            );
+
+                        if (
+                            entryElement
+                        ) {
+
+                            const entries =
+                                schedule[
+                                    cell.dataset.date
+                                ] || [];
+
+                            const entryId =
+                                entryElement.dataset
+                                    .eventId;
+
+                            const entry =
+                                entries.find(
+                                    item =>
+                                        String(
+                                            item.id
+                                        ) ===
+                                        String(
+                                            entryId
+                                        )
+                                );
+
+                            if (entry) {
+
+                                navigateToScheduledPaper(
+                                    entry
+                                );
+
+                                return;
+                            }
+
+                        }
+
+                        openDayModal(
+                            cell.dataset.date
+                        );
+
                     }
+                );
 
-                    openDayModal(cell.dataset.date);
-                });
-            });
+            }
+        );
 
-        grid.querySelectorAll("[data-scheduled-entry]")
-            .forEach(entryElement => {
-                entryElement.addEventListener("contextmenu", event => {
-                    const cell = entryElement.closest(".calendar-cell");
-                    if (!cell) {
-                        return;
-                    }
+        if (
+            !completedMode
+        ) {
 
-                    const entries = schedule[cell.dataset.date] || [];
-                    const entryId = entryElement.dataset.eventId;
-                    const entry = entries.find(
-                        item => String(item.id) === String(entryId)
+            grid.querySelectorAll(
+                "[data-scheduled-entry]"
+            ).forEach(
+                entryElement => {
+
+                    entryElement.addEventListener(
+                        "contextmenu",
+                        event => {
+
+                            const cell =
+                                entryElement.closest(
+                                    ".calendar-cell"
+                                );
+
+                            if (!cell) {
+                                return;
+                            }
+
+                            const entries =
+                                schedule[
+                                    cell.dataset.date
+                                ] || [];
+
+                            const entryId =
+                                entryElement.dataset
+                                    .eventId;
+
+                            const entry =
+                                entries.find(
+                                    item =>
+                                        String(
+                                            item.id
+                                        ) ===
+                                        String(
+                                            entryId
+                                        )
+                                );
+
+                            if (!entry) {
+                                return;
+                            }
+
+                            openCalendarContextMenu(
+                                event,
+                                entry,
+                                cell.dataset.date
+                            );
+
+                        }
                     );
 
-                    if (!entry) {
-                        return;
-                    }
+                }
+            );
 
-                    openCalendarContextMenu(
-                        event,
-                        entry,
-                        cell.dataset.date
-                    );
-                });
-            });
+        }
+
     }
 
-    async function openDayModal(key) {
-        selectedDateKey = key;
+    async function openDayModal(
+        key
+    ) {
+
+        if (
+            activeTab !==
+            "scheduled"
+        ) {
+            return;
+        }
+
+        selectedDateKey =
+            key;
 
         const modal =
-            document.getElementById("calendarDayModal");
-        const modalTitle =
-            document.getElementById("calendarModalTitle");
-        const errorBox =
-            document.getElementById("calendarModalError");
+            document.getElementById(
+                "calendarDayModal"
+            );
 
-        errorBox.textContent = "";
+        const modalTitle =
+            document.getElementById(
+                "calendarModalTitle"
+            );
+
+        const errorBox =
+            document.getElementById(
+                "calendarModalError"
+            );
+
+        errorBox.textContent =
+            "";
 
         const parsed =
-            new Date(key + "T00:00:00");
+            new Date(
+                key +
+                "T00:00:00"
+            );
 
         modalTitle.textContent =
             parsed.toLocaleDateString(
                 "en-US",
                 {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric"
+                    weekday:
+                        "long",
+                    month:
+                        "long",
+                    day:
+                        "numeric",
+                    year:
+                        "numeric"
                 }
             );
 
-        if (schedulingActive) {
-            await addSchedulingPaperToDate(key);
+        if (
+            schedulingActive
+        ) {
+            await addSchedulingPaperToDate(
+                key
+            );
         }
 
         renderModalEntries();
-        modal.classList.add("open");
+
+        modal.classList.add(
+            "open"
+        );
+
     }
 
     function closeDayModal() {
-        document
-            .getElementById("calendarDayModal")
-            .classList.remove("open");
 
         document
-            .getElementById("calendarModalError")
-            .textContent = "";
+            .getElementById(
+                "calendarDayModal"
+            )
+            .classList.remove(
+                "open"
+            );
+
+        document
+            .getElementById(
+                "calendarModalError"
+            )
+            .textContent =
+            "";
 
         const input =
-            document.getElementById("calendarAddInput");
+            document.getElementById(
+                "calendarAddInput"
+            );
+
         if (input) {
-            input.value = "";
+            input.value =
+                "";
         }
+
     }
 
     function renderModalEntries() {
-        const entries = schedule[selectedDateKey] || [];
+
+        const entries =
+            schedule[
+                selectedDateKey
+            ] || [];
+
         const container =
-            document.getElementById("calendarModalEntries");
+            document.getElementById(
+                "calendarModalEntries"
+            );
 
         if (!entries.length) {
+
             container.innerHTML =
                 '<div class="muted">Nothing scheduled yet.</div>';
+
             return;
         }
 
-        container.innerHTML = entries.map(entry => {
-            const href = getScheduledPaperHref(entry);
-            const label =
-                formatScheduledEntryLabel(entry);
-            const detail = entry.code || "";
+        container.innerHTML =
+            entries
+                .map(
+                    entry => {
 
-            return (
-                '<div class="attempt-row">' +
-                '<div class="attempt-row-text">' +
-                (
-                    href
-                        ? '<a href="' +
-                          escapeHtml(href) +
-                          '" class="scheduled-paper-link">' +
-                          escapeHtml(label) +
-                          "</a>"
-                        : escapeHtml(label)
-                ) +
-                (
-                    detail
-                        ? '<div class="muted">' +
-                          escapeHtml(detail) +
-                          "</div>"
-                        : ""
-                ) +
-                "</div>" +
-                '<button type="button" class="attempt-remove" ' +
-                'data-event-id="' +
-                escapeHtml(entry.id) +
-                '" aria-label="remove">×</button>' +
-                "</div>"
-            );
-        }).join("");
+                        const href =
+                            getScheduledPaperHref(
+                                entry
+                            );
 
-        container.querySelectorAll(".attempt-remove")
-            .forEach(button => {
-                button.addEventListener("click", async event => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                        const label =
+                            formatScheduledEntryLabel(
+                                entry
+                            );
 
-                    try {
-                        await CashewUserData.deleteCalendarEvent(
-                            button.dataset.eventId
+                        const detail =
+                            entry.code ||
+                            "";
+
+                        return (
+                            '<div class="attempt-row">' +
+                            '<div class="attempt-row-text">' +
+                            (
+                                href
+                                    ? '<a href="' +
+                                      escapeHtml(
+                                          href
+                                      ) +
+                                      '" class="scheduled-paper-link">' +
+                                      escapeHtml(
+                                          label
+                                      ) +
+                                      "</a>"
+                                    : escapeHtml(
+                                          label
+                                      )
+                            ) +
+                            (
+                                detail
+                                    ? '<div class="muted">' +
+                                      escapeHtml(
+                                          detail
+                                      ) +
+                                      "</div>"
+                                    : ""
+                            ) +
+                            "</div>" +
+                            '<button type="button" class="attempt-remove" ' +
+                            'data-event-id="' +
+                            escapeHtml(
+                                entry.id
+                            ) +
+                            '" aria-label="remove">×</button>' +
+                            "</div>"
                         );
-                        await refreshSchedule();
-                    } catch (error) {
-                        document.getElementById(
-                            "calendarModalError"
-                        ).textContent =
-                            "couldn't remove that paper.";
+
                     }
-                });
-            });
+                )
+                .join("");
+
+        container
+            .querySelectorAll(
+                ".attempt-remove"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        async event => {
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            try {
+
+                                await CashewUserData
+                                    .deleteCalendarEvent(
+                                        button.dataset
+                                            .eventId
+                                    );
+
+                                await loadSchedule();
+
+                                renderGrid();
+
+                                renderModalEntries();
+
+                            } catch (error) {
+
+                                document
+                                    .getElementById(
+                                        "calendarModalError"
+                                    )
+                                    .textContent =
+                                    "couldn't remove that paper.";
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
     }
 
-    async function addEntryToDate(key, entry) {
-        await CashewUserData.addCalendarEvent(
-            key,
-            entry
-        );
+    async function addEntryToDate(
+        key,
+        entry
+    ) {
+
+        await CashewUserData
+            .addCalendarEvent(
+                key,
+                entry
+            );
+
         await loadSchedule();
+
     }
 
-    async function addSchedulingPaperToDate(key) {
-        try {
-            await addEntryToDate(key, {
-                code: schedulingCode || "paper",
-                subject: schedulingSubject || "",
-                paper: schedulingPaper || "",
-                path: schedulingPath || "",
-                questionPath: schedulingFile || "",
-                paperKey: schedulingKey || ""
-            });
+    async function addSchedulingPaperToDate(
+        key
+    ) {
 
-            schedulingActive = false;
+        try {
+
+            await addEntryToDate(
+                key,
+                {
+                    code:
+                        schedulingCode ||
+                        "paper",
+
+                    subject:
+                        schedulingSubject ||
+                        "",
+
+                    paper:
+                        schedulingPaper ||
+                        "",
+
+                    path:
+                        schedulingPath ||
+                        "",
+
+                    questionPath:
+                        schedulingFile ||
+                        "",
+
+                    paperKey:
+                        schedulingKey ||
+                        ""
+                }
+            );
+
+            schedulingActive =
+                false;
+
             renderBanner();
+
+            await loadSchedule();
+
             renderGrid();
 
-            const url = new URL(window.location.href);
-            url.searchParams.delete("key");
-            url.searchParams.delete("code");
-            url.searchParams.delete("subject");
-            window.history.replaceState({}, "", url.toString());
+            const url =
+                new URL(
+                    window.location.href
+                );
+
+            url.searchParams.delete(
+                "key"
+            );
+
+            url.searchParams.delete(
+                "code"
+            );
+
+            url.searchParams.delete(
+                "subject"
+            );
+
+            url.searchParams.delete(
+                "paper"
+            );
+
+            url.searchParams.delete(
+                "path"
+            );
+
+            url.searchParams.delete(
+                "file"
+            );
+
+            window.history.replaceState(
+                {},
+                "",
+                url.toString()
+            );
+
         } catch (error) {
+
             console.error(
                 "cashewpapers: unable to schedule paper",
                 error
             );
+
         }
+
     }
 
-    async function handleAddFormSubmit(event) {
+    async function handleAddFormSubmit(
+        event
+    ) {
+
         event.preventDefault();
 
         const input =
-            document.getElementById("calendarAddInput");
+            document.getElementById(
+                "calendarAddInput"
+            );
+
         const errorBox =
-            document.getElementById("calendarModalError");
+            document.getElementById(
+                "calendarModalError"
+            );
+
         const value =
-            input.value.trim().toLowerCase();
+            input.value
+                .trim()
+                .toLowerCase();
 
         if (!value) {
             return;
         }
 
-        const user = await getCurrentUser();
+        const user =
+            await getCurrentUser();
+
         if (!user) {
-            window.location.href = "../login/";
+            window.location.href =
+                "../login/";
+
             return;
         }
 
         const index =
-            typeof cashewPaperSearchIndex !== "undefined"
+            typeof cashewPaperSearchIndex !==
+            "undefined"
                 ? cashewPaperSearchIndex
                 : {};
-        const match = index[value];
+
+        const match =
+            index[value];
 
         if (!match) {
+
             errorBox.textContent =
                 "couldn't find a paper with that code.";
+
             return;
         }
 
         try {
-            await addEntryToDate(selectedDateKey, {
-                code: match.code,
-                subject: match.subject || "",
-                paper: match.paper || "",
-                path: match.path || "",
-                questionPath: match.questionPath || "",
-                paperKey: match.code || ""
-            });
 
-            input.value = "";
-            errorBox.textContent = "";
+            await addEntryToDate(
+                selectedDateKey,
+                {
+                    code:
+                        match.code,
+
+                    subject:
+                        match.subject ||
+                        "",
+
+                    paper:
+                        match.paper ||
+                        "",
+
+                    path:
+                        match.path ||
+                        "",
+
+                    questionPath:
+                        match.questionPath ||
+                        "",
+
+                    paperKey:
+                        match.code ||
+                        ""
+                }
+            );
+
+            input.value =
+                "";
+
+            errorBox.textContent =
+                "";
+
             renderModalEntries();
             renderGrid();
+
         } catch (error) {
+
             errorBox.textContent =
                 "couldn't add that paper.";
+
         }
+
     }
 
     document
-        .getElementById("calendarPrevMonth")
-        .addEventListener("click", () => {
-            currentMonth.setMonth(
-                currentMonth.getMonth() - 1
-            );
-            renderGrid();
-        });
-
-    document
-        .getElementById("calendarNextMonth")
-        .addEventListener("click", () => {
-            currentMonth.setMonth(
-                currentMonth.getMonth() + 1
-            );
-            renderGrid();
-        });
-
-    document
-        .getElementById("calendarModalClose")
-        .addEventListener("click", closeDayModal);
-
-    document
-        .getElementById("calendarDayModal")
-        .addEventListener("click", event => {
-            if (
-                event.target.id ===
-                "calendarDayModal"
-            ) {
-                closeDayModal();
+        .getElementById(
+            "calendarTabScheduled"
+        )
+        .addEventListener(
+            "click",
+            () => {
+                switchTab(
+                    "scheduled"
+                );
             }
-        });
+        );
 
     document
-        .getElementById("calendarAddForm")
+        .getElementById(
+            "calendarTabCompleted"
+        )
+        .addEventListener(
+            "click",
+            () => {
+                switchTab(
+                    "completed"
+                );
+            }
+        );
+
+    document
+        .getElementById(
+            "calendarPrevMonth"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                currentMonth.setMonth(
+                    currentMonth.getMonth() -
+                    1
+                );
+
+                renderGrid();
+
+            }
+        );
+
+    document
+        .getElementById(
+            "calendarNextMonth"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                currentMonth.setMonth(
+                    currentMonth.getMonth() +
+                    1
+                );
+
+                renderGrid();
+
+            }
+        );
+
+    document
+        .getElementById(
+            "calendarModalClose"
+        )
+        .addEventListener(
+            "click",
+            closeDayModal
+        );
+
+    document
+        .getElementById(
+            "calendarDayModal"
+        )
+        .addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target.id ===
+                    "calendarDayModal"
+                ) {
+                    closeDayModal();
+                }
+
+            }
+        );
+
+    document
+        .getElementById(
+            "calendarAddForm"
+        )
         .addEventListener(
             "submit",
             handleAddFormSubmit
         );
-
-    let calendarUserId =
-        null;
-
-    getCurrentUser()
-        .then(user => {
-
-            calendarUserId =
-                user
-                    ? String(user.id)
-                    : null;
-
-        });
 
     window.addEventListener(
         "cashew-auth-change",
@@ -9849,7 +11794,9 @@ function generateSchedulerPage() {
 
             const nextUserId =
                 user
-                    ? String(user.id)
+                    ? String(
+                        user.id
+                    )
                     : null;
 
             if (
@@ -9863,57 +11810,73 @@ function generateSchedulerPage() {
                 nextUserId;
 
             try {
-                await refreshSchedule();
+
+                await refreshCalendarData();
+
             } catch (error) {
+
                 schedule = {};
+                completedSchedule = {};
+
+                renderBanner();
+                renderModeNote();
                 renderGrid();
+
             }
 
         }
     );
 
+    initializeCalendarTip();
     initializeCalendarContextMenu();
     renderDayLabels();
+    updateTabUI();
     renderBanner();
+    renderModeNote();
 
     /*
-       Render the calendar shell immediately. Account-owned scheduled entries
-       are filled from the cache/Supabase asynchronously afterward.
+        Render immediately, then hydrate both
+        account-owned calendars asynchronously.
     */
+
     renderGrid();
 
-    loadSchedule()
-        .then(() => {
+    Promise.all([
+        loadSchedule(),
+        loadCompletedPapers()
+    ])
+        .then(
+            () => {
 
-            renderGrid();
+                renderBanner();
+                renderModeNote();
+                renderGrid();
 
-            if (selectedDateKey) {
-                renderModalEntries();
             }
+        )
+        .catch(
+            error => {
 
-        })
-        .catch(error => {
+                console.error(
+                    "cashewpapers: unable to load calendar",
+                    error
+                );
 
-            console.error(
-                "cashewpapers: unable to load calendar",
-                error
-            );
+                schedule = {};
+                completedSchedule = {};
 
-            schedule = {};
-            renderGrid();
+                renderBanner();
+                renderModeNote();
+                renderGrid();
 
-        });
+            }
+        );
 
 })();
-
             </script>
-
         `,
-
         1
-
     );
-
 }
 
 
