@@ -316,10 +316,15 @@ function sessionSlug(code) {
 function parsePaperFilename(filename) {
 
     const match = filename.match(
-        /^(\d+)_([a-z]\d{2})_(qp|ms|er|in)_(\d+)\.pdf$/i
+        /^(\d+)_([a-z]\d{2})_(qp|ms|er|in|sf)_(\d+)\.(pdf|zip)$/i
     );
 
-    if (!match) {
+    /* Source files are ZIPs; the existing paper resources are PDFs. */
+    if (
+        !match ||
+        (match[3].toLowerCase() === "sf" && match[5].toLowerCase() !== "zip") ||
+        (match[3].toLowerCase() !== "sf" && match[5].toLowerCase() !== "pdf")
+    ) {
         return null;
     }
 
@@ -329,6 +334,27 @@ function parsePaperFilename(filename) {
         type: match[3].toLowerCase(),
         paper: match[4]
     };
+}
+
+/* Grade thresholds apply to an entire subject/session, not a component. */
+function parseGradeBoundaryFilename(filename) {
+
+    const match = filename.match(
+        /^(\d+)_([a-z]\d{2})_gt(?:\.pdf)?$/i
+    );
+
+    if (!match) {
+        return null;
+    }
+
+    return {
+        code: match[1],
+        sessionCode: match[2].toLowerCase()
+    };
+}
+
+function isPaperResourceFilename(filename) {
+    return Boolean(parsePaperFilename(filename));
 }
 
 
@@ -466,7 +492,8 @@ function buildDatabase(subjects) {
 
         database[subjectKey] = {
             subject,
-            years: {}
+            years: {},
+            gradeBoundaries: {}
         };
 
         const subjectFiles =
@@ -474,11 +501,24 @@ function buildDatabase(subjects) {
 
         for (const file of subjectFiles) {
 
-            if (
-                !file.relative
-                    .toLowerCase()
-                    .endsWith(".pdf")
-            ) {
+            const filenameOnly = path.basename(file.relative);
+            const gradeBoundary = parseGradeBoundaryFilename(filenameOnly);
+
+            /* Grade boundaries may be stored anywhere below a subject. */
+            if (gradeBoundary) {
+
+                if (gradeBoundary.code === subject.code) {
+                    database[subjectKey].gradeBoundaries[
+                        gradeBoundary.sessionCode
+                    ] = path.join("papers", subjectKey, file.relative)
+                        .split(path.sep)
+                        .join("/");
+                }
+
+                continue;
+            }
+
+            if (!isPaperResourceFilename(filenameOnly)) {
                 continue;
             }
 
@@ -556,6 +596,13 @@ function buildDatabase(subjects) {
                 parsePaperFilename(filename);
 
             if (!parsed) {
+                continue;
+            }
+
+            if (
+                parsed.type === "sf" &&
+                subjectKey !== "computer-science"
+            ) {
                 continue;
             }
 
@@ -655,6 +702,7 @@ function buildDatabase(subjects) {
                     markScheme: null,
                     examinerReport: null,
                     insert: null,
+                    sourceFile: null,
                     code: null
                 };
 
@@ -736,6 +784,28 @@ function buildDatabase(subjects) {
 
             }
 
+            /* Source files are deliberately exposed for Computer Science only. */
+            if (
+                parsed.type === "sf" &&
+                subjectKey === "computer-science"
+            ) {
+
+                if (!paper.sourceFile || !isFlatFile) {
+                    paper.sourceFile = publicPath;
+                }
+
+            }
+
+        }
+
+        /* A session inherits its subject/session grade-boundary PDF. */
+        for (const sessions of Object.values(database[subjectKey].years)) {
+            for (const session of Object.values(sessions)) {
+                session.gradeBoundary =
+                    database[subjectKey].gradeBoundaries[
+                        session.sessionCode
+                    ] || null;
+            }
         }
 
     }
@@ -3117,6 +3187,27 @@ body:has(.native-pdf-page) main {
 .native-pdf-mark:disabled {
     cursor: wait;
     opacity: 0.65;
+}
+
+.native-pdf-grade-boundary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #3a3c3f;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.native-pdf-grade-boundary:hover {
+    background: #414346;
+    border-color: var(--subdued);
 }
 
 .mcq-scan-modal {
@@ -7696,6 +7787,55 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
    ALL PAPERS PAGE
    ============================================================ */
 
+function paperViewerHref(file, gradeBoundary) {
+
+    let href =
+        "../../../../viewer/?file=" +
+        encodeURIComponent(file);
+
+    if (gradeBoundary) {
+        href +=
+            "&gradeBoundary=" +
+            encodeURIComponent(gradeBoundary);
+    }
+
+    return href;
+}
+
+function sourceFileCardHTML(subjectKey, paper) {
+
+    if (
+        subjectKey !== "computer-science" ||
+        !paper.sourceFile
+    ) {
+        return "";
+    }
+
+    const filename =
+        paper.sourceFile.split("/").pop();
+
+    return `
+        <div class="paper-card paper-source-card">
+
+            <div>
+                <h3>Paper ${paper.paper} Source File</h3>
+                <div class="paper-code">${filename}</div>
+            </div>
+
+            <div class="paper-actions">
+                <a
+                    class="paper-button"
+                    href="../../../../${paper.sourceFile}"
+                    download
+                >
+                    download
+                </a>
+            </div>
+
+        </div>
+    `;
+}
+
 function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions) {
 
     const categoryInfo =
@@ -7833,8 +7973,9 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                 ? `
                                                     <a
                                                         class="paper-button primary"
-                                                        href="../../../../viewer/?file=${encodeURIComponent(
-                                                            paper.question
+                                                        href="${paperViewerHref(
+                                                            paper.question,
+                                                            session.gradeBoundary
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -7850,8 +7991,9 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                 ? `
                                                     <a
                                                         class="paper-button"
-                                                        href="../../../../viewer/?file=${encodeURIComponent(
-                                                            paper.markScheme
+                                                        href="${paperViewerHref(
+                                                            paper.markScheme,
+                                                            session.gradeBoundary
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -7900,6 +8042,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                     </div>
 
                                 </div>
+                                ${sourceFileCardHTML(subjectKey, paper)}
                             `;
 
                         })
@@ -8074,7 +8217,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 ? `
                                     <a
                                         class="paper-button primary"
-                                        href="../../../../viewer/?file=${encodeURIComponent(paper.question)}"
+                                        href="${paperViewerHref(
+                                            paper.question,
+                                            session.gradeBoundary
+                                        )}"
                                     
                                                 target="_blank"
                                                 rel="noopener noreferrer"
@@ -8090,7 +8236,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 ? `
                                     <a
                                         class="paper-button"
-                                        href="../../../../viewer/?file=${encodeURIComponent(paper.markScheme)}"
+                                        href="${paperViewerHref(
+                                            paper.markScheme,
+                                            session.gradeBoundary
+                                        )}"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
@@ -8138,6 +8287,8 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                     </div>
 
                 </div>
+
+                ${sourceFileCardHTML(subjectKey, paper)}
 
             `;
 
@@ -8207,7 +8358,7 @@ function generatePdfReaderPage() {
                         id="nativePdfReturn"
                         href="#"
                     >
-                        ← return to paper selection
+                        ← return to paper
                     </a>
 
                     <div class="native-pdf-control-actions">
@@ -8219,6 +8370,16 @@ function generatePdfReaderPage() {
                         >
                             mark paper
                         </button>
+
+                        <a
+                            class="native-pdf-grade-boundary"
+                            id="nativePdfGradeBoundary"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            grade boundary
+                        </a>
 
                         <a
                             class="native-pdf-fullscreen"
@@ -8255,6 +8416,9 @@ function generatePdfReaderPage() {
     const fileParam =
         params.get("file");
 
+    const gradeBoundaryParam =
+        params.get("gradeBoundary");
+
     const frame =
         document.getElementById(
             "nativePdfFrame"
@@ -8275,14 +8439,26 @@ function generatePdfReaderPage() {
             "nativePdfMark"
         );
 
+    const gradeBoundaryButton =
+        document.getElementById(
+            "nativePdfGradeBoundary"
+        );
+
     function hideMarkButton() {
         if (markButton) {
             markButton.style.display = "none";
         }
     }
 
+    function hideGradeBoundaryButton() {
+        if (gradeBoundaryButton) {
+            gradeBoundaryButton.style.display = "none";
+        }
+    }
+
     if (!fileParam) {
         hideMarkButton();
+        hideGradeBoundaryButton();
         return;
     }
 
@@ -8317,8 +8493,31 @@ function generatePdfReaderPage() {
         );
 
         hideMarkButton();
+        hideGradeBoundaryButton();
         return;
 
+    }
+
+    if (gradeBoundaryButton && gradeBoundaryParam) {
+
+        try {
+            const gradeBoundaryUrl = new URL(
+                "../" + decodeURIComponent(gradeBoundaryParam),
+                window.location.href
+            ).href;
+
+            gradeBoundaryButton.href = gradeBoundaryUrl;
+
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to load grade boundary",
+                error
+            );
+            hideGradeBoundaryButton();
+        }
+
+    } else {
+        hideGradeBoundaryButton();
     }
 
     /*
@@ -11891,7 +12090,7 @@ function generateSchedulerPage() {
    computerscience, psychology, and economics).
    ============================================================ */
 
-function buildCategoryYears(subjectKey, categoryKey) {
+function buildCategoryYears(subjectKey, categoryKey, gradeBoundaries = {}) {
 
     const categoryYears = {};
 
@@ -11911,11 +12110,7 @@ function buildCategoryYears(subjectKey, categoryKey) {
 
     for (const file of scanFiles(subjectPath)) {
 
-        if (
-            !file.relative
-                .toLowerCase()
-                .endsWith(".pdf")
-        ) {
+        if (!isPaperResourceFilename(path.basename(file.relative))) {
             continue;
         }
 
@@ -11967,6 +12162,13 @@ function buildCategoryYears(subjectKey, categoryKey) {
             continue;
         }
 
+        if (
+            parsed.type === "sf" &&
+            subjectKey !== "computer-science"
+        ) {
+            continue;
+        }
+
         /*
             Only include files belonging to the category
             currently being generated.
@@ -12013,6 +12215,7 @@ function buildCategoryYears(subjectKey, categoryKey) {
 
             categoryYears[year][sessionFolder] = {
                 sessionCode: parsed.sessionCode,
+                gradeBoundary: gradeBoundaries[parsed.sessionCode] || null,
                 papers: {}
             };
 
@@ -12029,6 +12232,7 @@ function buildCategoryYears(subjectKey, categoryKey) {
                 markScheme: null,
                 examinerReport: null,
                 insert: null,
+                sourceFile: null,
                 code: null
             };
 
@@ -12114,6 +12318,17 @@ function buildCategoryYears(subjectKey, categoryKey) {
 
         }
 
+        if (
+            parsed.type === "sf" &&
+            subjectKey === "computer-science"
+        ) {
+
+            if (!paper.sourceFile || !isFlatFile) {
+                paper.sourceFile = publicPath;
+            }
+
+        }
+
     }
 
     return categoryYears;
@@ -12125,7 +12340,11 @@ function writeCategorizedSubjectPages(subjectKey, data) {
 
     for (const [categoryKey] of categories) {
 
-        const categoryYears = buildCategoryYears(subjectKey, categoryKey);
+        const categoryYears = buildCategoryYears(
+            subjectKey,
+            categoryKey,
+            data.gradeBoundaries
+        );
 
         /* Keep the search index up to date for this category */
 
