@@ -8268,25 +8268,25 @@ function generateAllPapersPage(
                                         }
 
                                         ${
-    sharedPaperInsertHref(
-        subjectKey,
-        paper,
-        resourcePrefix
-    )
-        ? `
-            <a
-                class="paper-button"
-                href="${sharedPaperInsertHref(
-                    subjectKey,
-                    paper,
-                    resourcePrefix
-                )}"
-            >
-                📎 Insert
-            </a>
-        `
-        : ""
-}
+                                            sharedPaperInsertHref(
+                                                subjectKey,
+                                                paper,
+                                                resourcePrefix
+                                            )
+                                                ? `
+                                                    <a
+                                                        class="paper-button"
+                                                        href="${sharedPaperInsertHref(
+                                                            subjectKey,
+                                                            paper,
+                                                            resourcePrefix
+                                                        )}"
+                                                    >
+                                                        📎 Insert
+                                                    </a>
+                                                `
+                                                : ""
+                                        }
 
                                         ${
                                             paper.question
@@ -8352,6 +8352,12 @@ function generateAllPapersPage(
                                     </div>
 
                                 </div>
+
+                                ${sourceFileCardHTML(
+                                    subjectKey,
+                                    paper,
+                                    resourcePrefix
+                                )}
 
                             `;
 
@@ -8680,25 +8686,25 @@ function generateSessionPage(
                         }
 
                         ${
-    sharedPaperInsertHref(
-        subjectKey,
-        paper,
-        resourcePrefix
-    )
-        ? `
-            <a
-                class="paper-button"
-                href="${sharedPaperInsertHref(
-                    subjectKey,
-                    paper,
-                    resourcePrefix
-                )}"
-            >
-                📎 Insert
-            </a>
-        `
-        : ""
-}
+                            sharedPaperInsertHref(
+                                subjectKey,
+                                paper,
+                                resourcePrefix
+                            )
+                                ? `
+                                    <a
+                                        class="paper-button"
+                                        href="${sharedPaperInsertHref(
+                                            subjectKey,
+                                            paper,
+                                            resourcePrefix
+                                        )}"
+                                    >
+                                        📎 Insert
+                                    </a>
+                                `
+                                : ""
+                        }
 
                         ${
                             paper.question
@@ -8764,6 +8770,12 @@ function generateSessionPage(
                     </div>
 
                 </div>
+
+                ${sourceFileCardHTML(
+                    subjectKey,
+                    paper,
+                    resourcePrefix
+                )}
 
             `;
 
