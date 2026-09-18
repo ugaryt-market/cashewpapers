@@ -3221,7 +3221,8 @@ body:has(.native-pdf-page) main {
     opacity: 0.65;
 }
 
-.native-pdf-grade-boundary {
+.native-pdf-grade-boundary,
+.native-pdf-source-file {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3237,7 +3238,8 @@ body:has(.native-pdf-page) main {
     cursor: pointer;
 }
 
-.native-pdf-grade-boundary:hover {
+.native-pdf-grade-boundary:hover,
+.native-pdf-source-file:hover {
     background: #414346;
     border-color: var(--subdued);
 }
@@ -7932,7 +7934,8 @@ function generateYearPage(
 function paperViewerHref(
     file,
     gradeBoundary,
-    pageDepth = 4
+    pageDepth = 4,
+    sourceFile = null
 ) {
 
     let href =
@@ -7950,56 +7953,20 @@ function paperViewerHref(
 
     }
 
-    return href;
-}
+    /*
+        A Computer Science source-file ZIP belongs to its matching
+        question paper.  Pass it to the viewer rather than rendering
+        it as a separate resource in the paper-selection page.
+    */
+    if (sourceFile) {
 
-function sourceFileCardHTML(
-    subjectKey,
-    paper,
-    resourcePrefix = "../../../../"
-) {
+        href +=
+            "&sourceFile=" +
+            encodeURIComponent(sourceFile);
 
-    if (
-        subjectKey !== "computer-science" ||
-        !paper.sourceFile
-    ) {
-        return "";
     }
 
-    const filename =
-        paper.sourceFile
-            .split("/")
-            .pop();
-
-    return `
-        <div class="paper-card paper-source-card">
-
-            <div>
-
-                <h3>
-                    Paper ${paper.paper} Source File
-                </h3>
-
-                <div class="paper-code">
-                    ${filename}
-                </div>
-
-            </div>
-
-            <div class="paper-actions">
-
-                <a
-                    class="paper-button"
-                    href="${resourcePrefix}${paper.sourceFile}"
-                    download
-                >
-                    download
-                </a>
-
-            </div>
-
-        </div>
-    `;
+    return href;
 }
 
 
@@ -8203,6 +8170,19 @@ function generateAllPapersPage(
                                         </div>
 
                                         ${
+                                            paper.insert
+                                                ? `
+                                                    <a
+                                                        class="paper-button"
+                                                        href="${resourcePrefix}${paper.insert}"
+                                                    >
+                                                        📎 Insert
+                                                    </a>
+                                                `
+                                                : ""
+                                        }
+
+                                        ${
                                             paper.question
                                                 ? `
                                                     <a
@@ -8210,7 +8190,8 @@ function generateAllPapersPage(
                                                         href="${paperViewerHref(
                                                             paper.question,
                                                             session.gradeBoundary,
-                                                            pageDepth
+                                                            pageDepth,
+                                                            paper.sourceFile
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -8253,19 +8234,6 @@ function generateAllPapersPage(
                                                 : ""
                                         }
 
-                                        ${
-                                            paper.insert
-                                                ? `
-                                                    <a
-                                                        class="paper-button"
-                                                        href="${resourcePrefix}${paper.insert}"
-                                                    >
-                                                        📎 Insert
-                                                    </a>
-                                                `
-                                                : ""
-                                        }
-
                                         <a
                                             class="paper-calendar-button"
                                             href="${schedulerHref}"
@@ -8278,14 +8246,6 @@ function generateAllPapersPage(
                                     </div>
 
                                 </div>
-
-                                ${
-                                    sourceFileCardHTML(
-                                        subjectKey,
-                                        paper,
-                                        resourcePrefix
-                                    )
-                                }
 
                             `;
 
@@ -8601,6 +8561,19 @@ function generateSessionPage(
                         </div>
 
                         ${
+                            paper.insert
+                                ? `
+                                    <a
+                                        class="paper-button"
+                                        href="${resourcePrefix}${paper.insert}"
+                                    >
+                                        📎 Insert
+                                    </a>
+                                `
+                                : ""
+                        }
+
+                        ${
                             paper.question
                                 ? `
                                     <a
@@ -8608,7 +8581,8 @@ function generateSessionPage(
                                         href="${paperViewerHref(
                                             paper.question,
                                             session.gradeBoundary,
-                                            pageDepth
+                                            pageDepth,
+                                            paper.sourceFile
                                         )}"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -8651,19 +8625,6 @@ function generateSessionPage(
                                 : ""
                         }
 
-                        ${
-                            paper.insert
-                                ? `
-                                    <a
-                                        class="paper-button"
-                                        href="${resourcePrefix}${paper.insert}"
-                                    >
-                                        📎 Insert
-                                    </a>
-                                `
-                                : ""
-                        }
-
                         <a
                             class="paper-calendar-button"
                             href="${schedulerHref}"
@@ -8676,14 +8637,6 @@ function generateSessionPage(
                     </div>
 
                 </div>
-
-                ${
-                    sourceFileCardHTML(
-                        subjectKey,
-                        paper,
-                        resourcePrefix
-                    )
-                }
 
             `;
 
@@ -8816,6 +8769,15 @@ function generatePdfReaderPage() {
 
                     <div class="native-pdf-control-actions">
 
+                        <a
+                            class="native-pdf-source-file"
+                            id="nativePdfSourceFile"
+                            href="#"
+                            download
+                        >
+                            download sourcefile
+                        </a>
+
                         <button
                             type="button"
                             class="native-pdf-mark"
@@ -8872,6 +8834,9 @@ function generatePdfReaderPage() {
     const gradeBoundaryParam =
         params.get("gradeBoundary");
 
+    const sourceFileParam =
+        params.get("sourceFile");
+
     const frame =
         document.getElementById(
             "nativePdfFrame"
@@ -8897,6 +8862,11 @@ function generatePdfReaderPage() {
             "nativePdfGradeBoundary"
         );
 
+    const sourceFileButton =
+        document.getElementById(
+            "nativePdfSourceFile"
+        );
+
     function hideMarkButton() {
         if (markButton) {
             markButton.style.display = "none";
@@ -8909,9 +8879,16 @@ function generatePdfReaderPage() {
         }
     }
 
+    function hideSourceFileButton() {
+        if (sourceFileButton) {
+            sourceFileButton.style.display = "none";
+        }
+    }
+
     if (!fileParam) {
         hideMarkButton();
         hideGradeBoundaryButton();
+        hideSourceFileButton();
         return;
     }
 
@@ -8947,6 +8924,7 @@ function generatePdfReaderPage() {
 
         hideMarkButton();
         hideGradeBoundaryButton();
+        hideSourceFileButton();
         return;
 
     }
@@ -8971,6 +8949,31 @@ function generatePdfReaderPage() {
 
     } else {
         hideGradeBoundaryButton();
+    }
+
+    /*
+       Source files are supplied only by matching Computer Science
+       question-paper links.  They download from the viewer toolbar,
+       so they do not appear as separate paper cards.
+    */
+    if (sourceFileButton && sourceFileParam) {
+
+        try {
+            sourceFileButton.href = new URL(
+                "../" + decodeURIComponent(sourceFileParam),
+                window.location.href
+            ).href;
+
+        } catch (error) {
+            console.error(
+                "cashewpapers: unable to load source file",
+                error
+            );
+            hideSourceFileButton();
+        }
+
+    } else {
+        hideSourceFileButton();
     }
 
     /*
