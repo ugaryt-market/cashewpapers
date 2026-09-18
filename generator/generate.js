@@ -8985,60 +8985,29 @@ function generatePdfReaderPage() {
        supported by the answer-key parser.
     */
     function isSupportedMcqPaper(file) {
-        const filename =
-            String(file).split("/").pop() || "";
 
-        return /^(9700|9701|9702)_[a-z]\\d{2}_qp_1[1-3]\\.pdf$/i
-            .test(filename);
-    }
+    const filename =
+        String(file).split("/").pop() || "";
 
-    if (
-        markButton &&
-        isSupportedMcqPaper(decodedFile)
-    ) {
+    /*
+        Biology / Chemistry / Physics:
+        Paper 1 MCQ → 11, 12, 13
 
-        markButton.style.display =
-            "inline-flex";
+        Economics:
+        Papers 1 and 3 are MCQ
+        → 11, 12, 13
+        → 31, 32, 33
+    */
 
-        const markPageUrl =
-            "../mark/?file=" +
-            encodeURIComponent(
-                decodedFile
-            );
+    return (
+        /^(9700|9701|9702)_[a-z]\\d{2}_qp_1[1-3]\\.pdf$/i
+            .test(filename)
+        ||
+        /^9708_[a-z]\\d{2}_qp_[13][1-3]\\.pdf$/i
+            .test(filename)
+    );
 
-        markButton.addEventListener(
-            "click",
-            event => {
-                event.preventDefault();
-
-                window.open(
-                    markPageUrl,
-                    "_blank",
-                    "noopener,noreferrer"
-                );
-            }
-        );
-
-    } else {
-        hideMarkButton();
-    }
-
-    if (fullscreen) {
-
-        fullscreen.href =
-            questionPaperUrl;
-
-        fullscreen.addEventListener(
-            "click",
-            event => {
-                event.preventDefault();
-                window.location.replace(
-                    questionPaperUrl
-                );
-            }
-        );
-
-    }
+}
 
     if (returnButton) {
 
