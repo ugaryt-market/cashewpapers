@@ -8261,7 +8261,7 @@ function generateAllPapersPage(
                                                         class="paper-button"
                                                         href="${resourcePrefix}${paper.insert}"
                                                     >
-                                                        📎 Insert
+                                                        Insert
                                                     </a>
                                                 `
                                                 : ""
@@ -8282,7 +8282,7 @@ function generateAllPapersPage(
                                                             resourcePrefix
                                                         )}"
                                                     >
-                                                        📎 Insert
+                                                        Insert
                                                     </a>
                                                 `
                                                 : ""
@@ -8302,7 +8302,7 @@ function generateAllPapersPage(
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
-                                                        📄 Question Paper
+                                                        Question Paper
                                                     </a>
                                                 `
                                                 : ""
@@ -8321,7 +8321,7 @@ function generateAllPapersPage(
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
-                                                        ✅ Mark Scheme
+                                                        Mark Scheme
                                                     </a>
                                                 `
                                                 : ""
@@ -8334,7 +8334,7 @@ function generateAllPapersPage(
                                                         class="paper-button"
                                                         href="${resourcePrefix}${paper.examinerReport}"
                                                     >
-                                                        📋 Examiner Report
+                                                        Examiner Report
                                                     </a>
                                                 `
                                                 : ""
@@ -8353,15 +8353,25 @@ function generateAllPapersPage(
 
                                 </div>
 
-                                ${sourceFileCardHTML(
-                                    subjectKey,
-                                    paper,
-                                    resourcePrefix
-                                )}
-
                             `;
 
                                 }
+                            )
+                            .join("");
+
+                    const sourceCards =
+                        papers
+                            .filter(
+                                paper =>
+                                    paper.sourceFile
+                            )
+                            .map(
+                                paper =>
+                                    sourceFileCardHTML(
+                                        subjectKey,
+                                        paper,
+                                        resourcePrefix
+                                    )
                             )
                             .join("");
 
@@ -8378,6 +8388,19 @@ function generateAllPapersPage(
                         <div class="paper-list">
                             ${cards}
                         </div>
+
+                        ${
+                            sourceCards
+                                ? `
+                                    <div
+                                        class="paper-list"
+                                        style="margin-top: 18px;"
+                                    >
+                                        ${sourceCards}
+                                    </div>
+                                `
+                                : ""
+                        }
 
                     </div>
 
@@ -8679,7 +8702,7 @@ function generateSessionPage(
                                         class="paper-button"
                                         href="${resourcePrefix}${paper.insert}"
                                     >
-                                        📎 Insert
+                                        Insert
                                     </a>
                                 `
                                 : ""
@@ -8700,7 +8723,7 @@ function generateSessionPage(
                                             resourcePrefix
                                         )}"
                                     >
-                                        📎 Insert
+                                        Insert
                                     </a>
                                 `
                                 : ""
@@ -8720,7 +8743,7 @@ function generateSessionPage(
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        📄 Question Paper
+                                        Question Paper
                                     </a>
                                 `
                                 : ""
@@ -8739,7 +8762,7 @@ function generateSessionPage(
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        ✅ Mark Scheme
+                                        Mark Scheme
                                     </a>
                                 `
                                 : ""
@@ -8752,7 +8775,7 @@ function generateSessionPage(
                                         class="paper-button"
                                         href="${resourcePrefix}${paper.examinerReport}"
                                     >
-                                        📋 Examiner Report
+                                        Examiner Report
                                     </a>
                                 `
                                 : ""
@@ -8771,15 +8794,25 @@ function generateSessionPage(
 
                 </div>
 
-                ${sourceFileCardHTML(
-                    subjectKey,
-                    paper,
-                    resourcePrefix
-                )}
-
             `;
 
                 }
+            )
+            .join("");
+
+    const sourceCards =
+        papers
+            .filter(
+                paper =>
+                    paper.sourceFile
+            )
+            .map(
+                paper =>
+                    sourceFileCardHTML(
+                        subjectKey,
+                        paper,
+                        resourcePrefix
+                    )
             )
             .join("");
 
@@ -8872,6 +8905,19 @@ function generateSessionPage(
                 ${cards}
 
             </div>
+
+            ${
+                sourceCards
+                    ? `
+                        <div
+                            class="paper-list"
+                            style="margin-top: 18px;"
+                        >
+                            ${sourceCards}
+                        </div>
+                    `
+                    : ""
+            }
 
         `,
 
