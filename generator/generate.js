@@ -9012,6 +9012,40 @@ function generatePdfReaderPage() {
 
 }
 
+if (
+    markButton &&
+    isSupportedMcqPaper(decodedFile)
+) {
+
+    markButton.style.display =
+        "inline-flex";
+
+    const markPageUrl =
+        "../mark/?file=" +
+        encodeURIComponent(
+            decodedFile
+        );
+
+    markButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            window.open(
+                markPageUrl,
+                "_blank",
+                "noopener,noreferrer"
+            );
+
+        }
+    );
+
+} else {
+
+    hideMarkButton();
+
+}
     if (returnButton) {
 
         returnButton.addEventListener(
@@ -10005,16 +10039,22 @@ if (pasteModeButton) {
            direct links to unsupported, non-MCQ question papers.
         */
         const mcqFilename =
-            String(decodedFile).split("/").pop() || "";
+    String(decodedFile).split("/").pop() || "";
 
-        if (
-            !/^(9700|9701|9702)_[a-z]\\d{2}_qp_1[1-3]\\.pdf$/i
-                .test(mcqFilename)
-        ) {
-            throw new Error(
-                "marking is currently available only for Biology, Chemistry and Physics Paper 1 multiple-choice papers."
-            );
-        }
+const supportedMcq =
+    /^(9700|9701|9702)_[a-z]\\d{2}_qp_1[1-3]\\.pdf$/i
+        .test(mcqFilename)
+    ||
+    /^9708_[a-z]\\d{2}_qp_[13][1-3]\\.pdf$/i
+        .test(mcqFilename);
+
+if (!supportedMcq) {
+
+    throw new Error(
+        "this paper is not a supported MCQ paper."
+    );
+
+}
 
         const markSchemeFile =
             decodedFile.replace(
