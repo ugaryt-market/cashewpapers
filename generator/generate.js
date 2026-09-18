@@ -7810,7 +7810,7 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
         `,
 
-        3
+        categoryKey ? 3 : 2
     );
 }
 
@@ -7819,22 +7819,33 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
    ALL PAPERS PAGE
    ============================================================ */
 
-function paperViewerHref(file, gradeBoundary) {
+function paperViewerHref(
+    file,
+    gradeBoundary,
+    pageDepth = 4
+) {
 
     let href =
-        "../../../../viewer/?file=" +
+        "../".repeat(pageDepth) +
+        "viewer/?file=" +
         encodeURIComponent(file);
 
     if (gradeBoundary) {
         href +=
             "&gradeBoundary=" +
-            encodeURIComponent(gradeBoundary);
+            encodeURIComponent(
+                gradeBoundary
+            );
     }
 
     return href;
 }
 
-function sourceFileCardHTML(subjectKey, paper) {
+function sourceFileCardHTML(
+    subjectKey,
+    paper,
+    resourcePrefix = "../../../../"
+) {
 
     if (
         subjectKey !== "computer-science" ||
@@ -7857,7 +7868,7 @@ function sourceFileCardHTML(subjectKey, paper) {
             <div class="paper-actions">
                 <a
                     class="paper-button"
-                    href="../../../../${paper.sourceFile}"
+                    href="${resourcePrefix}${paper.sourceFile}"
                     download
                 >
                     download
