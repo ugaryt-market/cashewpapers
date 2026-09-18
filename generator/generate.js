@@ -522,7 +522,7 @@ function buildDatabase(subjects) {
                 continue;
             }
 
-            const parts =
+                        const parts =
                 file.relative.split(path.sep);
 
             let year;
@@ -532,7 +532,10 @@ function buildDatabase(subjects) {
             let isFlatFile = false;
 
             /*
-                Categorized subjects support BOTH:
+                Both categorized and uncategorized subjects
+                support the flat repository format.
+
+                Categorized subjects:
 
                 Existing:
                 <subject>/
@@ -545,8 +548,17 @@ function buildDatabase(subjects) {
                 <subject>/
                 file.pdf
 
-                The flat format gets its category from
-                the paper number in the filename.
+                Uncategorized subjects:
+
+                Existing:
+                <subject>/
+                <year>/
+                <session>/
+                file.pdf
+
+                New flat format:
+                <subject>/
+                file.pdf
             */
 
             if (hasCategories(subjectKey)) {
@@ -569,26 +581,24 @@ function buildDatabase(subjects) {
 
                 }
 
-            }
+            } else {
 
-            /*
-                Uncategorized subjects continue to use:
+                if (parts.length === 1) {
 
-                <subject>/
-                <year>/
-                <session>/
-                file.pdf
-            */
+                    isFlatFile = true;
+                    filename = parts[0];
 
-            else {
+                } else {
 
-                if (parts.length < 3) {
-                    continue;
+                    if (parts.length < 3) {
+                        continue;
+                    }
+
+                    year = parts[0];
+                    sessionFolder = parts[1];
+                    filename = parts[2];
+
                 }
-
-                year = parts[0];
-                sessionFolder = parts[1];
-                filename = parts[2];
 
             }
 
@@ -611,20 +621,27 @@ function buildDatabase(subjects) {
             }
 
             /*
-                Flat categorized files derive their category,
-                year, and session directly from the filename.
+                Flat files derive their year and session
+                directly from the filename.
+
+                Categorized subjects also derive their
+                category from the paper number.
             */
 
             if (isFlatFile) {
 
-                categoryKey =
-                    inferFlatCategory(
-                        subjectKey,
-                        parsed.paper
-                    );
+                if (hasCategories(subjectKey)) {
 
-                if (!categoryKey) {
-                    continue;
+                    categoryKey =
+                        inferFlatCategory(
+                            subjectKey,
+                            parsed.paper
+                        );
+
+                    if (!categoryKey) {
+                        continue;
+                    }
+
                 }
 
                 year =
@@ -634,6 +651,21 @@ function buildDatabase(subjects) {
                 sessionFolder =
                     parsed.sessionCode;
 
+            }
+
+            /*
+                Make sure the category found in an existing
+                manually-organized folder is actually valid.
+            */
+
+            if (
+                hasCategories(subjectKey) &&
+                !getCategoryInfo(
+                    subjectKey,
+                    categoryKey
+                )
+            ) {
+                continue;
             }
 
             /*
