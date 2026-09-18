@@ -7931,6 +7931,49 @@ function generateYearPage(
    ALL PAPERS PAGE
    ============================================================ */
 
+function sharedPaperInsertHref(
+    subjectKey,
+    paper,
+    resourcePrefix
+) {
+
+    if (
+        subjectKey !==
+        "computer-science"
+    ) {
+        return null;
+    }
+
+    /*
+        Computer Science Paper 2 uses
+        one shared insert across all
+        years and examination series.
+
+        21, 22, 23 are all Paper 2
+        variants, so the first digit
+        identifies the paper.
+    */
+    const paperNumber =
+        String(
+            paper.paper || ""
+        )
+            .trim()
+            .charAt(0);
+
+    if (
+        paperNumber !==
+        "2"
+    ) {
+        return null;
+    }
+
+    return (
+        resourcePrefix +
+        "papers/computer-science/resources/9618_paper2_insert.pdf"
+    );
+
+}
+
 function paperViewerHref(
     file,
     gradeBoundary,
@@ -8181,6 +8224,27 @@ function generateAllPapersPage(
                                                 `
                                                 : ""
                                         }
+
+                                        ${
+    sharedPaperInsertHref(
+        subjectKey,
+        paper,
+        resourcePrefix
+    )
+        ? `
+            <a
+                class="paper-button"
+                href="${sharedPaperInsertHref(
+                    subjectKey,
+                    paper,
+                    resourcePrefix
+                )}"
+            >
+                📎 Insert
+            </a>
+        `
+        : ""
+}
 
                                         ${
                                             paper.question
@@ -8572,6 +8636,27 @@ function generateSessionPage(
                                 `
                                 : ""
                         }
+
+                        ${
+    sharedPaperInsertHref(
+        subjectKey,
+        paper,
+        resourcePrefix
+    )
+        ? `
+            <a
+                class="paper-button"
+                href="${sharedPaperInsertHref(
+                    subjectKey,
+                    paper,
+                    resourcePrefix
+                )}"
+            >
+                📎 Insert
+            </a>
+        `
+        : ""
+}
 
                         ${
                             paper.question
