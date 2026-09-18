@@ -7657,32 +7657,80 @@ function generateCategoryPage(subjectKey, subject, categoryKey, years) {
    YEAR PAGE
    ============================================================ */
 
-function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
+function generateYearPage(
+    subjectKey,
+    subject,
+    categoryKey,
+    year,
+    sessions
+) {
 
-    const categoryInfo = categoryKey ? getCategoryInfo(subjectKey, categoryKey) : null;
+    const categoryInfo =
+        categoryKey
+            ? getCategoryInfo(
+                subjectKey,
+                categoryKey
+            )
+            : null;
+
     const categoryBreadcrumbLabel =
-        categoryInfo && categoryInfo[3] ? categoryInfo[3] : categoryKey;
+        categoryInfo &&
+        categoryInfo[3]
+            ? categoryInfo[3]
+            : categoryKey;
 
-    const sessionCards = Object.entries(sessions)
-        .map(([folder, session]) => {
+    /*
+        Categorized pages sit at:
 
-            const slug = sessionSlug(session.sessionCode);
-            const count = Object.keys(session.papers).length;
+        subject/category/year/
+        depth = 3
 
-            const sessionPaperKeys =
-                Object.values(session.papers || {})
-                    .map(
-                        paper =>
-                            [
-                                subject.code,
-                                categoryKey || "",
-                                year,
-                                session.sessionCode,
-                                paper.paper
-                            ].join("-")
-                    );
+        Uncategorized pages sit at:
 
-            return `
+        subject/year/
+        depth = 2
+    */
+    const pageDepth =
+        categoryKey
+            ? 3
+            : 2;
+
+    const sessionCards =
+        Object.entries(sessions)
+            .map(
+                (
+                    [
+                        folder,
+                        session
+                    ]
+                ) => {
+
+                    const slug =
+                        sessionSlug(
+                            session.sessionCode
+                        );
+
+                    const count =
+                        Object.keys(
+                            session.papers
+                        ).length;
+
+                    const sessionPaperKeys =
+                        Object.values(
+                            session.papers || {}
+                        )
+                            .map(
+                                paper =>
+                                    [
+                                        subject.code,
+                                        categoryKey || "",
+                                        year,
+                                        session.sessionCode,
+                                        paper.paper
+                                    ].join("-")
+                            );
+
+                    return `
 
                 <a
                     class="year-session-card progress-overview-card"
@@ -7697,7 +7745,10 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                             <img
                                 class="card-icon-image"
-                                src="${assetPath("calendar.svg", 3)}"
+                                src="${assetPath(
+                                    "calendar.svg",
+                                    pageDepth
+                                )}"
                                 alt=""
                             >
 
@@ -7706,7 +7757,10 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
                         <div class="progress-overview-content">
 
                             <div class="year-session-name">
-                                ${sessionName(session.sessionCode, year)}
+                                ${sessionName(
+                                    session.sessionCode,
+                                    year
+                                )}
                             </div>
 
                             <div class="progress-overview-bar">
@@ -7735,8 +7789,9 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
             `;
 
-        })
-        .join("");
+                }
+            )
+            .join("");
 
     return documentHTML(
         `${subject.name} ${year}`,
@@ -7748,21 +7803,58 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
                 ${
                     categoryKey
                         ? breadcrumbHTML([
-                            { label: "subjects", href: "../../../" },
-                            { label: subjectShortLabel(subjectKey, subject), href: "../../" },
-                            { label: categoryBreadcrumbLabel, href: "../" },
-                            { label: String(year), current: true }
+                            {
+                                label: "subjects",
+                                href: "../../../"
+                            },
+                            {
+                                label:
+                                    subjectShortLabel(
+                                        subjectKey,
+                                        subject
+                                    ),
+                                href: "../../"
+                            },
+                            {
+                                label:
+                                    categoryBreadcrumbLabel,
+                                href: "../"
+                            },
+                            {
+                                label:
+                                    String(year),
+                                current: true
+                            }
                         ])
                         : breadcrumbHTML([
-                            { label: "subjects", href: "../../../" },
-                            { label: subjectShortLabel(subjectKey, subject), href: "../" },
-                            { label: String(year), current: true }
+                            {
+                                label: "subjects",
+                                href: "../../"
+                            },
+                            {
+                                label:
+                                    subjectShortLabel(
+                                        subjectKey,
+                                        subject
+                                    ),
+                                href: "../"
+                            },
+                            {
+                                label:
+                                    String(year),
+                                current: true
+                            }
                         ])
                 }
 
-                <h1>${subject.name} ${year}</h1>
+                <h1>
+                    ${subject.name} ${year}
+                </h1>
 
-                <p>${subject.code} · Choose a session to browse past papers.</p>
+                <p>
+                    ${subject.code}
+                    · Choose a session to browse past papers.
+                </p>
 
             </div>
 
@@ -7770,7 +7862,10 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                 ${sessionCards}
 
-                <a class="year-session-card" href="all/">
+                <a
+                    class="year-session-card"
+                    href="all/"
+                >
 
                     <div class="year-session-left">
 
@@ -7778,7 +7873,10 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
                             <img
                                 class="card-icon-image"
-                                src="${assetPath("stackofbooks.svg", 3)}"
+                                src="${assetPath(
+                                    "stackofbooks.svg",
+                                    pageDepth
+                                )}"
                                 alt=""
                             >
 
@@ -7791,18 +7889,30 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
                             </div>
 
                             <div class="year-session-count">
-                                ${Object.values(sessions).reduce(
-                                    (total, session) =>
-                                        total + Object.keys(session.papers).length,
-                                    0
-                                )} papers
+                                ${
+                                    Object.values(
+                                        sessions
+                                    ).reduce(
+                                        (
+                                            total,
+                                            session
+                                        ) =>
+                                            total +
+                                            Object.keys(
+                                                session.papers
+                                            ).length,
+                                        0
+                                    )
+                                } papers
                             </div>
 
                         </div>
 
                     </div>
 
-                    <div class="year-session-arrow">→</div>
+                    <div class="year-session-arrow">
+                        →
+                    </div>
 
                 </a>
 
@@ -7810,7 +7920,7 @@ function generateYearPage(subjectKey, subject, categoryKey, year, sessions) {
 
         `,
 
-        categoryKey ? 3 : 2
+        pageDepth
     );
 }
 
@@ -7831,11 +7941,13 @@ function paperViewerHref(
         encodeURIComponent(file);
 
     if (gradeBoundary) {
+
         href +=
             "&gradeBoundary=" +
             encodeURIComponent(
                 gradeBoundary
             );
+
     }
 
     return href;
@@ -7855,17 +7967,27 @@ function sourceFileCardHTML(
     }
 
     const filename =
-        paper.sourceFile.split("/").pop();
+        paper.sourceFile
+            .split("/")
+            .pop();
 
     return `
         <div class="paper-card paper-source-card">
 
             <div>
-                <h3>Paper ${paper.paper} Source File</h3>
-                <div class="paper-code">${filename}</div>
+
+                <h3>
+                    Paper ${paper.paper} Source File
+                </h3>
+
+                <div class="paper-code">
+                    ${filename}
+                </div>
+
             </div>
 
             <div class="paper-actions">
+
                 <a
                     class="paper-button"
                     href="${resourcePrefix}${paper.sourceFile}"
@@ -7873,21 +7995,33 @@ function sourceFileCardHTML(
                 >
                     download
                 </a>
+
             </div>
 
         </div>
     `;
 }
 
-function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions) {
+
+function generateAllPapersPage(
+    subjectKey,
+    subject,
+    categoryKey,
+    year,
+    sessions
+) {
 
     const categoryInfo =
         categoryKey
-            ? getCategoryInfo(subjectKey, categoryKey)
+            ? getCategoryInfo(
+                subjectKey,
+                categoryKey
+            )
             : null;
 
     const categoryBreadcrumbLabel =
-        categoryInfo && categoryInfo[3]
+        categoryInfo &&
+        categoryInfo[3]
             ? categoryInfo[3]
             : categoryKey;
 
@@ -7896,72 +8030,129 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
             ? categoryInfo[1]
             : categoryKey;
 
+    /*
+        Categorized:
+            subject/category/year/all/
+            depth = 4
+
+        Uncategorized:
+            subject/year/all/
+            depth = 3
+    */
+    const pageDepth =
+        categoryKey
+            ? 4
+            : 3;
+
+    const resourcePrefix =
+        "../".repeat(pageDepth);
+
     const groups =
         Object.entries(sessions)
-            .sort((a, b) =>
-                a[1].sessionCode.localeCompare(
-                    b[1].sessionCode
-                )
+            .sort(
+                (a, b) =>
+                    a[1].sessionCode.localeCompare(
+                        b[1].sessionCode
+                    )
             );
 
     const totalCount =
         groups.reduce(
-            (total, [, session]) =>
-                total + Object.keys(session.papers).length,
+            (
+                total,
+                [, session]
+            ) =>
+                total +
+                Object.keys(
+                    session.papers
+                ).length,
             0
         );
 
     const groupHTML =
         groups
-            .map(([folder, session]) => {
+            .map(
+                (
+                    [
+                        folder,
+                        session
+                    ]
+                ) => {
 
-                const slug =
-                    sessionSlug(
-                        session.sessionCode
-                    );
+                    const slug =
+                        sessionSlug(
+                            session.sessionCode
+                        );
 
-                const papers =
-                    Object.values(session.papers).sort(
-                        (a, b) =>
-                            a.paper.localeCompare(
-                                b.paper,
-                                undefined,
-                                { numeric: true }
-                            )
-                    );
+                    const papers =
+                        Object.values(
+                            session.papers
+                        ).sort(
+                            (
+                                a,
+                                b
+                            ) =>
+                                a.paper.localeCompare(
+                                    b.paper,
+                                    undefined,
+                                    {
+                                        numeric:
+                                            true
+                                    }
+                                )
+                        );
 
-                const cards =
-                    papers
-                        .map((paper, index) => {
+                    const cards =
+                        papers
+                            .map(
+                                (
+                                    paper,
+                                    index
+                                ) => {
 
-                            const paperStatusKey = [
-                                subject.code,
-                                categoryKey || "",
-                                year,
-                                session.sessionCode,
-                                paper.paper
-                            ].join("-");
+                                    const paperStatusKey =
+                                        [
+                                            subject.code,
+                                            categoryKey || "",
+                                            year,
+                                            session.sessionCode,
+                                            paper.paper
+                                        ].join("-");
 
-                            const paperDisplayCode =
-                                paper.code || `Paper ${paper.paper}`;
+                                    const paperDisplayCode =
+                                        paper.code ||
+                                        `Paper ${paper.paper}`;
 
-                            const schedulerHref =
-                                "../../../../scheduler/?key=" +
-                                encodeURIComponent(paperStatusKey) +
-                                "&code=" +
-                                encodeURIComponent(paperDisplayCode) +
-                                "&subject=" +
-                                encodeURIComponent(subject.name) +
-                                "&paper=" +
-                                encodeURIComponent(paper.paper) +
-                                "&path=" +
-                                encodeURIComponent(
-                                    `${subjectKey}/${categoryKey ? categoryKey + "/" : ""}${year}/${slug}/#paper-${paper.code}`
-                                ) +
-                                "&file=" +
-                                encodeURIComponent(paper.question || "");
+                                    const schedulerHref =
+                                        resourcePrefix +
+                                        "scheduler/?key=" +
+                                        encodeURIComponent(
+                                            paperStatusKey
+                                        ) +
+                                        "&code=" +
+                                        encodeURIComponent(
+                                            paperDisplayCode
+                                        ) +
+                                        "&subject=" +
+                                        encodeURIComponent(
+                                            subject.name
+                                        ) +
+                                        "&paper=" +
+                                        encodeURIComponent(
+                                            paper.paper
+                                        ) +
+                                        "&path=" +
+                                        encodeURIComponent(
+                                            `${subjectKey}/${categoryKey ? categoryKey + "/" : ""}${year}/${slug}/#paper-${paper.code}`
+                                        ) +
+                                        "&file=" +
+                                        encodeURIComponent(
+                                            paper.question ||
+                                            ""
+                                        );
 
-                            return `
+                                    return `
+
                                 <div
                                     class="paper-card"
                                     id="paper-${paper.code}"
@@ -8018,7 +8209,8 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                         class="paper-button primary"
                                                         href="${paperViewerHref(
                                                             paper.question,
-                                                            session.gradeBoundary
+                                                            session.gradeBoundary,
+                                                            pageDepth
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -8036,7 +8228,8 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                         class="paper-button"
                                                         href="${paperViewerHref(
                                                             paper.markScheme,
-                                                            session.gradeBoundary
+                                                            session.gradeBoundary,
+                                                            pageDepth
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -8052,7 +8245,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                 ? `
                                                     <a
                                                         class="paper-button"
-                                                        href="../../../../${paper.examinerReport}"
+                                                        href="${resourcePrefix}${paper.examinerReport}"
                                                     >
                                                         📋 Examiner Report
                                                     </a>
@@ -8065,7 +8258,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                                 ? `
                                                     <a
                                                         class="paper-button"
-                                                        href="../../../../${paper.insert}"
+                                                        href="${resourcePrefix}${paper.insert}"
                                                     >
                                                         📎 Insert
                                                     </a>
@@ -8085,18 +8278,29 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                                     </div>
 
                                 </div>
-                                ${sourceFileCardHTML(subjectKey, paper)}
+
+                                ${
+                                    sourceFileCardHTML(
+                                        subjectKey,
+                                        paper,
+                                        resourcePrefix
+                                    )
+                                }
+
                             `;
 
-                        })
-                        .join("");
+                                }
+                            )
+                            .join("");
 
-                return `
+                    return `
 
                     <div class="all-papers-session-group">
 
                         <h2 class="all-papers-session-title">
-                            ${shortSessionName(session.sessionCode)}
+                            ${shortSessionName(
+                                session.sessionCode
+                            )}
                         </h2>
 
                         <div class="paper-list">
@@ -8107,7 +8311,8 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
 
                 `;
 
-            })
+                }
+            )
             .join("");
 
     return documentHTML(
@@ -8119,17 +8324,55 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                 ${
                     categoryKey
                         ? breadcrumbHTML([
-                            { label: "subjects", href: "../../../../" },
-                            { label: subjectShortLabel(subjectKey, subject), href: "../../../" },
-                            { label: categoryBreadcrumbLabel, href: "../../" },
-                            { label: String(year), href: "../" },
-                            { label: "all", current: true }
+                            {
+                                label: "subjects",
+                                href: "../../../../"
+                            },
+                            {
+                                label:
+                                    subjectShortLabel(
+                                        subjectKey,
+                                        subject
+                                    ),
+                                href: "../../../"
+                            },
+                            {
+                                label:
+                                    categoryBreadcrumbLabel,
+                                href: "../../"
+                            },
+                            {
+                                label:
+                                    String(year),
+                                href: "../"
+                            },
+                            {
+                                label: "all",
+                                current: true
+                            }
                         ])
                         : breadcrumbHTML([
-                            { label: "subjects", href: "../../../" },
-                            { label: subjectShortLabel(subjectKey, subject), href: "../../" },
-                            { label: String(year), href: "../" },
-                            { label: "all", current: true }
+                            {
+                                label: "subjects",
+                                href: "../../../"
+                            },
+                            {
+                                label:
+                                    subjectShortLabel(
+                                        subjectKey,
+                                        subject
+                                    ),
+                                href: "../../"
+                            },
+                            {
+                                label:
+                                    String(year),
+                                href: "../"
+                            },
+                            {
+                                label: "all",
+                                current: true
+                            }
                         ])
                 }
 
@@ -8138,7 +8381,12 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
                 </h1>
 
                 <p>
-                    ${subject.name} ${subject.code}${categoryKey ? ` · ${categoryDisplayName}` : ""}
+                    ${subject.name} ${subject.code}
+                    ${
+                        categoryKey
+                            ? ` · ${categoryDisplayName}`
+                            : ""
+                    }
                     · ${totalCount} papers
                 </p>
 
@@ -8149,7 +8397,7 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
             </div>
         `,
 
-        4
+        pageDepth
     );
 
 }
@@ -8159,72 +8407,163 @@ function generateAllPapersPage(subjectKey, subject, categoryKey, year, sessions)
    SESSION PAGE
    ============================================================ */
 
-function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
+function generateSessionPage(
+    subjectKey,
+    subject,
+    categoryKey,
+    year,
+    session
+) {
 
-    const title = sessionName(session.sessionCode, year);
+    const title =
+        sessionName(
+            session.sessionCode,
+            year
+        );
 
-    const categoryInfo = categoryKey ? getCategoryInfo(subjectKey, categoryKey) : null;
+    const categoryInfo =
+        categoryKey
+            ? getCategoryInfo(
+                subjectKey,
+                categoryKey
+            )
+            : null;
+
     const categoryBreadcrumbLabel =
-        categoryInfo && categoryInfo[3] ? categoryInfo[3] : categoryKey;
-    const categoryDisplayName = categoryInfo ? categoryInfo[1] : categoryKey;
+        categoryInfo &&
+        categoryInfo[3]
+            ? categoryInfo[3]
+            : categoryKey;
+
+    const categoryDisplayName =
+        categoryInfo
+            ? categoryInfo[1]
+            : categoryKey;
+
+    /*
+        Categorized:
+            subject/category/year/session/
+            depth = 4
+
+        Uncategorized:
+            subject/year/session/
+            depth = 3
+    */
+    const pageDepth =
+        categoryKey
+            ? 4
+            : 3;
+
+    const resourcePrefix =
+        "../".repeat(pageDepth);
 
     const slug =
         sessionSlug(
             session.sessionCode
         );
 
-    const papers = Object.values(session.papers).sort((a, b) =>
-        a.paper.localeCompare(b.paper, undefined, { numeric: true })
-    );
+    const papers =
+        Object.values(
+            session.papers
+        ).sort(
+            (a, b) =>
+                a.paper.localeCompare(
+                    b.paper,
+                    undefined,
+                    {
+                        numeric:
+                            true
+                    }
+                )
+        );
 
-    const cards = papers
-        .map((paper, index) => {
+    const cards =
+        papers
+            .map(
+                (
+                    paper,
+                    index
+                ) => {
 
-            const currentGroup = String(paper.paper).charAt(0);
+                    const currentGroup =
+                        String(
+                            paper.paper
+                        ).charAt(0);
 
-            const previousGroup =
-                index > 0 ? String(papers[index - 1].paper).charAt(0) : null;
+                    const previousGroup =
+                        index > 0
+                            ? String(
+                                papers[
+                                    index - 1
+                                ].paper
+                            ).charAt(0)
+                            : null;
 
-            const groupBreak = index > 0 && currentGroup !== previousGroup;
+                    const groupBreak =
+                        index > 0 &&
+                        currentGroup !==
+                            previousGroup;
 
-            const paperStatusKey = [
-                subject.code,
-                categoryKey || "",
-                year,
-                session.sessionCode,
-                paper.paper
-            ].join("-");
+                    const paperStatusKey =
+                        [
+                            subject.code,
+                            categoryKey || "",
+                            year,
+                            session.sessionCode,
+                            paper.paper
+                        ].join("-");
 
-            const paperDisplayCode =
-                paper.code || `Paper ${paper.paper}`;
+                    const paperDisplayCode =
+                        paper.code ||
+                        `Paper ${paper.paper}`;
 
-            const schedulerHref =
-                "../../../../scheduler/?key=" +
-                encodeURIComponent(paperStatusKey) +
-                "&code=" +
-                encodeURIComponent(paperDisplayCode) +
-                "&subject=" +
-                encodeURIComponent(subject.name) +
-                "&paper=" +
-                encodeURIComponent(paper.paper) +
-                "&path=" +
-                encodeURIComponent(
-                    `${subjectKey}/${categoryKey ? categoryKey + "/" : ""}${year}/${slug}/#paper-${paper.code}`
-                ) +
-                "&file=" +
-                encodeURIComponent(paper.question || "");
+                    const schedulerHref =
+                        resourcePrefix +
+                        "scheduler/?key=" +
+                        encodeURIComponent(
+                            paperStatusKey
+                        ) +
+                        "&code=" +
+                        encodeURIComponent(
+                            paperDisplayCode
+                        ) +
+                        "&subject=" +
+                        encodeURIComponent(
+                            subject.name
+                        ) +
+                        "&paper=" +
+                        encodeURIComponent(
+                            paper.paper
+                        ) +
+                        "&path=" +
+                        encodeURIComponent(
+                            `${subjectKey}/${categoryKey ? categoryKey + "/" : ""}${year}/${slug}/#paper-${paper.code}`
+                        ) +
+                        "&file=" +
+                        encodeURIComponent(
+                            paper.question ||
+                            ""
+                        );
 
-            return `
+                    return `
 
                 <div
-                    class="paper-card ${groupBreak ? "group-break" : ""}"
+                    class="paper-card ${
+                        groupBreak
+                            ? "group-break"
+                            : ""
+                    }"
                     id="paper-${paper.code}"
-                    data-paper-code="${String(paper.code || "").toLowerCase()}"
+                    data-paper-code="${String(
+                        paper.code || ""
+                    ).toLowerCase()}"
                 >
 
                     <div>
 
-                        <h3>Paper ${paper.paper}</h3>
+                        <h3>
+                            Paper ${paper.paper}
+                        </h3>
 
                         <div class="paper-code">
                             ${paperDisplayCode}
@@ -8234,7 +8573,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                     <div class="paper-actions">
 
-                        <div class="paper-progress" data-paper-progress>
+                        <div
+                            class="paper-progress"
+                            data-paper-progress
+                        >
 
                             <div class="paper-progress-loading"></div>
 
@@ -8251,7 +8593,10 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 ☐ Mark as completed
                             </button>
 
-                            <div class="paper-attempts account-data-pending" data-paper-attempts></div>
+                            <div
+                                class="paper-attempts account-data-pending"
+                                data-paper-attempts
+                            ></div>
 
                         </div>
 
@@ -8262,12 +8607,12 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                         class="paper-button primary"
                                         href="${paperViewerHref(
                                             paper.question,
-                                            session.gradeBoundary
+                                            session.gradeBoundary,
+                                            pageDepth
                                         )}"
-                                    
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
                                         📄 Question Paper
                                     </a>
                                 `
@@ -8281,7 +8626,8 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                         class="paper-button"
                                         href="${paperViewerHref(
                                             paper.markScheme,
-                                            session.gradeBoundary
+                                            session.gradeBoundary,
+                                            pageDepth
                                         )}"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -8297,7 +8643,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 ? `
                                     <a
                                         class="paper-button"
-                                        href="../../../../${paper.examinerReport}"
+                                        href="${resourcePrefix}${paper.examinerReport}"
                                     >
                                         📋 Examiner Report
                                     </a>
@@ -8310,7 +8656,7 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                                 ? `
                                     <a
                                         class="paper-button"
-                                        href="../../../../${paper.insert}"
+                                        href="${resourcePrefix}${paper.insert}"
                                     >
                                         📎 Insert
                                     </a>
@@ -8331,12 +8677,19 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
                 </div>
 
-                ${sourceFileCardHTML(subjectKey, paper)}
+                ${
+                    sourceFileCardHTML(
+                        subjectKey,
+                        paper,
+                        resourcePrefix
+                    )
+                }
 
             `;
 
-        })
-        .join("");
+                }
+            )
+            .join("");
 
     return documentHTML(
         title,
@@ -8348,24 +8701,76 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
                 ${
                     categoryKey
                         ? breadcrumbHTML([
-                            { label: "subjects", href: "../../../../" },
-                            { label: subjectShortLabel(subjectKey, subject), href: "../../../" },
-                            { label: categoryBreadcrumbLabel, href: "../../" },
-                            { label: String(year), href: "../" },
-                            { label: shortSessionName(session.sessionCode), current: true }
+                            {
+                                label: "subjects",
+                                href: "../../../../"
+                            },
+                            {
+                                label:
+                                    subjectShortLabel(
+                                        subjectKey,
+                                        subject
+                                    ),
+                                href: "../../../"
+                            },
+                            {
+                                label:
+                                    categoryBreadcrumbLabel,
+                                href: "../../"
+                            },
+                            {
+                                label:
+                                    String(year),
+                                href: "../"
+                            },
+                            {
+                                label:
+                                    shortSessionName(
+                                        session.sessionCode
+                                    ),
+                                current: true
+                            }
                         ])
                         : breadcrumbHTML([
-                            { label: "subjects", href: "../../../" },
-                            { label: subjectShortLabel(subjectKey, subject), href: "../../" },
-                            { label: String(year), href: "../" },
-                            { label: shortSessionName(session.sessionCode), current: true }
+                            {
+                                label: "subjects",
+                                href: "../../../"
+                            },
+                            {
+                                label:
+                                    subjectShortLabel(
+                                        subjectKey,
+                                        subject
+                                    ),
+                                href: "../../"
+                            },
+                            {
+                                label:
+                                    String(year),
+                                href: "../"
+                            },
+                            {
+                                label:
+                                    shortSessionName(
+                                        session.sessionCode
+                                    ),
+                                current: true
+                            }
                         ])
                 }
 
-                <h1>${title}</h1>
+                <h1>
+                    ${title}
+                </h1>
 
                 <p>
-                    ${subject.name} ${subject.code}${categoryKey ? ` · ${categoryDisplayName}` : ""}
+                    ${subject.name}
+                    ${subject.code}
+                    ${
+                        categoryKey
+                            ? ` · ${categoryDisplayName}`
+                            : ""
+                    }
                 </p>
 
             </div>
@@ -8378,9 +8783,14 @@ function generateSessionPage(subjectKey, subject, categoryKey, year, session) {
 
         `,
 
-        4
+        pageDepth
     );
 }
+
+
+/* ============================================================
+   NATIVE PDF VIEWER PAGE
+   ============================================================ */
 
 
 /* ============================================================
