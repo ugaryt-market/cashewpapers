@@ -6271,7 +6271,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Alpha 0.1.96</div>
+                <div class="version">Version Beta 0.1.0</div>
 
             </section>
 
@@ -7997,19 +7997,61 @@ function paperViewerHref(
     }
 
     /*
-        A Computer Science source-file ZIP belongs to its matching
-        question paper.  Pass it to the viewer rather than rendering
-        it as a separate resource in the paper-selection page.
+        Computer Science source files are displayed as their
+        own paper card, so they are no longer passed into
+        the PDF viewer URL.
     */
-    if (sourceFile) {
+    return href;
+}
 
-        href +=
-            "&sourceFile=" +
-            encodeURIComponent(sourceFile);
 
+function sourceFileCardHTML(
+    subjectKey,
+    paper,
+    resourcePrefix = "../../../../"
+) {
+
+    if (
+        subjectKey !== "computer-science" ||
+        !paper.sourceFile
+    ) {
+        return "";
     }
 
-    return href;
+    const filename =
+        paper.sourceFile
+            .split("/")
+            .pop();
+
+    return `
+        <div class="paper-card paper-source-card">
+
+            <div>
+
+                <h3>
+                    Paper ${paper.paper} Source File
+                </h3>
+
+                <div class="paper-code">
+                    ${filename}
+                </div>
+
+            </div>
+
+            <div class="paper-actions">
+
+                <a
+                    class="paper-button"
+                    href="${resourcePrefix}${paper.sourceFile}"
+                    download
+                >
+                    download
+                </a>
+
+            </div>
+
+        </div>
+    `;
 }
 
 
