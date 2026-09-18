@@ -8782,13 +8782,18 @@ function generateSessionPage(
                         }
 
                         <a
-                            class="paper-calendar-button"
-                            href="${schedulerHref}"
-                            title="Schedule this paper"
-                            aria-label="Schedule this paper"
-                        >
-                            📅
-                        </a>
+    class="paper-calendar-button"
+    href="${schedulerHref}"
+    title="Schedule this paper"
+    aria-label="Schedule this paper"
+>
+    <img
+        src="${assetPath("calendar.svg", pageDepth)}"
+        alt=""
+        width="20"
+        height="20"
+    >
+</a>
 
                     </div>
 
