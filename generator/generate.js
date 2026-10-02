@@ -3198,31 +3198,7 @@ body:has(.native-pdf-page) main {
     gap: 8px;
 }
 
-.native-pdf-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 32px;
-    padding: 0 12px;
-    border: 1px solid var(--primary);
-    border-radius: 8px;
-    background: var(--primary);
-    color: white;
-    font-size: 13px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.native-pdf-mark:hover {
-    background: #ffa86c;
-    border-color: #ffa86c;
-}
-
-.native-pdf-mark:disabled {
-    cursor: wait;
-    opacity: 0.65;
-}
-
+.native-pdf-mark-scheme,
 .native-pdf-grade-boundary,
 .native-pdf-source-file {
     display: inline-flex;
@@ -3240,10 +3216,26 @@ body:has(.native-pdf-page) main {
     cursor: pointer;
 }
 
+.native-pdf-mark-scheme:hover,
 .native-pdf-grade-boundary:hover,
 .native-pdf-source-file:hover {
     background: #414346;
     border-color: var(--subdued);
+}
+
+
+/* ---------------- PDF FULLSCREEN ---------------- */
+
+.native-pdf-page:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    min-height: 0;
+    padding: 12px 24px;
+    background: var(--bg);
+}
+
+.native-pdf-page:fullscreen .native-pdf-window {
+    margin-bottom: 0;
 }
 
 .mcq-scan-modal {
@@ -6273,7 +6265,7 @@ function generateHome(subjects) {
 
                 <p>all the papers, with none of the mess.</p>
 
-                <div class="version">Version Beta 0.1.0</div>
+                <div class="version">Version Beta 0.1.1</div>
 
             </section>
 
@@ -7980,7 +7972,8 @@ function paperViewerHref(
     file,
     gradeBoundary,
     pageDepth = 4,
-    sourceFile = null
+    sourceFile = null,
+    markScheme = null
 ) {
 
     let href =
@@ -7994,6 +7987,16 @@ function paperViewerHref(
             "&gradeBoundary=" +
             encodeURIComponent(
                 gradeBoundary
+            );
+
+    }
+
+    if (markScheme) {
+
+        href +=
+            "&markScheme=" +
+            encodeURIComponent(
+                markScheme
             );
 
     }
@@ -8290,7 +8293,7 @@ function generateAllPapersPage(
                                                 : ""
                                         }
 
-                                        ${
+                                                                                ${
                                             paper.question
                                                 ? `
                                                     <a
@@ -8299,7 +8302,8 @@ function generateAllPapersPage(
                                                             paper.question,
                                                             session.gradeBoundary,
                                                             pageDepth,
-                                                            paper.sourceFile
+                                                            paper.sourceFile,
+                                                            paper.markScheme
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -8309,7 +8313,6 @@ function generateAllPapersPage(
                                                 `
                                                 : ""
                                         }
-
                                         ${
                                             paper.markScheme
                                                 ? `
@@ -8731,7 +8734,7 @@ function generateSessionPage(
                                 : ""
                         }
 
-                        ${
+                                                ${
                             paper.question
                                 ? `
                                     <a
@@ -8740,7 +8743,8 @@ function generateSessionPage(
                                             paper.question,
                                             session.gradeBoundary,
                                             pageDepth,
-                                            paper.sourceFile
+                                            paper.sourceFile,
+                                            paper.markScheme
                                         )}"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -8750,7 +8754,6 @@ function generateSessionPage(
                                 `
                                 : ""
                         }
-
                         ${
                             paper.markScheme
                                 ? `
@@ -8979,6 +8982,14 @@ function generatePdfReaderPage() {
                         </button>
 
                         <a
+                            class="native-pdf-mark-scheme"
+                            id="nativePdfMarkScheme"
+                            href="#"
+                        >
+                            mark scheme →
+                        </a>
+
+                        <a
                             class="native-pdf-grade-boundary"
                             id="nativePdfGradeBoundary"
                             href="#"
@@ -9029,6 +9040,9 @@ function generatePdfReaderPage() {
     const sourceFileParam =
         params.get("sourceFile");
 
+    const markSchemeParam =
+        params.get("markScheme");
+
     const frame =
         document.getElementById(
             "nativePdfFrame"
@@ -9037,6 +9051,11 @@ function generatePdfReaderPage() {
     const fullscreen =
         document.getElementById(
             "nativePdfFullscreen"
+        );
+
+    const pdfPage =
+        document.querySelector(
+            ".native-pdf-page"
         );
 
     const returnButton =
@@ -9049,6 +9068,11 @@ function generatePdfReaderPage() {
             "nativePdfMark"
         );
 
+    const markSchemeButton =
+        document.getElementById(
+            "nativePdfMarkScheme"
+        );
+
     const gradeBoundaryButton =
         document.getElementById(
             "nativePdfGradeBoundary"
@@ -9059,33 +9083,86 @@ function generatePdfReaderPage() {
             "nativePdfSourceFile"
         );
 
+
     function hideMarkButton() {
+
         if (markButton) {
-            markButton.style.display = "none";
+            markButton.style.display =
+                "none";
         }
+
     }
+
+
+    function hideMarkSchemeButton() {
+
+        if (markSchemeButton) {
+            markSchemeButton.style.display =
+                "none";
+        }
+
+    }
+
 
     function hideGradeBoundaryButton() {
+
         if (gradeBoundaryButton) {
-            gradeBoundaryButton.style.display = "none";
+            gradeBoundaryButton.style.display =
+                "none";
         }
+
     }
+
 
     function hideSourceFileButton() {
+
         if (sourceFileButton) {
-            sourceFileButton.style.display = "none";
+            sourceFileButton.style.display =
+                "none";
         }
+
     }
 
+
+    function updateFullscreenLabel() {
+
+        if (!fullscreen) {
+            return;
+        }
+
+        if (
+            pdfPage &&
+            document.fullscreenElement === pdfPage
+        ) {
+
+            fullscreen.textContent =
+                "exit fullscreen ←";
+
+        } else {
+
+            fullscreen.textContent =
+                "go to fullscreen →";
+
+        }
+
+    }
+
+
     if (!fileParam) {
+
         hideMarkButton();
+        hideMarkSchemeButton();
         hideGradeBoundaryButton();
         hideSourceFileButton();
+
         return;
+
     }
+
 
     let decodedFile = "";
     let questionPaperUrl = "";
+
 
     try {
 
@@ -9102,9 +9179,11 @@ function generatePdfReaderPage() {
             ).href;
 
         if (frame) {
+
             frame.src =
                 questionPaperUrl +
                 "#zoom=page-fit&page=1";
+
         }
 
     } catch (error) {
@@ -9115,141 +9194,303 @@ function generatePdfReaderPage() {
         );
 
         hideMarkButton();
+        hideMarkSchemeButton();
         hideGradeBoundaryButton();
         hideSourceFileButton();
+
         return;
 
     }
 
-    if (gradeBoundaryButton && gradeBoundaryParam) {
+
+    /*
+       Mark scheme button.
+
+       The question-paper viewer receives the mark-scheme
+       path through the markScheme query parameter.
+    */
+
+    if (
+        markSchemeButton &&
+        markSchemeParam
+    ) {
 
         try {
-            const gradeBoundaryUrl = new URL(
-                "../" + decodeURIComponent(gradeBoundaryParam),
-                window.location.href
-            ).href;
 
-            gradeBoundaryButton.href = gradeBoundaryUrl;
+            let markSchemeUrl =
+                "./?file=" +
+                encodeURIComponent(
+                    markSchemeParam
+                );
+
+            if (gradeBoundaryParam) {
+
+                markSchemeUrl +=
+                    "&gradeBoundary=" +
+                    encodeURIComponent(
+                        gradeBoundaryParam
+                    );
+
+            }
+
+            markSchemeButton.href =
+                markSchemeUrl;
 
         } catch (error) {
+
+            console.error(
+                "cashewpapers: unable to load mark scheme",
+                error
+            );
+
+            hideMarkSchemeButton();
+
+        }
+
+    } else {
+
+        hideMarkSchemeButton();
+
+    }
+
+
+    /*
+       Grade boundary.
+    */
+
+    if (
+        gradeBoundaryButton &&
+        gradeBoundaryParam
+    ) {
+
+        try {
+
+            const gradeBoundaryUrl =
+                new URL(
+                    "../" +
+                    decodeURIComponent(
+                        gradeBoundaryParam
+                    ),
+                    window.location.href
+                ).href;
+
+            gradeBoundaryButton.href =
+                gradeBoundaryUrl;
+
+        } catch (error) {
+
             console.error(
                 "cashewpapers: unable to load grade boundary",
                 error
             );
+
             hideGradeBoundaryButton();
+
         }
 
     } else {
+
         hideGradeBoundaryButton();
+
     }
 
+
     /*
-       Source files are supplied only by matching Computer Science
-       question-paper links.  They download from the viewer toolbar,
-       so they do not appear as separate paper cards.
+       Source files are supplied only by matching
+       Computer Science question-paper links.
     */
-    if (sourceFileButton && sourceFileParam) {
+
+    if (
+        sourceFileButton &&
+        sourceFileParam
+    ) {
 
         try {
-            sourceFileButton.href = new URL(
-                "../" + decodeURIComponent(sourceFileParam),
-                window.location.href
-            ).href;
+
+            sourceFileButton.href =
+                new URL(
+                    "../" +
+                    decodeURIComponent(
+                        sourceFileParam
+                    ),
+                    window.location.href
+                ).href;
 
         } catch (error) {
+
             console.error(
                 "cashewpapers: unable to load source file",
                 error
             );
+
             hideSourceFileButton();
+
         }
 
     } else {
+
         hideSourceFileButton();
+
     }
 
+
     /*
-       Set up the marking button independently from the PDF viewer.
-       The button is visible by default so a problem with another
-       viewer control cannot silently hide it.
+       MCQ marking.
     */
-    /*
-       This script is emitted from a template literal, so regex
-       backslashes must be escaped here to survive into viewer/index.html.
-       Cambridge 9700, 9701 and 9702 Paper 1 variants are the MCQ papers
-       supported by the answer-key parser.
-    */
+
     function isSupportedMcqPaper(file) {
 
-    const filename =
-        String(file).split("/").pop() || "";
+        const filename =
+            String(file)
+                .split("/")
+                .pop() || "";
 
-    /*
-        Biology / Chemistry / Physics:
-        Paper 1 MCQ → 11, 12, 13
-
-        Economics:
-        Papers 1 and 3 are MCQ
-        → 11, 12, 13
-        → 31, 32, 33
-    */
-
-    return (
-        /^(9700|9701|9702)_[a-z]\\d{2}_qp_1[1-3]\\.pdf$/i
-            .test(filename)
-        ||
-        /^9708_[a-z]\\d{2}_qp_[13][1-3]\\.pdf$/i
-            .test(filename)
-    );
-
-}
-
-if (
-    markButton &&
-    isSupportedMcqPaper(decodedFile)
-) {
-
-    markButton.style.display =
-        "inline-flex";
-
-    const markPageUrl =
-        "../mark/?file=" +
-        encodeURIComponent(
-            decodedFile
+        return (
+            /^(9700|9701|9702)_[a-z]\\d{2}_qp_1[1-3]\\.pdf$/i
+                .test(filename)
+            ||
+            /^9708_[a-z]\\d{2}_qp_[13][1-3]\\.pdf$/i
+                .test(filename)
         );
 
-    markButton.addEventListener(
-        "click",
-        event => {
+    }
 
-            event.preventDefault();
 
-            window.open(
-                markPageUrl,
-                "_blank",
-                "noopener,noreferrer"
+    if (
+        markButton &&
+        isSupportedMcqPaper(decodedFile)
+    ) {
+
+        markButton.style.display =
+            "inline-flex";
+
+        const markPageUrl =
+            "../mark/?file=" +
+            encodeURIComponent(
+                decodedFile
             );
 
-        }
-    );
+        markButton.addEventListener(
+            "click",
+            event => {
 
-} else {
+                event.preventDefault();
 
-    hideMarkButton();
+                window.open(
+                    markPageUrl,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
 
-}
+            }
+        );
+
+    } else {
+
+        hideMarkButton();
+
+    }
+
+
+    /*
+       Fullscreen viewer.
+
+       The entire PDF viewer page is placed into
+       browser fullscreen so the iframe can expand with it.
+    */
+
+    if (
+        fullscreen &&
+        pdfPage
+    ) {
+
+        fullscreen.addEventListener(
+            "click",
+            async event => {
+
+                event.preventDefault();
+
+                try {
+
+                    if (
+                        document.fullscreenElement ===
+                        pdfPage
+                    ) {
+
+                        await document.exitFullscreen();
+
+                    } else {
+
+                        if (
+                            document.fullscreenElement
+                        ) {
+
+                            await document.exitFullscreen();
+
+                        }
+
+                        if (
+                            pdfPage.requestFullscreen
+                        ) {
+
+                            await pdfPage.requestFullscreen();
+
+                        } else {
+
+                            window.open(
+                                questionPaperUrl,
+                                "_blank",
+                                "noopener,noreferrer"
+                            );
+
+                        }
+
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "cashewpapers: unable to enter fullscreen",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+        document.addEventListener(
+            "fullscreenchange",
+            updateFullscreenLabel
+        );
+
+        updateFullscreenLabel();
+
+    }
+
+
+    /*
+       Return button.
+    */
+
     if (returnButton) {
 
         returnButton.addEventListener(
             "click",
             event => {
+
                 event.preventDefault();
 
                 if (window.opener) {
+
                     window.close();
+
                 } else {
+
                     window.history.back();
+
                 }
+
             }
         );
 
