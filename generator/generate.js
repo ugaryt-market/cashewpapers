@@ -7973,7 +7973,8 @@ function paperViewerHref(
     gradeBoundary,
     pageDepth = 4,
     sourceFile = null,
-    markScheme = null
+    markScheme = null,
+    questionPaper = null
 ) {
 
     let href =
@@ -7997,6 +7998,16 @@ function paperViewerHref(
             "&markScheme=" +
             encodeURIComponent(
                 markScheme
+            );
+
+    }
+
+    if (questionPaper) {
+
+        href +=
+            "&questionPaper=" +
+            encodeURIComponent(
+                questionPaper
             );
 
     }
@@ -8313,7 +8324,7 @@ function generateAllPapersPage(
                                                 `
                                                 : ""
                                         }
-                                        ${
+                                                                                ${
                                             paper.markScheme
                                                 ? `
                                                     <a
@@ -8321,7 +8332,10 @@ function generateAllPapersPage(
                                                         href="${paperViewerHref(
                                                             paper.markScheme,
                                                             session.gradeBoundary,
-                                                            pageDepth
+                                                            pageDepth,
+                                                            null,
+                                                            null,
+                                                            paper.question
                                                         )}"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -8754,7 +8768,7 @@ function generateSessionPage(
                                 `
                                 : ""
                         }
-                        ${
+                                                ${
                             paper.markScheme
                                 ? `
                                     <a
@@ -8762,7 +8776,10 @@ function generateSessionPage(
                                         href="${paperViewerHref(
                                             paper.markScheme,
                                             session.gradeBoundary,
-                                            pageDepth
+                                            pageDepth,
+                                            null,
+                                            null,
+                                            paper.question
                                         )}"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -8981,13 +8998,23 @@ function generatePdfReaderPage() {
                             mark paper
                         </button>
 
-                        <a
-                            class="native-pdf-mark-scheme"
-                            id="nativePdfMarkScheme"
-                            href="#"
-                        >
-                            mark scheme →
-                        </a>
+                       <a
+    class="native-pdf-mark-scheme"
+    id="nativePdfMarkScheme"
+    href="#"
+>
+    mark scheme →
+</a>
+
+<a
+    class="native-pdf-mark-scheme"
+    id="nativePdfQuestionPaper"
+    href="#"
+    target="_blank"
+    rel="noopener noreferrer"
+>
+    question paper →
+</a>
 
                         <a
                             class="native-pdf-grade-boundary"
@@ -9043,6 +9070,9 @@ function generatePdfReaderPage() {
     const markSchemeParam =
         params.get("markScheme");
 
+    const questionPaperParam =
+    params.get("questionPaper");
+
     const frame =
         document.getElementById(
             "nativePdfFrame"
@@ -9073,6 +9103,11 @@ function generatePdfReaderPage() {
             "nativePdfMarkScheme"
         );
 
+    const questionPaperButton =
+    document.getElementById(
+        "nativePdfQuestionPaper"
+    );
+
     const gradeBoundaryButton =
         document.getElementById(
             "nativePdfGradeBoundary"
@@ -9102,6 +9137,15 @@ function generatePdfReaderPage() {
         }
 
     }
+
+    function hideQuestionPaperButton() {
+
+    if (questionPaperButton) {
+        questionPaperButton.style.display =
+            "none";
+    }
+
+}
 
 
     function hideGradeBoundaryButton() {
@@ -9210,89 +9254,86 @@ function generatePdfReaderPage() {
        path through the markScheme query parameter.
     */
 
-    if (
-        markSchemeButton &&
-        markSchemeParam
-    ) {
+    /*
+   Mark scheme button.
 
-        try {
+   This appears when the current document is a
+   question paper and a matching mark scheme exists.
+*/
 
-            let markSchemeUrl =
-                "./?file=" +
-                encodeURIComponent(
-                    markSchemeParam
-                );
+if (
+    markSchemeButton &&
+    markSchemeParam
+) {
 
-            if (gradeBoundaryParam) {
+    try {
 
-                markSchemeUrl +=
-                    "&gradeBoundary=" +
-                    encodeURIComponent(
-                        gradeBoundaryParam
-                    );
-
-            }
-
-            markSchemeButton.href =
-                markSchemeUrl;
-
-        } catch (error) {
-
-            console.error(
-                "cashewpapers: unable to load mark scheme",
-                error
+        const markSchemeUrl =
+            "./?file=" +
+            encodeURIComponent(
+                markSchemeParam
             );
 
-            hideMarkSchemeButton();
+        markSchemeButton.href =
+            markSchemeUrl;
 
-        }
+    } catch (error) {
 
-    } else {
+        console.error(
+            "cashewpapers: unable to load mark scheme",
+            error
+        );
 
         hideMarkSchemeButton();
 
     }
 
+} else {
 
-    /*
-       Grade boundary.
-    */
+    hideMarkSchemeButton();
 
-    if (
-        gradeBoundaryButton &&
-        gradeBoundaryParam
-    ) {
+}
 
-        try {
 
-            const gradeBoundaryUrl =
-                new URL(
-                    "../" +
-                    decodeURIComponent(
-                        gradeBoundaryParam
-                    ),
-                    window.location.href
-                ).href;
+/*
+   Question paper button.
 
-            gradeBoundaryButton.href =
-                gradeBoundaryUrl;
+   This appears when the current document is a
+   mark scheme and the matching question paper exists.
+*/
 
-        } catch (error) {
+if (
+    questionPaperButton &&
+    questionPaperParam
+) {
 
-            console.error(
-                "cashewpapers: unable to load grade boundary",
-                error
+    try {
+
+        const questionPaperTarget =
+            "./?file=" +
+            encodeURIComponent(
+                questionPaperParam
             );
 
-            hideGradeBoundaryButton();
+        questionPaperButton.href =
+            questionPaperTarget;
 
-        }
+    } catch (error) {
 
-    } else {
+        console.error(
+            "cashewpapers: unable to load question paper",
+            error
+        );
 
-        hideGradeBoundaryButton();
+        hideQuestionPaperButton();
 
     }
+
+} else {
+
+    hideQuestionPaperButton();
+
+}
 
 
     /*
